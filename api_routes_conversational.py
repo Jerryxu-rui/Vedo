@@ -1338,13 +1338,17 @@ async def generate_video_async(
 ):
     """异步生成视频"""
     try:
+        print(f"[Video Generation] Starting video generation for episode {workflow.episode_id}")
         workflow.transition_to(WorkflowState.VIDEO_GENERATING)
         save_workflow_state(db, workflow)
         
         # 创建pipeline adapter
         config_path = f"configs/{workflow.mode.value}2video.yaml"
+        print(f"[Video Generation] Loading config from {config_path}")
         adapter = create_adapter(workflow.mode, config_path)
+        print(f"[Video Generation] Initializing pipeline...")
         await adapter.initialize_pipeline()
+        print(f"[Video Generation] Pipeline initialized successfully")
         
         # 获取episode_id_str
         episode_id_str = workflow.context.get("episode_id_str", str(workflow.episode_id))
@@ -1363,6 +1367,7 @@ async def generate_video_async(
         )
         
         # 调用实际的视频生成逻辑
+        print(f"[Video Generation] Calling adapter.generate_video with {len(workflow.storyboard)} shots, {len(workflow.characters)} characters, {len(workflow.scenes)} scenes")
         result = await adapter.generate_video(
             storyboard=workflow.storyboard,
             characters=workflow.characters,
@@ -1371,6 +1376,7 @@ async def generate_video_async(
             episode_id=episode_id_str,
             progress=ws_callback
         )
+        print(f"[Video Generation] Result: {result}")
         
         if result.get("success"):
             workflow.transition_to(WorkflowState.VIDEO_COMPLETED)

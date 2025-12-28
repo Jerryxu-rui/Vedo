@@ -156,6 +156,7 @@ class Shot(Base):
             'scene_id': self.scene_id,
             'shot_number': self.shot_number,
             'visual_desc': self.visual_desc,
+            'description': self.visual_desc,  # Alias for frontend compatibility
             'composition': self.composition,
             'camera_angle': self.camera_angle,
             'camera_movement': self.camera_movement,
@@ -163,6 +164,7 @@ class Shot(Base):
             'voice_actor': self.voice_actor,
             'audio_desc': self.audio_desc,
             'frame_url': self.frame_url,
+            'image_url': self.frame_url,  # Alias for frontend compatibility
             'video_url': self.video_url,
             'status': self.status,
             'created_at': self.created_at.isoformat() if self.created_at else None,

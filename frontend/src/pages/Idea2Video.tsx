@@ -604,10 +604,17 @@ function Idea2Video() {
           </div>
           
           <div className="main-preview">
-            {currentShot?.image_url && (
+            {currentShot?.image_url ? (
               <img src={currentShot.image_url} alt={`Shot ${selectedShot + 1}`} className="preview-image" />
+            ) : (
+              <div className="shot-description-placeholder">
+                <div className="shot-visual-desc">
+                  <span className="camera-info">{currentShot?.camera_angle} | {currentShot?.camera_movement}</span>
+                  <p>{currentShot?.visual_desc || currentShot?.description}</p>
+                </div>
+              </div>
             )}
-            <div className="shot-label">{currentShot?.description}</div>
+            <div className="shot-label">{currentShot?.visual_desc?.substring(0, 100) || currentShot?.description}</div>
           </div>
 
           <div className="playback-controls">

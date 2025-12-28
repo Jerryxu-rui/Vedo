@@ -32,8 +32,8 @@ interface Outline {
   genre: string
   style: string
   synopsis: string
-  characters_summary: Array<{name: string, role: string}>
-  plot_summary: Array<{scene: string, description: string}>
+  characters_summary: Array<{name: string, role: string, description?: string}>
+  plot_summary: Array<{act?: string, scene?: string, description: string}>
   highlights: string[]
 }
 
@@ -130,16 +130,25 @@ function Idea2Video() {
     return completedStates[targetStep]?.includes(backendState) || false
   }
 
-  const addMessage = (role: 'assistant' | 'user' | 'system', content: string) => {
+  const addMessage = useCallback((role: 'assistant' | 'user' | 'system', content: string) => {
     setMessages(prev => [...prev, {
       id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       role,
       content,
       timestamp: new Date()
     }])
-  }
+  }, [])
 
   const pollStatus = useCallback(async (episodeId: string, expectedStep: string) => {
+    const addMsg = (role: 'assistant' | 'user' | 'system', content: string) => {
+      setMessages(prev => [...prev, {
+        id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        role,
+        content,
+        timestamp: new Date()
+      }])
+    }
+
     try {
       const response = await fetch(`/api/v1/conversational/episode/${episodeId}/state`)
       if (!response.ok) {
@@ -156,7 +165,7 @@ function Idea2Video() {
           status: 'error',
           error: data.error || 'Generation failed'
         }))
-        addMessage('system', `生成失败: ${data.error || '未知错误'}`)
+        addMsg('system', `生成失败: ${data.error || '未知错误'}`)
         return
       }
 
@@ -168,6 +177,11 @@ function Idea2Video() {
       if (isStepComplete(backendState, expectedStep)) {
         const newStep = determineStepFromState(backendState)
         const videoUrl = data.video_path || data.step_info?.video?.path || null
+        
+        console.log('[DEBUG] Poll complete - backendState:', backendState, 'expectedStep:', expectedStep)
+        console.log('[DEBUG] data.outline:', data.outline)
+        console.log('[DEBUG] data.characters:', data.characters)
+        console.log('[DEBUG] Full response data:', data)
         
         setWorkflow(prev => ({
           ...prev,
@@ -188,7 +202,7 @@ function Idea2Video() {
           'video': '视频生成完成！'
         }
         if (stepMessages[expectedStep]) {
-          addMessage('assistant', stepMessages[expectedStep])
+          addMsg('assistant', stepMessages[expectedStep])
         }
         return
       }
@@ -353,8 +367,7 @@ function Idea2Video() {
             <h4 className="section-title">剧本亮点</h4>
             {workflow.outline.plot_summary?.map((plot, index) => (
               <div key={index} className="highlight-item">
-                <span className="highlight-marker">亮点{index + 1}:</span>
-                <strong>{plot.scene}</strong>
+                <span className="highlight-marker">{plot.act || plot.scene || `亮点${index + 1}`}:</span>
                 <p>{plot.description}</p>
               </div>
             ))}

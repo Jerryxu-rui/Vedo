@@ -1,0 +1,16 @@
+[
+    {
+        "idx": 0,
+        "identifier_in_scene": "林默",
+        "is_visible": true,
+        "static_features": "林默 is a 30-year-old man with short, dark hair and a focused expression. He wears glasses and has a slight build.",
+        "dynamic_features": "林默 wears a loose-fitting t-shirt and comfortable pants. He is seen with his computer."
+    },
+    {
+        "idx": 1,
+        "identifier_in_scene": "镜像",
+        "is_visible": true,
+        "static_features": "镜像 has the same appearance as 林默, with short, dark hair and a focused expression. He also wears glasses and has a slight build.",
+        "dynamic_features": "镜像 is a digital reflection of 林默. He appears on the computer screen."
+    }
+]

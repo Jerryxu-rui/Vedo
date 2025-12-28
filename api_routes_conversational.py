@@ -1260,9 +1260,12 @@ async def confirm_scenes(
 ):
     """确认场景设计"""
     try:
-        workflow = workflow_manager.get_workflow(
-            int(episode_id) if episode_id.isdigit() else hash(episode_id)
-        )
+        episode_id_int = int(episode_id) if episode_id.isdigit() else hash(episode_id)
+        workflow = workflow_manager.get_workflow(episode_id_int)
+        
+        # Try to restore from database if not in memory
+        if not workflow:
+            workflow = workflow_manager.load_or_create_from_db(episode_id_int, episode_id, db)
         
         if not workflow:
             raise HTTPException(status_code=404, detail="Workflow not found")
@@ -1284,9 +1287,12 @@ async def generate_storyboard(
 ):
     """生成分镜剧本"""
     try:
-        workflow = workflow_manager.get_workflow(
-            int(episode_id) if episode_id.isdigit() else hash(episode_id)
-        )
+        episode_id_int = int(episode_id) if episode_id.isdigit() else hash(episode_id)
+        workflow = workflow_manager.get_workflow(episode_id_int)
+        
+        # Try to restore from database if not in memory
+        if not workflow:
+            workflow = workflow_manager.load_or_create_from_db(episode_id_int, episode_id, db)
         
         if not workflow:
             raise HTTPException(status_code=404, detail="Workflow not found")
@@ -1307,9 +1313,12 @@ async def confirm_storyboard(
 ):
     """确认分镜剧本"""
     try:
-        workflow = workflow_manager.get_workflow(
-            int(episode_id) if episode_id.isdigit() else hash(episode_id)
-        )
+        episode_id_int = int(episode_id) if episode_id.isdigit() else hash(episode_id)
+        workflow = workflow_manager.get_workflow(episode_id_int)
+        
+        # Try to restore from database if not in memory
+        if not workflow:
+            workflow = workflow_manager.load_or_create_from_db(episode_id_int, episode_id, db)
         
         if not workflow:
             raise HTTPException(status_code=404, detail="Workflow not found")
@@ -1433,9 +1442,12 @@ async def start_video_generation(
 ):
     """开始视频生成"""
     try:
-        workflow = workflow_manager.get_workflow(
-            int(episode_id) if episode_id.isdigit() else hash(episode_id)
-        )
+        episode_id_int = int(episode_id) if episode_id.isdigit() else hash(episode_id)
+        workflow = workflow_manager.get_workflow(episode_id_int)
+        
+        # Try to restore from database if not in memory
+        if not workflow:
+            workflow = workflow_manager.load_or_create_from_db(episode_id_int, episode_id, db)
         
         if not workflow:
             raise HTTPException(status_code=404, detail="Workflow not found")

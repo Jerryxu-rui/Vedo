@@ -220,7 +220,7 @@ function Idea2Video() {
     }])
   }, [])
 
-  const pollStatus = useCallback(async (episodeId: string, expectedStep: string) => {
+  const pollStatus = useCallback(async (episodeId: string, expectedStep: string, pollCount: number = 0) => {
     const addMsg = (role: 'assistant' | 'user' | 'system', content: string) => {
       setMessages(prev => [...prev, {
         id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -233,7 +233,7 @@ function Idea2Video() {
     try {
       const response = await fetch(`/api/v1/conversational/episode/${episodeId}/state`)
       if (!response.ok) {
-        setTimeout(() => pollStatus(episodeId, expectedStep), 3000)
+        setTimeout(() => pollStatus(episodeId, expectedStep, pollCount + 1), 3000)
         return
       }
       
@@ -251,7 +251,7 @@ function Idea2Video() {
       }
 
       if (backendState.includes('generating') || backendState.includes('refining')) {
-        setTimeout(() => pollStatus(episodeId, expectedStep), 2000)
+        setTimeout(() => pollStatus(episodeId, expectedStep, 0), 2000)
         return
       }
 
@@ -288,11 +288,31 @@ function Idea2Video() {
         return
       }
 
-      setTimeout(() => pollStatus(episodeId, expectedStep), 2000)
+      // If we've polled many times without progress and not in generating state,
+      // detect as stale and allow user to retry
+      if (pollCount > 15) {
+        const currentStep = determineStepFromState(backendState)
+        console.log('[DEBUG] Poll timeout - currentStep:', currentStep, 'expectedStep:', expectedStep)
+        
+        // Update to current state and stop generating status
+        setWorkflow(prev => ({
+          ...prev,
+          step: currentStep,
+          status: 'ready',
+          outline: data.outline || prev.outline,
+          characters: data.characters?.length > 0 ? data.characters : prev.characters,
+          scenes: data.scenes?.length > 0 ? data.scenes : prev.scenes,
+          storyboard: data.storyboard?.length > 0 ? data.storyboard : prev.storyboard
+        }))
+        addMsg('system', `生成似乎已停止。当前阶段: ${getStepLabel(currentStep)}。请点击"继续生成"重试。`)
+        return
+      }
+      
+      setTimeout(() => pollStatus(episodeId, expectedStep, pollCount + 1), 2000)
 
     } catch (error) {
       console.error('Poll error:', error)
-      setTimeout(() => pollStatus(episodeId, expectedStep), 3000)
+      setTimeout(() => pollStatus(episodeId, expectedStep, pollCount + 1), 3000)
     }
   }, [])
 

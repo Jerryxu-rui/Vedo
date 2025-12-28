@@ -32,7 +32,6 @@ outputType = "console"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "python api_server.py"
-waitForPort = 3001
 
 [[workflows.workflow]]
 name = "Frontend"

@@ -106,12 +106,14 @@ async def download_episode_video(
         if not video_path:
             raise HTTPException(status_code=404, detail="Video not found")
         
-        # Convert to absolute path
-        if not video_path.startswith('/'):
+        # Convert to absolute path - only add .working_dir if not already there
+        if not video_path.startswith('/') and not video_path.startswith('.working_dir'):
             video_path = os.path.join('.working_dir', video_path)
         
+        print(f"[Download] Looking for video at: {video_path}")
+        
         if not os.path.exists(video_path):
-            raise HTTPException(status_code=404, detail="Video file not found on disk")
+            raise HTTPException(status_code=404, detail=f"Video file not found on disk: {video_path}")
         
         # Determine filename
         filename = f"episode_{episode.episode_number}_{episode.title}.mp4"
@@ -148,12 +150,14 @@ async def stream_episode_video(
         if not video_path:
             raise HTTPException(status_code=404, detail="Video not found")
         
-        # Convert to absolute path
-        if not video_path.startswith('/'):
+        # Convert to absolute path - only add .working_dir if not already there
+        if not video_path.startswith('/') and not video_path.startswith('.working_dir'):
             video_path = os.path.join('.working_dir', video_path)
         
+        print(f"[Stream] Looking for video at: {video_path}")
+        
         if not os.path.exists(video_path):
-            raise HTTPException(status_code=404, detail="Video file not found on disk")
+            raise HTTPException(status_code=404, detail=f"Video file not found on disk: {video_path}")
         
         def iterfile():
             with open(video_path, mode="rb") as file_like:

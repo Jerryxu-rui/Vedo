@@ -68,5 +68,33 @@
             "path": ".working_dir/idea2video/character_portraits/3_影魔/back.png",
             "description": "A back view portrait of 影魔."
         }
+    },
+    "艾伦": {
+        "front": {
+            "path": ".working_dir/idea2video/character_portraits/0_艾伦/front.png",
+            "description": "A front view portrait of 艾伦."
+        },
+        "side": {
+            "path": ".working_dir/idea2video/character_portraits/0_艾伦/side.png",
+            "description": "A side view portrait of 艾伦."
+        },
+        "back": {
+            "path": ".working_dir/idea2video/character_portraits/0_艾伦/back.png",
+            "description": "A back view portrait of 艾伦."
+        }
+    },
+    "影子": {
+        "front": {
+            "path": ".working_dir/idea2video/character_portraits/1_影子/front.png",
+            "description": "A front view portrait of 影子."
+        },
+        "side": {
+            "path": ".working_dir/idea2video/character_portraits/1_影子/side.png",
+            "description": "A side view portrait of 影子."
+        },
+        "back": {
+            "path": ".working_dir/idea2video/character_portraits/1_影子/back.png",
+            "description": "A back view portrait of 影子."
+        }
     }
 }

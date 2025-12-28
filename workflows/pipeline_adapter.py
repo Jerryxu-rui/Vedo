@@ -206,19 +206,21 @@ class PipelineAdapter:
                 image_path = front_portrait.get("path", "")
                 
                 # 使用PersonalityExtractor提取性格特征
-                full_description = f"{char.static_features} {char.dynamic_features}"
+                static_features = char.static_features or ""
+                dynamic_features = char.dynamic_features or ""
+                full_description = f"{static_features} {dynamic_features}".strip()
                 personality = await self.personality_extractor.extract_traits_simple(
-                    description=full_description,
+                    description=full_description or "角色",
                     max_traits=5
                 )
                 
                 character = CharacterData(
-                    name=char.identifier_in_scene,
+                    name=char.identifier_in_scene or "角色",
                     role="protagonist" if char.idx == 0 else "supporting",
-                    description=char.static_features,
-                    appearance=char.dynamic_features,
-                    personality=personality,
-                    image_url=image_path
+                    description=static_features or "故事角色",
+                    appearance=dynamic_features or "待描述",
+                    personality=personality if personality else ["待定"],
+                    image_url=image_path if image_path else None
                 )
                 characters.append(character)
             

@@ -1,0 +1,36 @@
+[Character Generation] 70.0%: Extracting personality traits...
+Error extracting characters: 1 validation error for CharacterData
+appearance
+  Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]
+    For further information visit https://errors.pydantic.dev/2.12/v/string_type
+Traceback (most recent call last):
+  File "/home/runner/workspace/workflows/pipeline_adapter.py", line 215, in extract_and_generate_characters
+    character = CharacterData(
+                ^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/pydantic/main.py", line 250, in __init__
+    validated_self = self.__pydantic_validator__.validate_python(data, self_instance=self)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+pydantic_core._pydantic_core.ValidationError: 1 validation error for CharacterData
+appearance
+  Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]
+    For further information visit https://errors.pydantic.dev/2.12/v/string_type
+[Character Generation] Extracted 1 characters
+[Character Generation] Saving to database...
+[Character 1] Name: 主角
+[Character 1] Role: protagonist
+[Character 1] Image URL (raw): None
+[URL Conversion] WARNING: Empty file_path provided
+[Character 1] Image URL (converted): None
+[Character 1] Saved to DB with ID: d03542c0-bfb5-4403-a4a6-6c2632172b37
+[Character Generation] Database commit successful
+[DEBUG] Saved workflow state: episode=d2eff12d-7568-4e1b-a0e5-c744c4cd6114, state=WorkflowState.CHARACTERS_GENERATED
+[Character Generation] Sending WebSocket completion...
+✅ Generated 1 characters for episode 821114674111793461
+============================================================
+
+[DEBUG] Checking outline for episode d2eff12d-7568-4e1b-a0e5-c744c4cd6114, state: characters_generated
+[DEBUG] State check: session.state=characters_generated, not in ['initial', 'outline_generating']? True
+[DEBUG] Querying outline from database...
+[DEBUG] Query result: <database_models.EpisodeOutline object at 0x7f7b2a95a720>
+[DEBUG] Found outline for episode d2eff12d-7568-4e1b-a0e5-c744c4cd6114: {'id': '0cea7a1b-518c-4d5f-a032-3f6d0d47dee5', 'episode_id': 'd2eff12d-7568-4e1b-a0e5-c744c4cd6114', 'title': '基于创意的故事', 'genre': '未分类', 'style': 'cinematic', 'episode_count': 1, 'synopsis': '故事标题：影舞', 'characters_summary': [{'name': '艾伦', 'role': '主角', 'description': '艾伦是一位年轻的程序员，面容略显疲惫。 他专注地盯着电脑屏幕。'}, {'name': '影子', 'role': '配角', 'description': '影子是艾伦的影子，呈现出人形轮廓。 None'}], 'plot_summary': [{'act': '第1幕', 'description': '故事标题：影舞'}, {'act': '第2幕', 'description': '目标受众与类型：这个故事的目标受众是成人，属于科幻悬疑类型。'}, {'act': '第3幕', 'description': '故事梗概：艾伦，一位才华横溢但孤僻的程序员，在深夜的编码工作中偶然发现自己的影子拥有了独立的意识。最初的好奇和兴奋逐渐演变为恐惧和困惑，因为影子不仅能与他交流，还开始干涉他的生活，甚至操控他的行为。艾伦试图摆脱影子的控制，但影子变得越来越强大，揭示了艾伦内心深处隐藏的秘密和欲望。最终，艾伦必须面对自己内心的黑暗面，才能真正掌控自己的命运。故事以一场激烈的内心斗争达到高潮，艾伦最终接受了自己，与影子...'}, {'act': '第4幕', 'description': '主要人物介绍：\n* 艾伦：一位年轻有为的程序员，性格内向，工作狂，对技术充满热情，但内心孤独，渴望被理解。\n* 影子：艾伦的影子，拥有独立的意识和思想，起初是艾伦的倾听者和朋友，后来逐渐变得控制欲强，代表着艾伦内心深处的黑暗面。'}, {'act': '第5幕', 'description': '完整故事叙述：\n介绍：寂静的夜晚，电脑屏幕的蓝光映照在艾伦年轻而疲惫的脸上。他是一名才华横溢的程序员，专注于一个雄心勃勃的项目。他独自生活，唯一的陪伴就是屏幕上闪烁的代码。突然，他注意到自己的影子以一种奇怪的方式扭动着，仿佛拥有了自己的生命。'}], 'highlights': ['AI生成', 'cinematic', '原创故事'], 'created_at': '2025-12-28T08:03:45.093855', 'updated_at': '2025-12-28T08:03:45.093860'}
+INFO:     10.81.12.160:0 - "GET /api/v1/conversational/episode/d2eff12d-7568-4e1b-a0e5-c744c4cd6114/state HTTP/1.1" 200 OK

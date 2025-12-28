@@ -1,0 +1,16 @@
+[
+    {
+        "idx": 0,
+        "identifier_in_scene": "艾伦",
+        "is_visible": true,
+        "static_features": "艾伦是一位年轻的程序员，面容略显疲惫。",
+        "dynamic_features": "他专注地盯着电脑屏幕。"
+    },
+    {
+        "idx": 1,
+        "identifier_in_scene": "影子",
+        "is_visible": true,
+        "static_features": "影子是艾伦的影子，呈现出人形轮廓。",
+        "dynamic_features": null
+    }
+]

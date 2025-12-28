@@ -136,6 +136,13 @@ Located in `frontend/` directory:
 
 ## Recent Changes
 
+- **Granular Editing Endpoints** (Dec 28, 2025):
+  - Added individual edit/regenerate/delete endpoints for characters, scenes, and shots
+  - Characters: PATCH `/episode/{id}/characters/{char_id}` (edit), POST `.../regenerate` (regenerate image), DELETE
+  - Scenes: PATCH `/episode/{id}/scenes/{scene_id}` (edit), POST `.../regenerate` (regenerate image), DELETE
+  - Shots: PATCH `/episode/{id}/shots/{shot_id}` (edit), DELETE
+  - Updated batch generation logic to check existing count before deleting (incremental mode)
+  - Added `generate_character_portrait()` and `generate_scene_image()` helper methods to PipelineAdapter
 - **Draft Resume Feature** (Dec 28, 2025):
   - Added `load_or_create_from_db` method to WorkflowManager for persistent workflow state restoration
   - Workflow state now restored from database on server restart, including outline, characters, scenes, storyboard, and video path

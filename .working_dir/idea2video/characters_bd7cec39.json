@@ -1,0 +1,30 @@
+[
+    {
+        "idx": 0,
+        "identifier_in_scene": "艾伦·诺顿",
+        "is_visible": true,
+        "static_features": "艾伦是一位年轻的程序员，他有着深色的短发和专注的眼神。他看起来总是很疲惫。",
+        "dynamic_features": "他通常穿着宽松的休闲服装，经常穿着一件旧的连帽衫。"
+    },
+    {
+        "idx": 1,
+        "identifier_in_scene": "阴影",
+        "is_visible": true,
+        "static_features": "阴影是一个扭曲的、人形的暗影，它的形态不断变化，没有固定的面部特征。",
+        "dynamic_features": null
+    },
+    {
+        "idx": 2,
+        "identifier_in_scene": "莉莉·陈",
+        "is_visible": true,
+        "static_features": "莉莉是一位年轻的职业女性，留着齐肩的黑发，戴着一副眼镜，显得聪明干练。",
+        "dynamic_features": "她通常穿着职业套装，佩戴着简约的银色项链。"
+    },
+    {
+        "idx": 3,
+        "identifier_in_scene": "老板",
+        "is_visible": true,
+        "static_features": "老板是一位中年男性，头发灰白，面容严肃。",
+        "dynamic_features": "他总是穿着笔挺的西装，领带一丝不苟。"
+    }
+]

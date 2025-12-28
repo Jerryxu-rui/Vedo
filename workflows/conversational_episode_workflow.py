@@ -112,6 +112,7 @@ class ConversationalEpisodeWorkflow:
             "updated_at": datetime.now().isoformat(),
             "mode": mode,
             "style": style,
+            "initial_content": initial_content,  # CRITICAL: Store initial_content in context for outline generation
         }
         
         # 存储各步骤的数据

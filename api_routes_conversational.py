@@ -610,6 +610,54 @@ async def generate_storyboard_async(
         )
         
         workflow.storyboard = storyboard
+        
+        # Save storyboard shots to database
+        episode_id_str = workflow.context.get("episode_id_str", str(workflow.episode_id))
+        
+        # Group shots by scene name
+        scene_shots = {}
+        for shot in storyboard:
+            scene_name = shot.scene_name
+            if scene_name not in scene_shots:
+                scene_shots[scene_name] = []
+            scene_shots[scene_name].append(shot)
+        
+        # Create Scene and Shot records
+        for scene_idx, (scene_name, shots) in enumerate(scene_shots.items()):
+            # Create or get scene
+            db_scene = db.query(Scene).filter(
+                Scene.episode_id == episode_id_str,
+                Scene.scene_number == scene_idx + 1
+            ).first()
+            
+            if not db_scene:
+                db_scene = Scene(
+                    episode_id=episode_id_str,
+                    scene_number=scene_idx + 1,
+                    location=scene_name,
+                    description=f"Scene: {scene_name}",
+                    status="completed"
+                )
+                db.add(db_scene)
+                db.flush()
+            
+            # Create shot records
+            for shot in shots:
+                db_shot = Shot(
+                    scene_id=db_scene.id,
+                    shot_number=shot.shot_number,
+                    visual_desc=shot.visual_desc,
+                    camera_angle=shot.camera_angle,
+                    camera_movement=shot.camera_movement,
+                    dialogue=shot.dialogue,
+                    voice_actor=shot.voice_actor,
+                    status="completed"
+                )
+                db.add(db_shot)
+        
+        db.commit()
+        print(f"[Storyboard] Saved {len(storyboard)} shots to database")
+        
         workflow.transition_to(WorkflowState.STORYBOARD_GENERATED)
         save_workflow_state(db, workflow)
         

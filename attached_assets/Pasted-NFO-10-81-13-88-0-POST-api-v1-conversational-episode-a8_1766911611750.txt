@@ -1,0 +1,32 @@
+NFO:     10.81.13.88:0 - "POST /api/v1/conversational/episode/a8142603-544d-4346-9a44-6b6db6715290/storyboard/confirm HTTP/1.1" 200 OK
+INFO:     10.81.13.88:0 - "POST /api/v1/conversational/episode/a8142603-544d-4346-9a44-6b6db6715290/video/generate HTTP/1.1" 200 OK
+[DEBUG] Saved workflow state: episode=a8142603-544d-4346-9a44-6b6db6715290, state=WorkflowState.VIDEO_GENERATING
+Chat model rate limiting: 500 req/min, 2000 req/day
+Image generator rate limiting: 10 req/min, 500 req/day
+Video generator rate limiting: 10 req/min, 100 req/day
+Error generating episode video: ResourceError.__init__() missing 1 required positional argument: 'resource_type'
+Error generating video: [GENERATION] Failed to generate episode video
+Traceback (most recent call last):
+  File "/home/runner/workspace/workflows/video_generation_adapter.py", line 490, in generate_episode_video
+    final_path = await self.concatenate_shot_videos(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/workflows/video_generation_adapter.py", line 407, in concatenate_shot_videos
+    raise ResourceError("No successful shots to concatenate")
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: ResourceError.__init__() missing 1 required positional argument: 'resource_type'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/runner/workspace/workflows/pipeline_adapter.py", line 569, in generate_video
+    result = await video_adapter.generate_episode_video(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/workflows/video_generation_adapter.py", line 512, in generate_episode_video
+    raise GenerationError(
+utils.error_handling.GenerationError: [GENERATION] Failed to generate episode video
+[DEBUG] Saved workflow state: episode=a8142603-544d-4346-9a44-6b6db6715290, state=WorkflowState.FAILED
+[DEBUG] Checking outline for episode a8142603-544d-4346-9a44-6b6db6715290, state: failed
+[DEBUG] State check: session.state=failed, not in ['initial', 'outline_generating']? True
+[DEBUG] Querying outline from database...
+[DEBUG] Query result: <database_models.EpisodeOutline object at 0x7f1fb2929610>
+[DEBUG] Found outline for episode a8142603-544d-4346-9a44-6b6db6715290: {'id': '2ad1379f-e619-455c-8848-9713bc53abc1', 'episode_id': 'a8142603-544d-4346-9a44-6b6db6715290', 'title': '基于创意的故事', 'genre': '未分类', 'style': 'cinematic', 'episode_count': 1, 'synopsis': '故事标题：毛球的奇妙冒险', 'characters_summary': [{'name': '毛球', 'role': '主角', 'description': '一只小猫，有着柔软的白色毛发，一双明亮的大眼睛。 None'}, {'name': '毛线球', 'role': '配角', 'description': '一个色彩斑斓的毛线球 None'}, {'name': '啾啾', 'role': '配角', 'description': '一只小鸟 None'}, {'name': '老龟智者', 'role': '配角', 'description': '一位老龟 None'}, {'name': '主人', 'role': '配角', 'description': 'Unknown None'}], 'plot_summary': [{'act': '第1幕', 'description': '故事标题：毛球的奇妙冒险'}, {'act': '第2幕', 'description': '目标受众 & 类型：这个故事是面向所有年龄段的观众，在奇幻冒险类型中。'}, {'act': '第3幕', 'description': '故事梗概：毛球是一只充满好奇心的小猫，它最喜欢的玩具就是一个色彩斑斓的毛线球。一天，毛球在玩耍时不小心将毛线球碰到了壁炉旁的一张旧地图上，地图突然发光，将毛球和毛线球吸入了一个充满奇幻色彩的世界。在这个世界里，毛线球拥有了神奇的力量，指引着毛球寻找回家的路。一路上，毛球遇到了各种各样友善的动物，它们帮助毛球克服了重重困难，最终找到了回到现实世界的通道。毛球带着对冒险的记忆和与新朋友的友谊，更加珍惜...'}, {'act': '第4幕', 'description': '主要人物介绍：\n*   毛球：一只天真可爱、充满好奇心的小猫，勇敢且富有冒险精神。\n*   毛线球：一个色彩斑斓的毛线球，拥有神奇的力量，是毛球冒险的指引者。\n*   小鸟啾啾：一只友善的小鸟，是毛球在奇幻世界遇到的第一个朋友，为毛球提供指引和帮助。\n*   老龟智者：一位知识渊博的老龟，给予毛球重要的建议和指引。'}, {'act': '第5幕', 'description': '完整故事叙述：'}], 'highlights': ['AI生成', 'cinematic', '原创故事'], 'created_at': '2025-12-28T08:26:05.729408', 'updated_at': '2025-12-28T08:26:05.729412'}

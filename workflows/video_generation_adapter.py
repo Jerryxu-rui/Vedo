@@ -404,7 +404,7 @@ class VideoGenerationAdapter:
         successful_shots.sort(key=lambda x: x["shot_number"])
         
         if not successful_shots:
-            raise ResourceError("No successful shots to concatenate")
+            raise ResourceError("No successful shots to concatenate", resource_type="video_shots")
         
         video_paths = [shot["video_path"] for shot in successful_shots]
         

@@ -96,5 +96,75 @@
             "path": ".working_dir/idea2video/character_portraits/1_影子/back.png",
             "description": "A back view portrait of 影子."
         }
+    },
+    "主人": {
+        "front": {
+            "path": ".working_dir/idea2video/character_portraits/4_主人/front.png",
+            "description": "A front view portrait of 主人."
+        },
+        "side": {
+            "path": ".working_dir/idea2video/character_portraits/4_主人/side.png",
+            "description": "A side view portrait of 主人."
+        },
+        "back": {
+            "path": ".working_dir/idea2video/character_portraits/4_主人/back.png",
+            "description": "A back view portrait of 主人."
+        }
+    },
+    "毛线球": {
+        "front": {
+            "path": ".working_dir/idea2video/character_portraits/1_毛线球/front.png",
+            "description": "A front view portrait of 毛线球."
+        },
+        "side": {
+            "path": ".working_dir/idea2video/character_portraits/1_毛线球/side.png",
+            "description": "A side view portrait of 毛线球."
+        },
+        "back": {
+            "path": ".working_dir/idea2video/character_portraits/1_毛线球/back.png",
+            "description": "A back view portrait of 毛线球."
+        }
+    },
+    "毛球": {
+        "front": {
+            "path": ".working_dir/idea2video/character_portraits/0_毛球/front.png",
+            "description": "A front view portrait of 毛球."
+        },
+        "side": {
+            "path": ".working_dir/idea2video/character_portraits/0_毛球/side.png",
+            "description": "A side view portrait of 毛球."
+        },
+        "back": {
+            "path": ".working_dir/idea2video/character_portraits/0_毛球/back.png",
+            "description": "A back view portrait of 毛球."
+        }
+    },
+    "啾啾": {
+        "front": {
+            "path": ".working_dir/idea2video/character_portraits/2_啾啾/front.png",
+            "description": "A front view portrait of 啾啾."
+        },
+        "side": {
+            "path": ".working_dir/idea2video/character_portraits/2_啾啾/side.png",
+            "description": "A side view portrait of 啾啾."
+        },
+        "back": {
+            "path": ".working_dir/idea2video/character_portraits/2_啾啾/back.png",
+            "description": "A back view portrait of 啾啾."
+        }
+    },
+    "老龟智者": {
+        "front": {
+            "path": ".working_dir/idea2video/character_portraits/3_老龟智者/front.png",
+            "description": "A front view portrait of 老龟智者."
+        },
+        "side": {
+            "path": ".working_dir/idea2video/character_portraits/3_老龟智者/side.png",
+            "description": "A side view portrait of 老龟智者."
+        },
+        "back": {
+            "path": ".working_dir/idea2video/character_portraits/3_老龟智者/back.png",
+            "description": "A back view portrait of 老龟智者."
+        }
     }
 }

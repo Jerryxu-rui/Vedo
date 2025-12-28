@@ -1,0 +1,37 @@
+[
+    {
+        "idx": 0,
+        "identifier_in_scene": "毛球",
+        "is_visible": true,
+        "static_features": "一只小猫，有着柔软的白色毛发，一双明亮的大眼睛。",
+        "dynamic_features": null
+    },
+    {
+        "idx": 1,
+        "identifier_in_scene": "毛线球",
+        "is_visible": true,
+        "static_features": "一个色彩斑斓的毛线球",
+        "dynamic_features": null
+    },
+    {
+        "idx": 2,
+        "identifier_in_scene": "啾啾",
+        "is_visible": true,
+        "static_features": "一只小鸟",
+        "dynamic_features": null
+    },
+    {
+        "idx": 3,
+        "identifier_in_scene": "老龟智者",
+        "is_visible": true,
+        "static_features": "一位老龟",
+        "dynamic_features": null
+    },
+    {
+        "idx": 4,
+        "identifier_in_scene": "主人",
+        "is_visible": false,
+        "static_features": "Unknown",
+        "dynamic_features": null
+    }
+]

@@ -428,27 +428,34 @@ class PipelineAdapter:
                 await progress.update(0.5, "Designing storyboard...")
             
             # 调用pipeline的design_storyboard方法
-            # Note: Idea2VideoPipeline doesn't have design_storyboard, need to use Script2VideoPipeline's storyboard_artist
+            # Note: Idea2VideoPipeline doesn't have design_storyboard, need to create StoryboardArtist
+            from agents import StoryboardArtist
+            
             if hasattr(self.pipeline, 'design_storyboard'):
                 storyboard_brief = await self.pipeline.design_storyboard(
                     script=script,
                     characters=characters_in_scene,
                     user_requirement=f"风格：{style}"
                 )
-            elif hasattr(self.pipeline, 'storyboard_artist'):
-                # For Idea2VideoPipeline, use storyboard_artist directly
-                from agents import StoryboardArtist
-                if not hasattr(self.pipeline, 'storyboard_artist'):
-                    self.pipeline.storyboard_artist = StoryboardArtist(chat_model=self.pipeline.chat_model)
-                
+            elif hasattr(self.pipeline, 'storyboard_artist') and self.pipeline.storyboard_artist is not None:
+                # Use existing storyboard_artist if available
                 storyboard_brief = await self.pipeline.storyboard_artist.design_storyboard(
                     script=script,
                     characters=characters_in_scene,
                     user_requirement=f"风格：{style}",
                     retry_timeout=150
                 )
+            elif hasattr(self.pipeline, 'chat_model') and self.pipeline.chat_model is not None:
+                # Create a StoryboardArtist using the pipeline's chat_model
+                storyboard_artist = StoryboardArtist(chat_model=self.pipeline.chat_model)
+                storyboard_brief = await storyboard_artist.design_storyboard(
+                    script=script,
+                    characters=characters_in_scene,
+                    user_requirement=f"风格：{style}",
+                    retry_timeout=150
+                )
             else:
-                raise AttributeError(f"Pipeline {type(self.pipeline).__name__} doesn't have design_storyboard or storyboard_artist")
+                raise AttributeError(f"Pipeline {type(self.pipeline).__name__} doesn't have design_storyboard, storyboard_artist, or chat_model")
             
             if progress:
                 await progress.update(0.8, "Converting storyboard format...")

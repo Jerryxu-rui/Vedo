@@ -21,23 +21,28 @@ function Library() {
 
   const fetchVideos = async () => {
     try {
-      const response = await fetch('/api/v1/seko/series')
-      if (response.ok) {
-        const data = await response.json()
+      const seriesResponse = await fetch('/api/v1/seko/series')
+      if (seriesResponse.ok) {
+        const seriesList = await seriesResponse.json()
         const videoList: VideoItem[] = []
         
-        for (const series of data.series || []) {
-          for (const episode of series.episodes || []) {
-            videoList.push({
-              id: episode.id,
-              title: `${series.title} - Episode ${episode.episode_number}`,
-              created_at: episode.created_at,
-              status: episode.status,
-              duration: episode.duration
-            })
+        for (const series of seriesList || []) {
+          const episodesResponse = await fetch(`/api/v1/seko/series/${series.id}/episodes`)
+          if (episodesResponse.ok) {
+            const episodes = await episodesResponse.json()
+            for (const episode of episodes || []) {
+              videoList.push({
+                id: episode.id,
+                title: episode.title || `${series.title} - 第${episode.episode_number}集`,
+                created_at: episode.created_at,
+                status: episode.status,
+                duration: episode.duration
+              })
+            }
           }
         }
         
+        videoList.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
         setVideos(videoList)
       }
     } catch (error) {

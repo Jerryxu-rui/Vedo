@@ -593,9 +593,23 @@ async def create_conversational_episode(
         )
     
     try:
+        # Auto-create series if it doesn't exist
+        series = db.query(Series).filter(Series.id == request.series_id).first()
+        if not series:
+            series = Series(
+                id=request.series_id,
+                title=request.title or "Default Series",
+                description="Auto-generated series",
+                genre="general",
+                style_preset=request.style or "cinematic",
+                status="in_progress"
+            )
+            db.add(series)
+            db.flush()
+        
         # 创建Episode记录
         episode = Episode(
-            series_id=request.series_id,
+            series_id=series.id,
             episode_number=request.episode_number,
             title=request.title or f"Episode {request.episode_number}",
             status="draft"

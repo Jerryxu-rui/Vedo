@@ -309,9 +309,36 @@ async def generate_characters_async(
         print(f"[Character Generation] Pipeline initialized")
         
         # 获取内容（从大纲或原始内容）
+        # Build full content from outline including characters_summary
         content = workflow.context.get("initial_content", "")
         if workflow.outline:
-            content = workflow.outline.synopsis
+            # Build comprehensive content from outline
+            parts = []
+            if workflow.outline.title:
+                parts.append(f"标题: {workflow.outline.title}")
+            if workflow.outline.synopsis:
+                parts.append(f"剧情概要: {workflow.outline.synopsis}")
+            
+            # Include character summaries from outline
+            if workflow.outline.characters_summary:
+                parts.append("\n角色列表:")
+                for char_info in workflow.outline.characters_summary:
+                    if isinstance(char_info, dict):
+                        name = char_info.get("name", "")
+                        role = char_info.get("role", "")
+                        desc = char_info.get("description", "")
+                        parts.append(f"- {name} ({role}): {desc}")
+            
+            # Include plot summary
+            if workflow.outline.plot_summary:
+                parts.append("\n剧情结构:")
+                for plot_point in workflow.outline.plot_summary:
+                    if isinstance(plot_point, dict):
+                        act = plot_point.get("act", "")
+                        desc = plot_point.get("description", "")
+                        parts.append(f"- {act}: {desc}")
+            
+            content = "\n".join(parts)
         print(f"[Character Generation] Content length: {len(content)} chars")
         
         # 创建进度回调

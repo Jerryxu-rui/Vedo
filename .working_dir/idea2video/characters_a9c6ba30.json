@@ -1,0 +1,30 @@
+[
+    {
+        "idx": 0,
+        "identifier_in_scene": "星野光一",
+        "is_visible": true,
+        "static_features": "星野光一 is a young man in his early twenties with short, dark hair. He has a focused gaze and a slender build.",
+        "dynamic_features": "He wears comfortable, casual clothing suitable for long hours of programming."
+    },
+    {
+        "idx": 1,
+        "identifier_in_scene": "影",
+        "is_visible": true,
+        "static_features": "影 mirrors 星野光一 in appearance, sharing the same short, dark hair and overall features.",
+        "dynamic_features": "As a shadow, he doesn't wear clothing, but his form is distinct and animated."
+    },
+    {
+        "idx": 2,
+        "identifier_in_scene": "绫濑未来",
+        "is_visible": true,
+        "static_features": "绫濑未来 is a young woman in her late teens with bright, long brown hair and friendly eyes.",
+        "dynamic_features": "She is dressed in stylish, modern clothing."
+    },
+    {
+        "idx": 3,
+        "identifier_in_scene": "黑田博士",
+        "is_visible": true,
+        "static_features": "黑田博士 is a man in his fifties with graying hair and a serious expression. He has a medium build.",
+        "dynamic_features": "He wears a professional, perhaps slightly disheveled, lab coat or suit."
+    }
+]

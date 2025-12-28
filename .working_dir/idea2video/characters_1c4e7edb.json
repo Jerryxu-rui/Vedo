@@ -1,0 +1,16 @@
+[
+    {
+        "idx": 0,
+        "identifier_in_scene": "艾伦",
+        "is_visible": true,
+        "static_features": "艾伦是一位年轻的程序员，面容憔悴，眼神专注。",
+        "dynamic_features": null
+    },
+    {
+        "idx": 1,
+        "identifier_in_scene": "影子（希尔）",
+        "is_visible": true,
+        "static_features": "影子拥有独立的意识，聪明。",
+        "dynamic_features": null
+    }
+]

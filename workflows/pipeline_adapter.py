@@ -207,7 +207,7 @@ class PipelineAdapter:
                 
                 # 使用PersonalityExtractor提取性格特征
                 full_description = f"{char.static_features} {char.dynamic_features}"
-                personality = self.personality_extractor.extract_traits_simple(
+                personality = await self.personality_extractor.extract_traits_simple(
                     description=full_description,
                     max_traits=5
                 )

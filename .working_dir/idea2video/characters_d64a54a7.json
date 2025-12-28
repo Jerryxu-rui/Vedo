@@ -1,0 +1,37 @@
+[
+    {
+        "idx": 0,
+        "identifier_in_scene": "泷泽明",
+        "is_visible": true,
+        "static_features": "A 17-year-old young man with short, dark hair and a slightly tired face.",
+        "dynamic_features": "Wears glasses and casual, comfortable clothing, likely a loose-fitting t-shirt and jeans."
+    },
+    {
+        "idx": 1,
+        "identifier_in_scene": "黑",
+        "is_visible": true,
+        "static_features": "A shadowy figure with sharper features and glowing red eyes.",
+        "dynamic_features": "Appears as a dark silhouette."
+    },
+    {
+        "idx": 2,
+        "identifier_in_scene": "绫",
+        "is_visible": true,
+        "static_features": "A 17-year-old girl with long, flowing hair.",
+        "dynamic_features": "Wears a traditional sword-fighting uniform (a kendogi) or casual, sporty attire, with a noticeable katana strapped to her side."
+    },
+    {
+        "idx": 3,
+        "identifier_in_scene": "影魔",
+        "is_visible": true,
+        "static_features": "A tall, gaunt figure with piercing eyes and a stern and menacing face.",
+        "dynamic_features": "Dressed in dark, flowing robes."
+    },
+    {
+        "idx": 4,
+        "identifier_in_scene": "影舞者",
+        "is_visible": true,
+        "static_features": "Possessing 明's youthful features but with enhanced, sharper lines.",
+        "dynamic_features": "Clothing is a seamless blend of coding attire and shadowy material, shifting and flowing like liquid darkness, with traces of glowing code interwoven into the fabric."
+    }
+]

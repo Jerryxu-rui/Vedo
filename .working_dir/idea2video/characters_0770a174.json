@@ -1,0 +1,37 @@
+[
+    {
+        "idx": 0,
+        "identifier_in_scene": "泷泽明",
+        "is_visible": true,
+        "static_features": "A 17-year-old young man with a focused, slightly tired face, suggesting long hours spent in front of a computer. He has short, dark hair and wears glasses.",
+        "dynamic_features": "Dressed in casual, comfortable clothing, likely a loose-fitting t-shirt and jeans, suitable for late-night coding sessions."
+    },
+    {
+        "idx": 1,
+        "identifier_in_scene": "黑",
+        "is_visible": true,
+        "static_features": "A shadowy figure resembling 明, but with sharper features and a more menacing aura. His hair is wild and unkempt.",
+        "dynamic_features": "He appears as a dark silhouette with glowing red eyes, lacking distinct clothing."
+    },
+    {
+        "idx": 2,
+        "identifier_in_scene": "绫",
+        "is_visible": true,
+        "static_features": "A 17-year-old girl with a bright and cheerful face. She has long, flowing hair, often tied back to keep it out of her face during sword practice.",
+        "dynamic_features": "She wears a traditional sword-fighting uniform (a kendogi) or casual, sporty attire, with a noticeable katana strapped to her side."
+    },
+    {
+        "idx": 3,
+        "identifier_in_scene": "影魔",
+        "is_visible": true,
+        "static_features": "A tall, gaunt figure with piercing eyes that reflect the darkness within. He has a stern and menacing face.",
+        "dynamic_features": "Dressed in dark, flowing robes that seem to absorb the light around him. His presence is accompanied by swirling shadows."
+    },
+    {
+        "idx": 4,
+        "identifier_in_scene": "影舞者",
+        "is_visible": true,
+        "static_features": "A fusion of 明 and 黑, possessing 明's youthful features but with enhanced, sharper lines and an otherworldly glow. His hair is a blend of dark and shadow.",
+        "dynamic_features": "His clothing is a seamless blend of coding attire and shadowy material, shifting and flowing like liquid darkness, with traces of glowing code interwoven into the fabric."
+    }
+]

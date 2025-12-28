@@ -1,0 +1,72 @@
+{
+    "影舞者": {
+        "front": {
+            "path": ".working_dir/idea2video/character_portraits/4_影舞者/front.png",
+            "description": "A front view portrait of 影舞者."
+        },
+        "side": {
+            "path": ".working_dir/idea2video/character_portraits/4_影舞者/side.png",
+            "description": "A side view portrait of 影舞者."
+        },
+        "back": {
+            "path": ".working_dir/idea2video/character_portraits/4_影舞者/back.png",
+            "description": "A back view portrait of 影舞者."
+        }
+    },
+    "绫": {
+        "front": {
+            "path": ".working_dir/idea2video/character_portraits/2_绫/front.png",
+            "description": "A front view portrait of 绫."
+        },
+        "side": {
+            "path": ".working_dir/idea2video/character_portraits/2_绫/side.png",
+            "description": "A side view portrait of 绫."
+        },
+        "back": {
+            "path": ".working_dir/idea2video/character_portraits/2_绫/back.png",
+            "description": "A back view portrait of 绫."
+        }
+    },
+    "黑": {
+        "front": {
+            "path": ".working_dir/idea2video/character_portraits/1_黑/front.png",
+            "description": "A front view portrait of 黑."
+        },
+        "side": {
+            "path": ".working_dir/idea2video/character_portraits/1_黑/side.png",
+            "description": "A side view portrait of 黑."
+        },
+        "back": {
+            "path": ".working_dir/idea2video/character_portraits/1_黑/back.png",
+            "description": "A back view portrait of 黑."
+        }
+    },
+    "泷泽明": {
+        "front": {
+            "path": ".working_dir/idea2video/character_portraits/0_泷泽明/front.png",
+            "description": "A front view portrait of 泷泽明."
+        },
+        "side": {
+            "path": ".working_dir/idea2video/character_portraits/0_泷泽明/side.png",
+            "description": "A side view portrait of 泷泽明."
+        },
+        "back": {
+            "path": ".working_dir/idea2video/character_portraits/0_泷泽明/back.png",
+            "description": "A back view portrait of 泷泽明."
+        }
+    },
+    "影魔": {
+        "front": {
+            "path": ".working_dir/idea2video/character_portraits/3_影魔/front.png",
+            "description": "A front view portrait of 影魔."
+        },
+        "side": {
+            "path": ".working_dir/idea2video/character_portraits/3_影魔/side.png",
+            "description": "A side view portrait of 影魔."
+        },
+        "back": {
+            "path": ".working_dir/idea2video/character_portraits/3_影魔/back.png",
+            "description": "A back view portrait of 影魔."
+        }
+    }
+}

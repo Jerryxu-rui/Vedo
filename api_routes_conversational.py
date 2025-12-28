@@ -666,8 +666,7 @@ async def generate_storyboard_async(
                     episode_id=episode_id_str,
                     scene_number=scene_idx + 1,
                     location=scene_name,
-                    description=f"Scene: {scene_name}",
-                    status="completed"
+                    description=f"Scene: {scene_name}"
                 )
                 db.add(db_scene)
                 db.flush()

@@ -849,31 +849,20 @@ async def get_workflow_state(
         else:
             print(f"[DEBUG] Skipping outline query because state is {session.state}")
         
-        # 获取角色
+        # 获取角色 - always try to get from database if they exist
         characters_data = []
-        if session.state not in [
-            "initial", "outline_generating",
-            "outline_generated", "outline_confirmed",
-            "refining", "refined",
-            "characters_generating"
-        ]:
-            db_characters = db.query(CharacterDesign).filter(
-                CharacterDesign.episode_id == episode_id
-            ).all()
+        db_characters = db.query(CharacterDesign).filter(
+            CharacterDesign.episode_id == episode_id
+        ).all()
+        if db_characters:
             characters_data = [c.to_dict() for c in db_characters]
         
-        # 获取场景
+        # 获取场景 - always try to get from database if they exist
         scenes_data = []
-        if session.state not in [
-            "initial", "outline_generating",
-            "outline_generated", "outline_confirmed",
-            "refining", "refined",
-            "characters_generating", "characters_generated",
-            "characters_confirmed", "scenes_generating"
-        ]:
-            db_scenes = db.query(SceneDesign).filter(
-                SceneDesign.episode_id == episode_id
-            ).all()
+        db_scenes = db.query(SceneDesign).filter(
+            SceneDesign.episode_id == episode_id
+        ).all()
+        if db_scenes:
             scenes_data = [s.to_dict() for s in db_scenes]
         
         # Get video path if completed

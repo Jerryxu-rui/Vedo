@@ -462,6 +462,40 @@ class WorkflowManager:
         if session.context and session.context.get('video_path'):
             workflow.context['video_path'] = session.context['video_path']
         
+        # Infer the correct state based on what data actually exists
+        # This ensures we restore to the correct stage even if state wasn't saved properly
+        inferred_state = workflow.state
+        if workflow.context.get('video_path'):
+            inferred_state = WorkflowState.VIDEO_COMPLETED
+        elif len(workflow.storyboard) > 0:
+            inferred_state = WorkflowState.STORYBOARD_GENERATED
+        elif len(workflow.scenes) > 0:
+            inferred_state = WorkflowState.SCENES_GENERATED
+        elif len(workflow.characters) > 0:
+            inferred_state = WorkflowState.CHARACTERS_GENERATED
+        elif workflow.outline:
+            inferred_state = WorkflowState.OUTLINE_GENERATED
+        
+        # Only update state if inferred state is further along
+        state_order = [
+            WorkflowState.INITIAL,
+            WorkflowState.OUTLINE_GENERATING, WorkflowState.OUTLINE_GENERATED, WorkflowState.OUTLINE_CONFIRMED,
+            WorkflowState.REFINING, WorkflowState.REFINED,
+            WorkflowState.CHARACTERS_GENERATING, WorkflowState.CHARACTERS_GENERATED, WorkflowState.CHARACTERS_CONFIRMED,
+            WorkflowState.SCENES_GENERATING, WorkflowState.SCENES_GENERATED, WorkflowState.SCENES_CONFIRMED,
+            WorkflowState.STORYBOARD_GENERATING, WorkflowState.STORYBOARD_GENERATED, WorkflowState.STORYBOARD_CONFIRMED,
+            WorkflowState.VIDEO_GENERATING, WorkflowState.VIDEO_COMPLETED
+        ]
+        
+        try:
+            current_idx = state_order.index(workflow.state) if workflow.state in state_order else 0
+            inferred_idx = state_order.index(inferred_state) if inferred_state in state_order else 0
+            if inferred_idx > current_idx:
+                workflow.state = inferred_state
+                print(f"[WorkflowManager] Updated state from {session.state} to {inferred_state.value} based on existing data")
+        except (ValueError, AttributeError):
+            pass
+        
         self.workflows[episode_id] = workflow
         print(f"[WorkflowManager] Restored workflow from database: episode={episode_id_str}, state={workflow.state}, storyboard_count={len(workflow.storyboard)}")
         

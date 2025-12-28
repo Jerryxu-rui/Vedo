@@ -4,6 +4,7 @@ Provides endpoints for idea2video and script2video pipelines with shot-level tra
 Includes Seko multi-episode series management
 """
 import asyncio
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, BackgroundTasks, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -30,24 +31,31 @@ from api_routes_websocket import router as websocket_router
 from api_routes_video import router as video_router
 from database import init_db
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Lifespan context manager for startup and shutdown events"""
+    print("Starting ViMax API Server...")
+    init_db()
+    print("Database initialized")
+    yield
+    print("Shutting down ViMax API Server...")
+
+
 app = FastAPI(
     title="ViMax Video Generation API",
     description="API for generating videos from ideas and scripts with shot-level tracking and multi-episode series management",
-    version="3.0.0"
+    version="3.0.0",
+    lifespan=lifespan
 )
 
-# Initialize database on startup
-@app.on_event("startup")
-async def startup_event():
-    """Initialize database tables on application startup"""
-    print("🚀 Starting ViMax API Server...")
-    init_db()
-    print("✅ Database initialized")
-
-# Configure CORS
+# Configure CORS - allow all origins for Replit deployment
+# Set CORS_ORIGINS env var to comma-separated list of origins, or use "*" for all
+cors_origins_env = os.getenv("CORS_ORIGINS", "*")
+allowed_origins = ["*"] if cors_origins_env == "*" else cors_origins_env.split(",")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:5174", "http://localhost:3000"],  # Frontend URLs
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -332,7 +340,7 @@ async def run_idea2video_pipeline(job_id: str, request: Idea2VideoRequest):
         shots = scan_working_directory(pipeline.working_dir)
         
         jobs[job_id]["status"] = "completed"
-        jobs[job_id]["shots"] = [shot.dict() for shot in shots]
+        jobs[job_id]["shots"] = [shot.model_dump() for shot in shots]
         jobs[job_id]["result"] = {
             "message": "Video generated successfully",
             "project_title": request.project_title or "Untitled Project",
@@ -371,7 +379,7 @@ async def run_script2video_pipeline(job_id: str, request: Script2VideoRequest):
         shots = scan_working_directory(pipeline.working_dir)
         
         jobs[job_id]["status"] = "completed"
-        jobs[job_id]["shots"] = [shot.dict() for shot in shots]
+        jobs[job_id]["shots"] = [shot.model_dump() for shot in shots]
         jobs[job_id]["result"] = {
             "message": "Video generated successfully",
             "project_title": request.project_title or "Untitled Project",
@@ -444,7 +452,7 @@ async def generate_idea2video(
 ):
     """Generate video from an idea with shot-level tracking"""
     # Log incoming request for debugging
-    print(f"[DEBUG] Received idea2video request: {request.dict()}")
+    print(f"[DEBUG] Received idea2video request: {request.model_dump()}")
     print(f"[DEBUG] Idea length: {len(request.idea)}")
     print(f"[DEBUG] User requirement: {request.user_requirement}")
     print(f"[DEBUG] Style: {request.style}")
@@ -462,7 +470,7 @@ async def generate_idea2video(
         "status": "queued",
         "created_at": created_at,
         "updated_at": created_at,
-        "request": request.dict(),
+        "request": request.model_dump(),
         "working_dir": working_dir,
         "shots": []
     }
@@ -485,7 +493,7 @@ async def generate_script2video(
 ):
     """Generate video from a script with shot-level tracking"""
     # Log incoming request for debugging
-    print(f"[DEBUG] Received script2video request: {request.dict()}")
+    print(f"[DEBUG] Received script2video request: {request.model_dump()}")
     print(f"[DEBUG] Script length: {len(request.script)}")
     print(f"[DEBUG] User requirement: {request.user_requirement}")
     print(f"[DEBUG] Style: {request.style}")
@@ -503,7 +511,7 @@ async def generate_script2video(
         "status": "queued",
         "created_at": created_at,
         "updated_at": created_at,
-        "request": request.dict(),
+        "request": request.model_dump(),
         "working_dir": working_dir,
         "shots": []
     }
@@ -530,7 +538,7 @@ async def get_job_status(job_id: str):
     # Scan working directory for latest shot information
     if job.get("working_dir") and os.path.exists(job["working_dir"]):
         shots = scan_working_directory(job["working_dir"])
-        job["shots"] = [shot.dict() for shot in shots]
+        job["shots"] = [shot.model_dump() for shot in shots]
         
         # Calculate progress based on shots
         if shots:
@@ -567,7 +575,7 @@ async def get_job_shots(job_id: str):
     return {
         "job_id": job_id,
         "total_shots": len(shots),
-        "shots": [shot.dict() for shot in shots]
+        "shots": [shot.model_dump() for shot in shots]
     }
 
 
@@ -869,7 +877,7 @@ async def create_character(request: CharacterCreateRequest):
             character_id=character.character_id,
             name=character.name,
             description=character.description,
-            appearance=character.appearance.dict(),
+            appearance=character.appearance.model_dump(),
             personality_traits=character.personality_traits,
             reference_images=character.reference_images,
             age=character.age,
@@ -895,7 +903,7 @@ async def list_characters(limit: int = 50, offset: int = 0):
                     "character_id": char.character_id,
                     "name": char.name,
                     "description": char.description,
-                    "appearance": char.appearance.dict(),
+                    "appearance": char.appearance.model_dump(),
                     "personality_traits": char.personality_traits,
                     "reference_images": char.reference_images,
                     "age": char.age,
@@ -928,7 +936,7 @@ async def get_character(character_id: str):
         character_id=character.character_id,
         name=character.name,
         description=character.description,
-        appearance=character.appearance.dict(),
+        appearance=character.appearance.model_dump(),
         personality_traits=character.personality_traits,
         reference_images=character.reference_images,
         age=character.age,
@@ -942,7 +950,7 @@ async def get_character(character_id: str):
 @app.put("/api/v1/characters/{character_id}", response_model=CharacterResponse)
 async def update_character(character_id: str, request: CharacterUpdateRequest):
     """Update a character"""
-    updates = request.dict(exclude_none=True)
+    updates = request.model_dump(exclude_none=True)
     
     character = character_service.update_character(character_id, updates)
     if not character:
@@ -952,7 +960,7 @@ async def update_character(character_id: str, request: CharacterUpdateRequest):
         character_id=character.character_id,
         name=character.name,
         description=character.description,
-        appearance=character.appearance.dict(),
+        appearance=character.appearance.model_dump(),
         personality_traits=character.personality_traits,
         reference_images=character.reference_images,
         age=character.age,
@@ -986,7 +994,7 @@ async def get_character_appearances(character_id: str):
         "character_id": character_id,
         "character_name": character.name,
         "total_appearances": len(appearances),
-        "appearances": [app.dict() for app in appearances]
+        "appearances": [app.model_dump() for app in appearances]
     }
 
 
@@ -1022,7 +1030,7 @@ async def record_character_appearance(
         scene_idx=scene_idx
     )
     
-    return appearance.dict()
+    return appearance.model_dump()
 
 
 @app.get("/api/v1/jobs/{job_id}/characters")
@@ -1041,7 +1049,7 @@ async def get_job_characters(job_id: str):
                 "character_id": char.character_id,
                 "name": char.name,
                 "description": char.description,
-                "appearance": char.appearance.dict()
+                "appearance": char.appearance.model_dump()
             }
             for char in characters
         ]
@@ -1060,7 +1068,7 @@ async def extract_characters_from_script(script: str):
                 {
                     "name": char.name,
                     "description": char.description,
-                    "appearance": char.appearance.dict() if char.appearance else {},
+                    "appearance": char.appearance.model_dump() if char.appearance else {},
                     "personality_traits": char.personality_traits
                 }
                 for char in characters
@@ -1072,4 +1080,4 @@ async def extract_characters_from_script(script: str):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=3001)
+    uvicorn.run(app, host="0.0.0.0", port=5000)

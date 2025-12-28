@@ -602,15 +602,30 @@ async def upload_reference_image(
     db: Session = Depends(get_db)
 ):
     """Upload a reference image for a character"""
+    import os
+    import aiofiles
+    
     try:
         character = db.query(Character).filter(Character.id == character_id).first()
         
         if not character:
             raise HTTPException(status_code=404, detail="Character not found")
         
-        # Save file (implement your file storage logic here)
-        # Example: save to /static/characters/{character_id}/{filename}
-        file_url = f"/static/characters/{character_id}/{file.filename}"
+        # Create upload directory
+        upload_dir = os.path.join(".working_dir", "uploads", "characters", character_id)
+        os.makedirs(upload_dir, exist_ok=True)
+        
+        # Generate safe filename
+        safe_filename = f"{uuid.uuid4().hex[:8]}_{file.filename}"
+        file_path = os.path.join(upload_dir, safe_filename)
+        
+        # Save file to disk
+        async with aiofiles.open(file_path, 'wb') as out_file:
+            content = await file.read()
+            await out_file.write(content)
+        
+        # Generate URL for API access
+        file_url = f"/media/uploads/characters/{character_id}/{safe_filename}"
         
         # Add to reference images
         if character.reference_images is None:

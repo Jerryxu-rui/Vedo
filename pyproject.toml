@@ -5,6 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "aiofiles>=25.1.0",
     "chardet>=5.2.0",
     "faiss-cpu>=1.12.0",
     "fastapi>=0.115.0",
@@ -15,8 +16,11 @@ dependencies = [
     "moviepy>=2.2.1",
     "openai>=1.95.0",
     "opencv-python",
+    "psycopg2-binary>=2.9.11",
     "pydantic>=2.10.0",
+    "python-multipart>=0.0.21",
     "scenedetect[opencv]>=0.6.7.1",
+    "sqlalchemy>=2.0.45",
     "uvicorn>=0.34.0",
 ]
 
@@ -35,6 +39,6 @@ name = "pytorch-cu128"
 url = "https://download.pytorch.org/whl/cu128"
 explicit = true
 
-[[index]]
+[[tool.uv.index]]
 url = "https://pypi.tuna.tsinghua.edu.cn/simple"
 default = true

@@ -184,8 +184,8 @@ class ResourceError(ViMaxError):
         )
 
 
-class TimeoutError(ViMaxError):
-    """超时错误"""
+class OperationTimeoutError(ViMaxError):
+    """超时错误 (renamed from TimeoutError to avoid shadowing built-in)"""
     
     def __init__(
         self,
@@ -208,6 +208,9 @@ class TimeoutError(ViMaxError):
             retry_suggested=True,
             **kwargs
         )
+
+
+TimeoutError = OperationTimeoutError
 
 
 class NetworkError(ViMaxError):

@@ -1,0 +1,37 @@
+[
+    {
+        "idx": 0,
+        "identifier_in_scene": "艾莎",
+        "is_visible": true,
+        "static_features": "艾莎是一位技艺高超、意志坚定的记忆猎人。她的年龄在20岁到30岁之间，拥有一头深色短发，眼神锐利。",
+        "dynamic_features": "她身穿一件黑色紧身战斗服，腰间佩戴着记忆提取器。"
+    },
+    {
+        "idx": 1,
+        "identifier_in_scene": "克斯",
+        "is_visible": true,
+        "static_features": "克斯是一位外表冷酷、内心善良的走私犯。他年龄在30岁到40岁之间，头发蓬乱，面部线条硬朗。",
+        "dynamic_features": "克斯通常穿着深色宽松的衣服，腰间别着一把能量枪。"
+    },
+    {
+        "idx": 2,
+        "identifier_in_scene": "议长瓦伦",
+        "is_visible": true,
+        "static_features": "议长瓦伦是一个野心勃勃、不择手段的政治家。他的年龄在50岁到60岁之间，头发灰白，眼神阴鸷。",
+        "dynamic_features": "议长瓦伦总是穿着剪裁得体的制服，佩戴着象征权力的徽章。"
+    },
+    {
+        "idx": 3,
+        "identifier_in_scene": "格洛克星人",
+        "is_visible": true,
+        "static_features": "一个粗壮的格洛克星人，体型魁梧，皮肤呈深绿色，面部有明显的褶皱。",
+        "dynamic_features": null
+    },
+    {
+        "idx": 4,
+        "identifier_in_scene": "黑衣人",
+        "is_visible": true,
+        "static_features": "一位神秘的黑衣人，身材瘦削，面容隐藏在阴影中。",
+        "dynamic_features": "穿着一件长款黑色外套。"
+    }
+]

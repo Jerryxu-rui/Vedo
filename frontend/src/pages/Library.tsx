@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import './Library.css'
 
 interface VideoItem {
@@ -11,6 +12,7 @@ interface VideoItem {
 }
 
 function Library() {
+  const navigate = useNavigate()
   const [videos, setVideos] = useState<VideoItem[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('all')
@@ -109,7 +111,11 @@ function Library() {
       ) : (
         <div className="video-grid">
           {filteredVideos.map(video => (
-            <div key={video.id} className="video-card">
+            <div 
+              key={video.id} 
+              className={`video-card ${video.status === 'draft' ? 'clickable' : ''}`}
+              onClick={() => video.status === 'draft' && navigate(`/idea2video?episode=${video.id}`)}
+            >
               <div className="video-thumbnail">
                 {video.thumbnail ? (
                   <img src={video.thumbnail} alt={video.title} />
@@ -119,7 +125,7 @@ function Library() {
                   </div>
                 )}
                 <div className={`video-status-badge ${video.status}`}>
-                  {video.status}
+                  {video.status === 'draft' ? '草稿' : video.status === 'completed' ? '已完成' : video.status}
                 </div>
               </div>
               <div className="video-info">
@@ -130,6 +136,17 @@ function Library() {
                 )}
               </div>
               <div className="video-actions">
+                {video.status === 'draft' && (
+                  <button 
+                    className="btn btn-primary btn-sm"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      navigate(`/idea2video?episode=${video.id}`)
+                    }}
+                  >
+                    继续编辑
+                  </button>
+                )}
                 {video.status === 'completed' && (
                   <>
                     <a 
@@ -137,14 +154,16 @@ function Library() {
                       className="btn btn-secondary btn-sm"
                       target="_blank"
                       rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
                     >
-                      Preview
+                      预览
                     </a>
                     <a 
                       href={`/api/v1/videos/episode/${video.id}/download`}
                       className="btn btn-primary btn-sm"
+                      onClick={(e) => e.stopPropagation()}
                     >
-                      Download
+                      下载
                     </a>
                   </>
                 )}

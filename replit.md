@@ -136,6 +136,12 @@ Located in `frontend/` directory:
 
 ## Recent Changes
 
+- **Draft Resume Feature** (Dec 28, 2025):
+  - Added `load_or_create_from_db` method to WorkflowManager for persistent workflow state restoration
+  - Workflow state now restored from database on server restart, including outline, characters, scenes, storyboard, and video path
+  - Frontend Idea2Video now detects `?episode` query parameter and restores previous progress
+  - Users can click "继续编辑" (Continue Editing) in Library to resume draft projects
+  - API keys moved to environment variable `${YUNWU_API_KEY}` in config files for security
 - Redesigned Idea2Video page to match reference UI with split-panel studio layout:
   - Episode sidebar on far left for multi-episode management
   - Navigation sidebar with icon tabs (画面/配音/音乐)

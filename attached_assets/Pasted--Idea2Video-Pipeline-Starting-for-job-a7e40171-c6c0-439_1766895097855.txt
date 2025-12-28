@@ -1,0 +1,48 @@
+[Idea2Video Pipeline] Starting for job a7e40171-c6c0-4397-89b3-5f986ef63226
+[Idea2Video Pipeline] Idea: a woman with a dog  run on beach ...
+[Idea2Video Pipeline] Style: cinematic
+🎲 Using variation seed: .528599749480 for prompt diversity
+🧠 Developing story with variation seed: .528599749480...
+INFO:     10.81.4.160:0 - "GET /api/v1/jobs/a7e40171-c6c0-4397-89b3-5f986ef63226 HTTP/1.1" 404 Not Found
+[Idea2Video Pipeline] Error for job a7e40171-c6c0-4397-89b3-5f986ef63226: Error code: 401 - {'error': {'message': 'Invalid token (request id: 2025122812100565094112100UaNb00)', 'message_zh': '无效的令牌', 'type': 'new_api_error'}}
+Traceback (most recent call last):
+  File "/home/runner/workspace/api_routes_direct_pipeline.py", line 150, in run_idea2video_pipeline
+    final_video_path = await pipeline(
+                       ^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/pipelines/idea2video_pipeline.py", line 333, in __call__
+    story = await self.develop_story(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/pipelines/idea2video_pipeline.py", line 228, in develop_story
+    story = await self.screenwriter.develop_story(idea=idea, user_requirement=user_requirement)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/agents/screenwriter.py", line 134, in develop_story
+    response = await self.chat_model.ainvoke(messages)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/langchain_core/language_models/chat_models.py", line 421, in ainvoke
+    llm_result = await self.agenerate_prompt(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/langchain_core/language_models/chat_models.py", line 1128, in agenerate_prompt
+    return await self.agenerate(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/langchain_core/language_models/chat_models.py", line 1086, in agenerate
+    raise exceptions[0]
+  File "/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/langchain_core/language_models/chat_models.py", line 1339, in _agenerate_with_cache
+    result = await self._agenerate(
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/langchain_openai/chat_models/base.py", line 1628, in _agenerate
+    raise e
+  File "/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/langchain_openai/chat_models/base.py", line 1621, in _agenerate
+    raw_response = await self.async_client.with_raw_response.create(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/openai/_legacy_response.py", line 381, in wrapped
+    return cast(LegacyAPIResponse[R], await func(*args, **kwargs))
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/openai/resources/chat/completions/completions.py", line 2678, in create
+    return await self._post(
+           ^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/openai/_base_client.py", line 1797, in post
+    return await self.request(cast_to, opts, stream=stream, stream_cls=stream_cls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/openai/_base_client.py", line 1597, in request
+    raise self._make_status_error_from_response(err.response) from None
+openai.AuthenticationError: Error code: 401 - {'error': {'message': 'Invalid token (request id: 2025122812100565094112100UaNb00)', 'message_zh': '无效的令牌', 'type': 'new_api_error'}}

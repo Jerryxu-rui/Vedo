@@ -1,0 +1,37 @@
+[
+    {
+        "idx": 0,
+        "identifier_in_scene": "Sarah",
+        "is_visible": true,
+        "static_features": "Sarah is a woman in her late 40s with short brown hair. Her eyes are a light hazel.",
+        "dynamic_features": "She is dressed in running gear."
+    },
+    {
+        "idx": 1,
+        "identifier_in_scene": "Max",
+        "is_visible": true,
+        "static_features": "Max is a golden retriever.",
+        "dynamic_features": null
+    },
+    {
+        "idx": 2,
+        "identifier_in_scene": "Amelia",
+        "is_visible": false,
+        "static_features": "Amelia's static features are not described in the script, so we can imagine she has long, dark hair and a gentle face.",
+        "dynamic_features": null
+    },
+    {
+        "idx": 3,
+        "identifier_in_scene": "Thomas",
+        "is_visible": false,
+        "static_features": "Thomas's static features are not described in the script, we can imagine he is a man with graying hair and kind eyes.",
+        "dynamic_features": null
+    },
+    {
+        "idx": 4,
+        "identifier_in_scene": "her late husband",
+        "is_visible": false,
+        "static_features": "Her late husband's static features are not described in the script. We can imagine he had a warm smile and a friendly demeanor.",
+        "dynamic_features": null
+    }
+]

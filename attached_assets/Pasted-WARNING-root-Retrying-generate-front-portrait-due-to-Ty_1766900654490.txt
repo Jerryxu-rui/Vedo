@@ -1,0 +1,50 @@
+WARNING:root:Retrying generate_front_portrait due to TypeError('can only concatenate str (not "NoneType") to str') (Attempt 3)
+WARNING:root:Retrying generate_front_portrait due to TypeError('can only concatenate str (not "NoneType") to str') (Attempt 3)
+WARNING:root:Retrying generate_front_portrait due to TypeError('can only concatenate str (not "NoneType") to str') (Attempt 3)
+[Idea2Video Pipeline] Error for job 08c31de4-22da-4152-8b4d-b5aa923cea37: can only concatenate str (not "NoneType") to str
+Traceback (most recent call last):
+  File "/home/runner/workspace/api_routes_direct_pipeline.py", line 150, in run_idea2video_pipeline
+    final_video_path = await pipeline(
+                       ^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/pipelines/idea2video_pipeline.py", line 345, in __call__
+    character_portraits_registry = await self.generate_character_portraits(
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/pipelines/idea2video_pipeline.py", line 189, in generate_character_portraits
+    character_portraits_registry.update(await future)
+                                        ^^^^^^^^^^^^
+  File "/nix/store/vnvdzw4182wb2ifzi0cczhv80yfnpx1q-python3-3.12.11/lib/python3.12/asyncio/tasks.py", line 631, in _wait_for_one
+    return f.result()  # May raise f.exception().
+           ^^^^^^^^^^
+  File "/home/runner/workspace/pipelines/idea2video_pipeline.py", line 280, in generate_portraits_for_single_character
+    front_portrait_output = await self.character_portraits_generator.generate_front_portrait(character, style)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/tenacity/asyncio/__init__.py", line 189, in async_wrapped
+    return await copy(fn, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/tenacity/asyncio/__init__.py", line 111, in __call__
+    do = await self.iter(retry_state=retry_state)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/tenacity/asyncio/__init__.py", line 153, in iter
+    result = await action(retry_state)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/tenacity/_utils.py", line 99, in inner
+    return call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/tenacity/__init__.py", line 420, in exc_check
+    raise retry_exc.reraise()
+          ^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/tenacity/__init__.py", line 187, in reraise
+    raise self.last_attempt.result()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nix/store/vnvdzw4182wb2ifzi0cczhv80yfnpx1q-python3-3.12.11/lib/python3.12/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "/nix/store/vnvdzw4182wb2ifzi0cczhv80yfnpx1q-python3-3.12.11/lib/python3.12/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/tenacity/asyncio/__init__.py", line 114, in __call__
+    result = await fn(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/agents/character_portraits_generator.py", line 49, in generate_front_portrait
+    features = "(static) " + character.static_features + "; (dynamic) " + character.dynamic_features
+               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+TypeError: can only concatenate str (not "NoneType") to str

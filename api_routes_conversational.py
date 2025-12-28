@@ -14,7 +14,7 @@ import os
 from database import get_db
 from database_models import (
     Episode, EpisodeWorkflowSession, EpisodeOutline,
-    CharacterDesign, SceneDesign, Character, Scene, Shot
+    CharacterDesign, SceneDesign, Character, Scene, Shot, Series
 )
 from workflows.conversational_episode_workflow import (
     ConversationalEpisodeWorkflow, WorkflowManager, WorkflowMode, WorkflowState,

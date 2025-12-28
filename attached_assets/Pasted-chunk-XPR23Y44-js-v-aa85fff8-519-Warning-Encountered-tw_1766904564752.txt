@@ -1,0 +1,34 @@
+chunk-XPR23Y44.js?v=aa85fff8:519 Warning: Encountered two children with the same key, `1766904546503`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+    at div
+    at div
+    at div
+    at Idea2Video (https://cf8f9c9c-762e-48d6-840c-54e8c8b2652c-00-10v3max4c88t7.riker.replit.dev/src/pages/Idea2Video.tsx:22:27)
+    at RenderedRoute (https://cf8f9c9c-762e-48d6-840c-54e8c8b2652c-00-10v3max4c88t7.riker.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=aa85fff8:4106:5)
+    at Outlet (https://cf8f9c9c-762e-48d6-840c-54e8c8b2652c-00-10v3max4c88t7.riker.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=aa85fff8:4512:26)
+    at main
+    at div
+    at Layout (https://cf8f9c9c-762e-48d6-840c-54e8c8b2652c-00-10v3max4c88t7.riker.replit.dev/src/components/Layout.tsx:22:20)
+    at RenderedRoute (https://cf8f9c9c-762e-48d6-840c-54e8c8b2652c-00-10v3max4c88t7.riker.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=aa85fff8:4106:5)
+    at Routes (https://cf8f9c9c-762e-48d6-840c-54e8c8b2652c-00-10v3max4c88t7.riker.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=aa85fff8:4576:5)
+    at App
+    at Router (https://cf8f9c9c-762e-48d6-840c-54e8c8b2652c-00-10v3max4c88t7.riker.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=aa85fff8:4519:15)
+    at BrowserRouter (https://cf8f9c9c-762e-48d6-840c-54e8c8b2652c-00-10v3max4c88t7.riker.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=aa85fff8:5265:5)
+Idea2Video.tsx:220 
+ POST https://cf8f9c9c-762e-48d6-840c-54e8c8b2652c-00-10v3max4c88t7.riker.replit.dev/api/v1/conversational/episode/create 500 (Internal Server Error)
+chunk-XPR23Y44.js?v=aa85fff8:519 Warning: Encountered two children with the same key, `1766904546503`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+    at div
+    at div
+    at div
+    at Idea2Video (https://cf8f9c9c-762e-48d6-840c-54e8c8b2652c-00-10v3max4c88t7.riker.replit.dev/src/pages/Idea2Video.tsx:22:27)
+    at RenderedRoute (https://cf8f9c9c-762e-48d6-840c-54e8c8b2652c-00-10v3max4c88t7.riker.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=aa85fff8:4106:5)
+    at Outlet (https://cf8f9c9c-762e-48d6-840c-54e8c8b2652c-00-10v3max4c88t7.riker.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=aa85fff8:4512:26)
+    at main
+    at div
+    at Layout (https://cf8f9c9c-762e-48d6-840c-54e8c8b2652c-00-10v3max4c88t7.riker.replit.dev/src/components/Layout.tsx:22:20)
+    at RenderedRoute (https://cf8f9c9c-762e-48d6-840c-54e8c8b2652c-00-10v3max4c88t7.riker.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=aa85fff8:4106:5)
+    at Routes (https://cf8f9c9c-762e-48d6-840c-54e8c8b2652c-00-10v3max4c88t7.riker.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=aa85fff8:4576:5)
+    at App
+    at Router (https://cf8f9c9c-762e-48d6-840c-54e8c8b2652c-00-10v3max4c88t7.riker.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=aa85fff8:4519:15)
+    at BrowserRouter (https://cf8f9c9c-762e-48d6-840c-54e8c8b2652c-00-10v3max4c88t7.riker.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=aa85fff8:5265:5)
+﻿
+

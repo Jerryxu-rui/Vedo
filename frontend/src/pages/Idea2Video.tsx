@@ -132,7 +132,7 @@ function Idea2Video() {
 
   const addMessage = (role: 'assistant' | 'user' | 'system', content: string) => {
     setMessages(prev => [...prev, {
-      id: Date.now().toString(),
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       role,
       content,
       timestamp: new Date()

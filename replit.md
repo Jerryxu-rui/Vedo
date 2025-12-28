@@ -136,7 +136,13 @@ Located in `frontend/` directory:
 
 ## Recent Changes
 
-- Enhanced Idea2Video page with complete 6-step workflow UI (Input → Outline → Characters → Scenes → Storyboard → Video)
+- Redesigned Idea2Video page to match reference UI with split-panel studio layout:
+  - Episode sidebar on far left for multi-episode management
+  - Navigation sidebar with icon tabs (画面/配音/音乐)
+  - Chat panel with AI assistant (Seko) conversation and workflow checklist
+  - Dynamic content panel on right for previewing outline, characters, scenes, storyboard, and video
+- Added Chinese localization for workflow labels
+- Implemented storyboard view with shot timeline and playback controls
 - Added robust state polling with lowercase normalization to handle enum format variations
 - Fixed video URL extraction with fallback chain (video_path or step_info.video.path)
 - Fixed character portrait generator bug with None values for dynamic_features

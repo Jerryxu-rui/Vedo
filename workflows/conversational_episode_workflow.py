@@ -253,6 +253,14 @@ class ConversationalEpisodeWorkflow:
             WorkflowState.STORYBOARD_GENERATED: [WorkflowState.STORYBOARD_CONFIRMED, WorkflowState.STORYBOARD_GENERATING],
             WorkflowState.STORYBOARD_CONFIRMED: [WorkflowState.VIDEO_GENERATING],
             WorkflowState.VIDEO_GENERATING: [WorkflowState.VIDEO_COMPLETED, WorkflowState.FAILED],
+            WorkflowState.FAILED: [
+                WorkflowState.INITIAL,
+                WorkflowState.OUTLINE_GENERATING,
+                WorkflowState.CHARACTERS_GENERATING,
+                WorkflowState.SCENES_GENERATING,
+                WorkflowState.STORYBOARD_GENERATING,
+                WorkflowState.VIDEO_GENERATING,
+            ],
         }
         
         allowed_states = valid_transitions.get(self.state, [])

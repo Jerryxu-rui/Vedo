@@ -344,6 +344,120 @@ class WorkflowManager:
         """获取工作流"""
         return self.workflows.get(episode_id)
     
+    def load_or_create_from_db(self, episode_id: int, episode_id_str: str, db) -> Optional[ConversationalEpisodeWorkflow]:
+        """
+        从数据库加载工作流，如果内存中不存在则从数据库恢复
+        
+        Args:
+            episode_id: 整数形式的episode ID (用于内存缓存key)
+            episode_id_str: 字符串形式的episode ID (用于数据库查询)
+            db: 数据库会话
+        
+        Returns:
+            恢复的工作流实例，如果数据库中不存在则返回None
+        """
+        from database_models import EpisodeWorkflowSession, EpisodeOutline, CharacterDesign, SceneDesign
+        
+        if episode_id in self.workflows:
+            return self.workflows[episode_id]
+        
+        session = db.query(EpisodeWorkflowSession).filter(
+            EpisodeWorkflowSession.episode_id == episode_id_str
+        ).first()
+        
+        if not session:
+            return None
+        
+        workflow = ConversationalEpisodeWorkflow(
+            episode_id=episode_id,
+            mode=WorkflowMode(session.mode),
+            initial_content=session.initial_content or "",
+            style=session.style or "写实电影感"
+        )
+        
+        workflow.state = WorkflowState(session.state)
+        workflow.context = session.context or {}
+        workflow.context["episode_id_str"] = episode_id_str
+        workflow.error = session.error_message
+        
+        outline = db.query(EpisodeOutline).filter(
+            EpisodeOutline.episode_id == episode_id_str
+        ).first()
+        
+        if outline:
+            workflow.outline = OutlineData(
+                title=outline.title or "",
+                genre=outline.genre,
+                style=outline.style,
+                episode_count=outline.episode_count or 1,
+                synopsis=outline.synopsis or "",
+                characters_summary=outline.characters_summary or [],
+                plot_summary=outline.plot_summary or [],
+                highlights=outline.highlights or []
+            )
+        
+        characters = db.query(CharacterDesign).filter(
+            CharacterDesign.episode_id == episode_id_str
+        ).all()
+        
+        for char in characters:
+            workflow.characters.append(CharacterData(
+                name=char.name,
+                description=char.description or "",
+                appearance=char.appearance or "",
+                personality=char.personality or [],
+                role=char.role or "supporting",
+                image_url=char.image_url
+            ))
+        
+        try:
+            scenes = db.query(SceneDesign).filter(
+                SceneDesign.episode_id == episode_id_str
+            ).all()
+            
+            for scene in scenes:
+                workflow.scenes.append(SceneData(
+                    name=scene.name,
+                    description=scene.description or "",
+                    atmosphere=scene.atmosphere or "",
+                    image_url=scene.image_url
+                ))
+        except Exception:
+            pass
+        
+        try:
+            from database_models import Scene, Shot
+            db_scenes = db.query(Scene).filter(
+                Scene.episode_id == episode_id_str
+            ).all()
+            
+            for scene in db_scenes:
+                shots = db.query(Shot).filter(
+                    Shot.scene_id == scene.id
+                ).order_by(Shot.shot_number).all()
+                
+                for shot in shots:
+                    workflow.storyboard.append(ShotData(
+                        shot_number=shot.shot_number,
+                        scene_name=scene.location or f"Scene {scene.scene_number}",
+                        visual_desc=shot.visual_desc or "",
+                        camera_angle=shot.camera_angle or "",
+                        camera_movement=shot.camera_movement or "",
+                        character_action=None,
+                        dialogue=shot.dialogue,
+                        voice_actor=shot.voice_actor
+                    ))
+        except Exception as e:
+            print(f"[WorkflowManager] Failed to load storyboard: {e}")
+        
+        if session.context and session.context.get('video_path'):
+            workflow.context['video_path'] = session.context['video_path']
+        
+        self.workflows[episode_id] = workflow
+        print(f"[WorkflowManager] Restored workflow from database: episode={episode_id_str}, state={workflow.state}, storyboard_count={len(workflow.storyboard)}")
+        
+        return workflow
+    
     def remove_workflow(self, episode_id: int):
         """移除工作流"""
         if episode_id in self.workflows:

@@ -702,15 +702,14 @@ async def get_workflow_state(
         # 从数据库获取会话
         session = get_workflow_session(db, episode_id)
         
-        # 从内存获取工作流实例
-        workflow = workflow_manager.get_workflow(
-            int(episode_id) if episode_id.isdigit() else hash(episode_id)
-        )
+        # 使用 load_or_create_from_db 从数据库恢复完整工作流状态
+        episode_id_int = int(episode_id) if episode_id.isdigit() else hash(episode_id)
+        workflow = workflow_manager.load_or_create_from_db(episode_id_int, episode_id, db)
         
         if not workflow:
-            # 如果内存中没有，从数据库恢复
+            # 如果数据库中也没有会话记录，创建一个基本的工作流
             workflow = ConversationalEpisodeWorkflow.from_dict({
-                "episode_id": int(episode_id) if episode_id.isdigit() else hash(episode_id),
+                "episode_id": episode_id_int,
                 "mode": session.mode,
                 "state": session.state,
                 "style": session.style,

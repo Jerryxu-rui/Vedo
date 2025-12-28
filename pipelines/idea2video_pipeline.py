@@ -39,7 +39,9 @@ class Idea2VideoPipeline:
         config_path: str,
     ):
         with open(config_path, "r") as f:
-            config = yaml.safe_load(f)
+            config_str = f.read()
+        config_str = os.path.expandvars(config_str)
+        config = yaml.safe_load(config_str)
 
         chat_model_args = config["chat_model"]["init_args"]
         chat_model = init_chat_model(**chat_model_args)

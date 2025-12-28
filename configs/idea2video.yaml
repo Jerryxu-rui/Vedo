@@ -2,7 +2,7 @@ chat_model:
   init_args:
     model: gemini-2.0-flash-001
     model_provider: openai
-    api_key: sk-wGqBV0IREwCVg0fLt0Kntavxbgh5iQPUtinvUroUPyWRR5BN
+    api_key: ${YUNWU_API_KEY}
     base_url: https://yunwu.ai/v1
   # Rate limits for chat model API calls
   # Set to null to disable rate limiting for this service
@@ -12,7 +12,7 @@ chat_model:
 image_generator:
   class_path: tools.ImageGeneratorDoubaoSeedreamYunwuAPI
   init_args:
-    api_key: sk-wGqBV0IREwCVg0fLt0Kntavxbgh5iQPUtinvUroUPyWRR5BN
+    api_key: ${YUNWU_API_KEY}
     model: doubao-seedream-4-0-250828
   # Rate limits for image generation API calls
   # Set to null to disable rate limiting for this service
@@ -23,7 +23,7 @@ image_generator:
 video_generator:
   class_path: tools.VideoGeneratorVeoYunwuAPI
   init_args:
-    api_key: sk-wGqBV0IREwCVg0fLt0Kntavxbgh5iQPUtinvUroUPyWRR5BN
+    api_key: ${YUNWU_API_KEY}
     base_url: https://yunwu.ai
     t2v_model: veo3-fast
     ff2v_model: veo3-fast

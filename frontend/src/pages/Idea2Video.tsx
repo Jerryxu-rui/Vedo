@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import './Idea2Video.css'
 
 interface Character {
@@ -67,8 +68,10 @@ interface WorkflowStep {
 }
 
 function Idea2Video() {
+  const [searchParams] = useSearchParams()
   const [idea, setIdea] = useState('')
   const [style, setStyle] = useState('cinematic')
+  const [isRestoringDraft, setIsRestoringDraft] = useState(false)
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: '1',
@@ -99,6 +102,84 @@ function Idea2Video() {
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
+
+  useEffect(() => {
+    const episodeId = searchParams.get('episode')
+    if (episodeId && !workflow.episodeId) {
+      restoreDraftState(episodeId)
+    }
+  }, [searchParams])
+
+  const restoreDraftState = async (episodeId: string) => {
+    setIsRestoringDraft(true)
+    try {
+      const response = await fetch(`/api/v1/conversational/episode/${episodeId}/state`)
+      if (!response.ok) {
+        console.error('Failed to restore draft state')
+        setIsRestoringDraft(false)
+        return
+      }
+      
+      const data = await response.json()
+      const backendState = (data.state as string).toLowerCase()
+      
+      const step = determineStepFromState(backendState)
+      const isGenerating = backendState.includes('generating') || backendState.includes('refining')
+      
+      setWorkflow(prev => ({
+        ...prev,
+        step: step,
+        status: isGenerating ? 'generating' : 'ready',
+        episodeId: episodeId,
+        outline: data.outline || null,
+        characters: data.characters || [],
+        scenes: data.scenes || [],
+        storyboard: data.storyboard || [],
+        videoUrl: data.video_path || null,
+        error: data.error || null
+      }))
+      
+      setMessages([
+        {
+          id: '1',
+          role: 'assistant',
+          content: '欢迎回来！我已经恢复了您之前的项目进度。',
+          timestamp: new Date()
+        }
+      ])
+      
+      if (data.outline) {
+        setMessages(prev => [...prev, {
+          id: `restored-outline-${Date.now()}`,
+          role: 'assistant',
+          content: `当前项目标题: "${data.outline.title}"，进度已恢复到"${getStepLabel(step)}"阶段。`,
+          timestamp: new Date()
+        }])
+      }
+      
+      if (isGenerating) {
+        pollStatus(episodeId, step)
+      }
+      
+    } catch (error) {
+      console.error('Error restoring draft:', error)
+    } finally {
+      setIsRestoringDraft(false)
+    }
+  }
+
+  const getStepLabel = (step: string): string => {
+    const labels: Record<string, string> = {
+      'input': '输入创意',
+      'outline': '故事大纲',
+      'characters': '角色设计',
+      'scenes': '场景设计',
+      'storyboard': '分镜设计',
+      'video': '视频生成',
+      'completed': '已完成'
+    }
+    return labels[step] || step
+  }
 
   const workflowSteps: WorkflowStep[] = [
     { id: 'outline', label: '根据本集内容，生成详细的故事大纲', completed: workflow.step !== 'input' && workflow.step !== 'outline', active: workflow.step === 'outline' },

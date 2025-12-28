@@ -364,6 +364,36 @@ async def generate_characters_async(
         )
         print(f"[Character Generation] Extracted {len(characters)} characters")
         
+        # If no characters were extracted, create a default protagonist based on the outline
+        if len(characters) == 0:
+            print(f"[Character Generation] No characters extracted, creating default protagonist...")
+            from workflows.conversational_episode_workflow import CharacterInfo
+            
+            # Create a default character based on the story context
+            default_name = "主角"
+            default_role = "protagonist"
+            default_desc = "故事的主要人物"
+            
+            # Try to extract character info from outline
+            if workflow.outline and workflow.outline.characters_summary:
+                for char_info in workflow.outline.characters_summary:
+                    if isinstance(char_info, dict):
+                        default_name = char_info.get("name", default_name)
+                        default_role = char_info.get("role", default_role)
+                        default_desc = char_info.get("description", default_desc)
+                        break
+            
+            default_character = CharacterInfo(
+                name=default_name,
+                role=default_role,
+                description=default_desc,
+                appearance="未指定外貌",
+                personality="待定性格",
+                image_url=None
+            )
+            characters = [default_character]
+            print(f"[Character Generation] Created default character: {default_name}")
+        
         workflow.characters = characters
         workflow.transition_to(WorkflowState.CHARACTERS_GENERATED)
         

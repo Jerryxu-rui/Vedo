@@ -469,7 +469,7 @@ function Idea2Video() {
       )
     }
 
-    if (workflow.step === 'characters' && workflow.characters.length > 0) {
+    if (workflow.step === 'characters') {
       return (
         <div className="right-panel-content">
           <div className="panel-header">
@@ -477,18 +477,24 @@ function Idea2Video() {
             <span className="badge badge-info">内容由 AI 生成</span>
           </div>
           
-          <div className="characters-grid-new">
-            {workflow.characters.map((char) => (
-              <div key={char.id} className="character-card-new">
-                {char.image_url && (
-                  <img src={char.image_url} alt={char.name} className="character-image-new" />
-                )}
-                <div className="character-overlay">
-                  <span className="character-name">{char.name}</span>
+          {workflow.characters.length > 0 ? (
+            <div className="characters-grid-new">
+              {workflow.characters.map((char) => (
+                <div key={char.id} className="character-card-new">
+                  {char.image_url && (
+                    <img src={char.image_url} alt={char.name} className="character-image-new" />
+                  )}
+                  <div className="character-overlay">
+                    <span className="character-name">{char.name}</span>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="empty-state-panel">
+              <p>暂时没有检测到角色，您可以直接继续下一步，系统将自动生成角色。</p>
+            </div>
+          )}
 
           <div className="panel-footer">
             <button className="btn-primary-action" onClick={handleConfirmCharacters}>
@@ -499,38 +505,45 @@ function Idea2Video() {
       )
     }
 
-    if (workflow.step === 'scenes' && workflow.scenes.length > 0) {
+    if (workflow.step === 'scenes') {
       return (
         <div className="right-panel-content">
           <div className="panel-header">
             <h3>第1集: {workflow.outline?.title}</h3>
-            <span className="badge badge-success">已有视频</span>
             <span className="badge badge-info">内容由 AI 生成</span>
           </div>
           
-          <div className="content-section">
-            <h4 className="section-title highlight">场景列表</h4>
-            <div className="scene-descriptions">
-              {workflow.scenes.map((scene) => (
-                <p key={scene.id}>
-                  <strong>{scene.name}</strong>: {scene.description}
-                </p>
-              ))}
-            </div>
-          </div>
-
-          <div className="scenes-grid-new">
-            {workflow.scenes.map((scene) => (
-              <div key={scene.id} className="scene-card-new">
-                {scene.image_url && (
-                  <img src={scene.image_url} alt={scene.name} className="scene-image-new" />
-                )}
-                <div className="scene-overlay">
-                  <span>{scene.name}</span>
+          {workflow.scenes.length > 0 ? (
+            <>
+              <div className="content-section">
+                <h4 className="section-title highlight">场景列表</h4>
+                <div className="scene-descriptions">
+                  {workflow.scenes.map((scene) => (
+                    <p key={scene.id}>
+                      <strong>{scene.name}</strong>: {scene.description}
+                    </p>
+                  ))}
                 </div>
               </div>
-            ))}
-          </div>
+
+              <div className="scenes-grid-new">
+                {workflow.scenes.map((scene) => (
+                  <div key={scene.id} className="scene-card-new">
+                    {scene.image_url && (
+                      <img src={scene.image_url} alt={scene.name} className="scene-image-new" />
+                    )}
+                    <div className="scene-overlay">
+                      <span>{scene.name}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            <div className="empty-state-panel">
+              <p>场景正在生成中，请稍候...</p>
+            </div>
+          )}
 
           <div className="panel-footer">
             <button className="btn-primary-action" onClick={handleConfirmScenes}>
@@ -541,8 +554,28 @@ function Idea2Video() {
       )
     }
 
-    if (workflow.step === 'storyboard' && workflow.storyboard.length > 0) {
+    if (workflow.step === 'storyboard') {
       const currentShot = workflow.storyboard[selectedShot]
+      
+      if (workflow.storyboard.length === 0) {
+        return (
+          <div className="right-panel-content">
+            <div className="panel-header">
+              <h3>分镜设计</h3>
+              <span className="badge badge-info">内容由 AI 生成</span>
+            </div>
+            <div className="empty-state-panel">
+              <p>分镜正在生成中，请稍候...</p>
+            </div>
+            <div className="panel-footer">
+              <button className="btn-primary-action" onClick={handleConfirmStoryboard}>
+                确认分镜设计
+              </button>
+            </div>
+          </div>
+        )
+      }
+      
       return (
         <div className="right-panel-content storyboard-view">
           <div className="storyboard-header">

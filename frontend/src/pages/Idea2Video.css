@@ -385,6 +385,26 @@
   color: #666;
 }
 
+.empty-state-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  color: #999;
+  background: rgba(99, 102, 241, 0.05);
+  border-radius: 12px;
+  margin: 20px 0;
+}
+
+.empty-state-panel p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
 .generating-state {
   display: flex;
   flex-direction: column;

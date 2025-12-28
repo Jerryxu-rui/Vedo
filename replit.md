@@ -136,8 +136,12 @@ Located in `frontend/` directory:
 
 ## Recent Changes
 
+- Enhanced Idea2Video page with complete 6-step workflow UI (Input → Outline → Characters → Scenes → Storyboard → Video)
+- Added robust state polling with lowercase normalization to handle enum format variations
+- Fixed video URL extraction with fallback chain (video_path or step_info.video.path)
+- Fixed character portrait generator bug with None values for dynamic_features
+- Added scenes step to match backend workflow requirements
 - Added React frontend with modern dark theme UI
-- Fixed API key security - moved from hardcoded to environment variables
 - Fixed file upload handling with aiofiles
 - Updated to Pydantic v2 conventions (.model_dump())
 - Added PostgreSQL support with psycopg2-binary

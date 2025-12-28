@@ -1,0 +1,20 @@
+{
+    "idx": 3,
+    "is_last": false,
+    "cam_idx": 0,
+    "visual_desc": "INT. LIGHTHOUSE KEEPER'S QUARTERS - DAY. <Sarah> (female, late 40s, short brown hair, wearing loose-fitting clothes) looks out the window on the right side of the frame, a flicker of unease in her eyes. <Gus> (medium-sized, scruffy mixed-breed dog) whines softly, nudging her hand. Soft indoor lighting with shadows. The window looks out to the sea.",
+    "variation_type": "small",
+    "variation_reason": "This shot only shows the characters' subtle movements and expressions, thus the variation type is small.",
+    "ff_desc": "The camera shows a medium shot of the lighthouse keeper's quarters. The interior is dimly lit by soft indoor lighting, creating shadows. A woman in her late 40s, with short brown hair and wearing loose-fitting clothes, is positioned on the right side of the frame. She looks out the window, her expression reflecting a flicker of unease. A medium-sized, scruffy mixed-breed dog is nudging her hand and whining softly. Through the window, a view of the sea can be seen.",
+    "ff_vis_char_idxs": [
+        0,
+        1
+    ],
+    "lf_desc": "The camera shows a medium shot of the lighthouse keeper's quarters. The interior is dimly lit by soft indoor lighting, creating shadows. A woman in her late 40s, with short brown hair and wearing loose-fitting clothes, is positioned on the right side of the frame. She looks out the window, her expression reflecting a flicker of unease. A medium-sized, scruffy mixed-breed dog is nudging her hand and whining softly. Through the window, a view of the sea can be seen.",
+    "lf_vis_char_idxs": [
+        0,
+        1
+    ],
+    "motion_desc": "The camera remains static. The woman with short brown hair and wearing loose-fitting clothes continues to look out the window with a worried expression. The medium-sized, scruffy mixed-breed dog is nudging her hand and whining softly.",
+    "audio_desc": "[Sound Effect] <Gus> whining softly.\n[Speaker] Sarah: Easy, boy."
+}

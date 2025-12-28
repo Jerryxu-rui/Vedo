@@ -1,0 +1,20 @@
+{
+    "idx": 0,
+    "is_last": false,
+    "cam_idx": 0,
+    "visual_desc": "INT. LIGHTHOUSE KEEPER'S QUARTERS - DAY. <Sarah> (female, late 40s, short brown hair, wearing loose-fitting clothes) sits at a wooden table, meticulously cleaning a nautical chart. The room is sparsely furnished. <Gus> (medium-sized, scruffy mixed-breed dog) lies at her feet. Sunlight streams in through the window on the right, casting long shadows across the room. The table is in the center of the frame. The scene is lit by natural sunlight, creating a sense of isolation and routine.",
+    "variation_type": "small",
+    "variation_reason": "This shot only shows the woman with short brown hair, wearing loose-fitting clothes, cleaning the nautical chart, and the scruffy, medium-sized mixed-breed dog is lying at her feet. The changes are very small.",
+    "ff_desc": "The scene is set inside the sparsely furnished lighthouse keeper's quarters. A wooden table sits in the center of the frame where a woman with short brown hair, wearing loose-fitting clothes, sits meticulously cleaning a nautical chart. A scruffy, medium-sized mixed-breed dog lies at the woman's feet. Sunlight streams in through a window on the right, casting long shadows across the room.",
+    "ff_vis_char_idxs": [
+        0,
+        1
+    ],
+    "lf_desc": "The scene is set inside the sparsely furnished lighthouse keeper's quarters. A wooden table sits in the center of the frame where a woman with short brown hair, wearing loose-fitting clothes, sits meticulously cleaning a nautical chart. A scruffy, medium-sized mixed-breed dog lies at the woman's feet. Sunlight streams in through a window on the right, casting long shadows across the room.",
+    "lf_vis_char_idxs": [
+        0,
+        1
+    ],
+    "motion_desc": "Static shot. The woman with short brown hair, wearing loose-fitting clothes, is meticulously cleaning the nautical chart, and the scruffy, medium-sized mixed-breed dog is lying at her feet.",
+    "audio_desc": "[Sound Effect] Ambient sounds of the sea and faint creaking of the lighthouse."
+}

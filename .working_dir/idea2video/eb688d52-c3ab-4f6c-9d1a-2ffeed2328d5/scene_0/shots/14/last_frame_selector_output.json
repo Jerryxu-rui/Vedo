@@ -1,0 +1,17 @@
+{
+    "reference_image_path_and_text_pairs": [
+        [
+            ".working_dir/idea2video/eb688d52-c3ab-4f6c-9d1a-2ffeed2328d5/character_portraits/0_Sarah/front.png",
+            "A front view portrait of Sarah."
+        ],
+        [
+            ".working_dir/idea2video/eb688d52-c3ab-4f6c-9d1a-2ffeed2328d5/character_portraits/1_Gus/front.png",
+            "A front view portrait of Gus."
+        ],
+        [
+            ".working_dir/idea2video/eb688d52-c3ab-4f6c-9d1a-2ffeed2328d5/scene_0/shots/11/first_frame.png",
+            "A medium shot of a woman in her late 40s with short brown hair, standing outside and facing the camera. The woman, positioned in the center of the frame, is wearing loose-fitting clothes. Her face shows exhaustion, but her eyes reflect a newfound strength. A medium-sized, scruffy mixed-breed dog sits beside the woman on the left, panting, yet alert. A lighthouse looms behind the woman. The sea stretches out on the right side of the frame. The lighting is soft, suggesting early morning or late afternoon, casting a gentle glow on the scene. The color palette is muted, creating a serene and contemplative atmosphere."
+        ]
+    ],
+    "text_prompt": "Create an image based on the following guidance: A lighthouse on the right side of the frame. A woman in her late 40s with short brown hair, wearing loose-fitting clothes is facing the lighthouse. A medium-sized, scruffy mixed-breed dog is sitting quietly next to the woman. The woman should reference Image 0. The dog should reference Image 3. The overall scene should reference Image 6."
+}

@@ -1,0 +1,97 @@
+[
+    {
+        "idx": 0,
+        "active_shot_idxs": [
+            0,
+            3
+        ],
+        "parent_cam_idx": null,
+        "parent_shot_idx": null,
+        "reason": "CAMERA_0 (Shot 0) establishes the interior scene and introduces the main character, Sarah, and her dog, Gus, along with the setting. It is the root camera.",
+        "is_parent_fully_covers_child": null,
+        "missing_info": null
+    },
+    {
+        "idx": 1,
+        "active_shot_idxs": [
+            1
+        ],
+        "parent_cam_idx": 0,
+        "parent_shot_idx": 0,
+        "reason": "The parent shot's field of view covers the child shot's field of view (from medium shot to close-up). Both shots show Sarah.",
+        "is_parent_fully_covers_child": true,
+        "missing_info": null
+    },
+    {
+        "idx": 2,
+        "active_shot_idxs": [
+            2,
+            4
+        ],
+        "parent_cam_idx": null,
+        "parent_shot_idx": null,
+        "reason": "CAMERA_2 (Shot 2) establishes the exterior scene showing the lighthouse and sea. It does not depend on the previous camera.",
+        "is_parent_fully_covers_child": null,
+        "missing_info": null
+    },
+    {
+        "idx": 3,
+        "active_shot_idxs": [
+            5,
+            10
+        ],
+        "parent_cam_idx": 2,
+        "parent_shot_idx": 2,
+        "reason": "CAMERA_3 (Shot 5) continues to show the lighthouse at night, with specific events happening, is captured from a similar point of view with CAMERA_2 (Shot 2). The establishing shot contains the actions described in the child.",
+        "is_parent_fully_covers_child": true,
+        "missing_info": null
+    },
+    {
+        "idx": 4,
+        "active_shot_idxs": [
+            6,
+            8,
+            9
+        ],
+        "parent_cam_idx": 3,
+        "parent_shot_idx": 5,
+        "reason": "The parent shot's field of view covers the child shot's field of view. The lamp room is inside the lighthouse, as shown in the parent shot.",
+        "is_parent_fully_covers_child": true,
+        "missing_info": null
+    },
+    {
+        "idx": 5,
+        "active_shot_idxs": [
+            7
+        ],
+        "parent_cam_idx": 4,
+        "parent_shot_idx": 6,
+        "reason": "The parent shot's field of view covers the child shot's field of view (from medium shot to close-up). Both shots show Sarah.",
+        "is_parent_fully_covers_child": true,
+        "missing_info": null
+    },
+    {
+        "idx": 6,
+        "active_shot_idxs": [
+            11,
+            12,
+            14
+        ],
+        "parent_cam_idx": 3,
+        "parent_shot_idx": 10,
+        "reason": "The parent shot's field of view covers the child shot's field of view. Both shots show the lighthouse in exterior environment.",
+        "is_parent_fully_covers_child": true,
+        "missing_info": null
+    },
+    {
+        "idx": 7,
+        "active_shot_idxs": [
+            13
+        ],
+        "parent_cam_idx": 3,
+        "parent_shot_idx": 10,
+        "reason": "The parent shot's field of view covers the child shot's field of view. Both shots show the sea and dawn.",
+        "is_parent_fully_covers_child": true,
+        "missing_info": null
+    }
+]

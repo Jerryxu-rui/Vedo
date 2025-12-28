@@ -1,0 +1,30 @@
+{
+    "Sarah": {
+        "front": {
+            "path": ".working_dir/idea2video/eb688d52-c3ab-4f6c-9d1a-2ffeed2328d5/character_portraits/0_Sarah/front.png",
+            "description": "A front view portrait of Sarah."
+        },
+        "side": {
+            "path": ".working_dir/idea2video/eb688d52-c3ab-4f6c-9d1a-2ffeed2328d5/character_portraits/0_Sarah/side.png",
+            "description": "A side view portrait of Sarah."
+        },
+        "back": {
+            "path": ".working_dir/idea2video/eb688d52-c3ab-4f6c-9d1a-2ffeed2328d5/character_portraits/0_Sarah/back.png",
+            "description": "A back view portrait of Sarah."
+        }
+    },
+    "Gus": {
+        "front": {
+            "path": ".working_dir/idea2video/eb688d52-c3ab-4f6c-9d1a-2ffeed2328d5/character_portraits/1_Gus/front.png",
+            "description": "A front view portrait of Gus."
+        },
+        "side": {
+            "path": ".working_dir/idea2video/eb688d52-c3ab-4f6c-9d1a-2ffeed2328d5/character_portraits/1_Gus/side.png",
+            "description": "A side view portrait of Gus."
+        },
+        "back": {
+            "path": ".working_dir/idea2video/eb688d52-c3ab-4f6c-9d1a-2ffeed2328d5/character_portraits/1_Gus/back.png",
+            "description": "A back view portrait of Gus."
+        }
+    }
+}

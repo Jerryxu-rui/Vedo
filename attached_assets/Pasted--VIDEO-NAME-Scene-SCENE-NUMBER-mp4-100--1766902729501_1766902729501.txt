@@ -1,0 +1,32 @@
+  $VIDEO_NAME-Scene-$SCENE_NUMBER.mp4
+100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 192/192 [00:02<00:00, 64.84frame/s]
+☑️ Generated new camera image for shot 7 (not completed), saved to .working_dir/idea2video/eb688d52-c3ab-4f6c-9d1a-2ffeed2328d5/scene_0/shots/7/new_camera_5.png.
+☑️ Generated first_frame for shot 7, saved to .working_dir/idea2video/eb688d52-c3ab-4f6c-9d1a-2ffeed2328d5/scene_0/shots/7/first_frame.png.
+🎬 Starting video generation for shot 7...
+☑️ Generated video for shot 11, saved to .working_dir/idea2video/eb688d52-c3ab-4f6c-9d1a-2ffeed2328d5/scene_0/shots/11/video.mp4.
+☑️ Generated video for shot 12, saved to .working_dir/idea2video/eb688d52-c3ab-4f6c-9d1a-2ffeed2328d5/scene_0/shots/12/video.mp4.
+☑️ Generated video for shot 13, saved to .working_dir/idea2video/eb688d52-c3ab-4f6c-9d1a-2ffeed2328d5/scene_0/shots/13/video.mp4.
+☑️ Generated video for shot 9, saved to .working_dir/idea2video/eb688d52-c3ab-4f6c-9d1a-2ffeed2328d5/scene_0/shots/9/video.mp4.
+☑️ Generated video for shot 8, saved to .working_dir/idea2video/eb688d52-c3ab-4f6c-9d1a-2ffeed2328d5/scene_0/shots/8/video.mp4.
+☑️ Generated video for shot 7, saved to .working_dir/idea2video/eb688d52-c3ab-4f6c-9d1a-2ffeed2328d5/scene_0/shots/7/video.mp4.
+☑️ Generated video for shot 14, saved to .working_dir/idea2video/eb688d52-c3ab-4f6c-9d1a-2ffeed2328d5/scene_0/shots/14/video.mp4.
+🎬 Starting concatenating videos...
+MoviePy - Building video .working_dir/idea2video/eb688d52-c3ab-4f6c-9d1a-2ffeed2328d5/scene_0/final_video.mp4.
+MoviePy - Writing audio in final_videoTEMP_MPY_wvf_snd.mp3
+MoviePy - Done.                                                                                                                                 
+MoviePy - Writing video .working_dir/idea2video/eb688d52-c3ab-4f6c-9d1a-2ffeed2328d5/scene_0/final_video.mp4
+
+MoviePy - Done !                                                                                                                                
+MoviePy - video ready .working_dir/idea2video/eb688d52-c3ab-4f6c-9d1a-2ffeed2328d5/scene_0/final_video.mp4
+☑️ Concatenated videos, saved to .working_dir/idea2video/eb688d52-c3ab-4f6c-9d1a-2ffeed2328d5/scene_0/final_video.mp4.
+🎬 Starting concatenating videos...
+MoviePy - Building video .working_dir/idea2video/eb688d52-c3ab-4f6c-9d1a-2ffeed2328d5/final_video.mp4.
+MoviePy - Writing audio in final_videoTEMP_MPY_wvf_snd.mp3
+MoviePy - Done.                                                                                                                                 
+MoviePy - Writing video .working_dir/idea2video/eb688d52-c3ab-4f6c-9d1a-2ffeed2328d5/final_video.mp4
+
+MoviePy - Done !                                                                                                                                
+MoviePy - video ready .working_dir/idea2video/eb688d52-c3ab-4f6c-9d1a-2ffeed2328d5/final_video.mp4
+☑️ Concatenated videos, saved to .working_dir/idea2video/eb688d52-c3ab-4f6c-9d1a-2ffeed2328d5/final_video.mp4.
+[Idea2Video Pipeline] Completed for job eb688d52-c3ab-4f6c-9d1a-2ffeed2328d5
+[Idea2Video Pipeline] Video saved to: .working_dir/idea2video/eb688d52-c3ab-4f6c-9d1a-2ffeed2328d5/final_video.mp4

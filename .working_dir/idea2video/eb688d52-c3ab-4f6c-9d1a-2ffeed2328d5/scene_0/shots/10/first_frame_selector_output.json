@@ -1,0 +1,9 @@
+{
+    "reference_image_path_and_text_pairs": [
+        [
+            ".working_dir/idea2video/eb688d52-c3ab-4f6c-9d1a-2ffeed2328d5/scene_0/shots/5/first_frame.png",
+            "A wide, exterior shot at night shows a lighthouse on the left side of the frame. A massive wave is crashing against the base of the lighthouse. The structure appears sturdy. The sea is a turbulent expanse of white foam, and rain is falling heavily, blurring the image. Strong backlighting from the lighthouse lamp creates dramatic shadows."
+        ]
+    ],
+    "text_prompt": "Create a shot at dawn of a coastline showing the lighthouse and the sea. The lighthouse should reference Image 0. The sea should be churned but relatively calm, and the coastline should have storm debris."
+}

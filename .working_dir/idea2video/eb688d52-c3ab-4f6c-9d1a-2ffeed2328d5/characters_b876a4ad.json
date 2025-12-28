@@ -1,0 +1,16 @@
+[
+    {
+        "idx": 0,
+        "identifier_in_scene": "Sarah",
+        "is_visible": true,
+        "static_features": "Sarah is a woman in her late 40s with short brown hair and a determined expression. She has weathered hands and a noticeable wedding ring on her left hand.",
+        "dynamic_features": "Sarah is wearing practical, loose-fitting clothing suitable for working in the lighthouse. She wears simple jewelry."
+    },
+    {
+        "idx": 1,
+        "identifier_in_scene": "Gus",
+        "is_visible": true,
+        "static_features": "Gus is a medium-sized, scruffy mixed-breed dog.",
+        "dynamic_features": null
+    }
+]

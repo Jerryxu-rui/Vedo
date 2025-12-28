@@ -1,0 +1,9 @@
+{
+    "reference_image_path_and_text_pairs": [
+        [
+            ".working_dir/idea2video/eb688d52-c3ab-4f6c-9d1a-2ffeed2328d5/scene_0/shots/2/first_frame.png",
+            "Exterior shot of a tall, white lighthouse positioned at the center of the frame, standing on a rocky outcrop. The sea stretches out to the horizon, appearing deceptively calm under a pale, unsettling grey sky. The lighting is flat, contributing to an uneasy mood."
+        ]
+    ],
+    "text_prompt": "Create an image based on the following guidance: The lighthouse should reference Image 0. The lighting and sky should be adjusted to match the description."
+}

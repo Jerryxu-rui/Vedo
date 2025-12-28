@@ -1,0 +1,14 @@
+{
+    "idx": 5,
+    "is_last": false,
+    "cam_idx": 3,
+    "visual_desc": "EXT. LIGHTHOUSE - NIGHT. A colossal wave crashes against the lighthouse base. The structure SHUDDERS violently. Rain lashes down, blurring the image. The lighthouse, illuminated by its lamp, is on the left of the frame. The sea is a churning mass of white foam. Strong backlighting from the lamp creates dramatic shadows.",
+    "variation_type": "small",
+    "variation_reason": "The primary change in the shot involves the lighthouse shuddering, which is a relatively minor change in overall composition.",
+    "ff_desc": "A wide, exterior shot at night shows a lighthouse on the left side of the frame. A massive wave is crashing against the base of the lighthouse. The structure appears sturdy. The sea is a turbulent expanse of white foam, and rain is falling heavily, blurring the image. Strong backlighting from the lighthouse lamp creates dramatic shadows.",
+    "ff_vis_char_idxs": [],
+    "lf_desc": "A wide, exterior shot at night shows a lighthouse on the left side of the frame. A massive wave has just crashed against the base of the lighthouse. The structure appears sturdy. The sea is a turbulent expanse of white foam, and rain is falling heavily, blurring the image. Strong backlighting from the lighthouse lamp creates dramatic shadows. The lighthouse visibly shudders.",
+    "lf_vis_char_idxs": [],
+    "motion_desc": "The lighthouse shudders violently from the crashing wave. The image remains blurred by the heavy rain. The churning sea continues to foam.",
+    "audio_desc": "[Sound Effect] Crashing wave, violent shaking, heavy rain."
+}

@@ -1,0 +1,14 @@
+{
+    "idx": 4,
+    "is_last": false,
+    "cam_idx": 2,
+    "visual_desc": "EXT. LIGHTHOUSE - DAY. The wind picks up, causing the sea to become choppy. The lighthouse (a tall white sentinel) GROANS faintly. Dark clouds gather ominously on the horizon. The lighthouse is positioned to the left of the frame. The sky is overcast, creating a sense of foreboding.",
+    "variation_type": "small",
+    "variation_reason": "The shot shows the change of the environment, thus the variation type is small.",
+    "ff_desc": "EXT. LIGHTHOUSE - DAY. In a wide shot, a tall, white lighthouse stands on the left side of the frame. The sea is visible, slightly choppy due to a light wind. The sky is overcast, filled with dark clouds gathering ominously on the horizon. The scene is lit by diffused daylight, creating a foreboding atmosphere.",
+    "ff_vis_char_idxs": [],
+    "lf_desc": "EXT. LIGHTHOUSE - DAY. In a wide shot, a tall, white lighthouse stands on the left side of the frame. The sea has become more choppy with increased winds. The sky is heavily overcast, filled with dark clouds gathered ominously on the horizon. The scene is lit by diffused daylight, further darkened, creating an intensified foreboding atmosphere.",
+    "lf_vis_char_idxs": [],
+    "motion_desc": "The wind picks up, causing the sea to become choppy. The lighthouse GROANS faintly. Dark clouds gather more ominously on the horizon.",
+    "audio_desc": "[Sound Effect] Wind picking up, low groaning sound from the lighthouse structure."
+}

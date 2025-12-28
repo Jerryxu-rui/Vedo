@@ -1,0 +1,14 @@
+{
+    "idx": 10,
+    "is_last": false,
+    "cam_idx": 3,
+    "visual_desc": "EXT. LIGHTHOUSE - DAWN. The coastline is ravaged. Debris litters the shore. The storm has passed, but the damage is evident. The sea is calmer, but churned. The lighthouse is on the left side of the frame. The scene is lit by the soft, diffused light of dawn.",
+    "variation_type": "small",
+    "variation_reason": "The light brightens slightly, the overall environment does not have significant changes, thus the variation type is small.",
+    "ff_desc": "Exterior shot at dawn. The coastline is visible, showing signs of a recent storm with debris scattered along the shore. The sea is churned but relatively calm. A lighthouse is positioned on the left side of the frame. The scene is illuminated by the soft, diffused light of dawn, creating a somber mood.",
+    "ff_vis_char_idxs": [],
+    "lf_desc": "Exterior shot at dawn. The coastline is visible, showing signs of a recent storm with debris scattered along the shore. The sea is churned but relatively calm. A lighthouse is positioned on the left side of the frame. The scene is illuminated by the soft, diffused light of dawn, creating a somber mood.",
+    "lf_vis_char_idxs": [],
+    "motion_desc": "The camera is static, capturing the scene. The dawn light gradually brightens, revealing more details of the ravaged coastline.",
+    "audio_desc": "[Sound Effect] Distant waves, calmer than before, the cry of seagulls."
+}

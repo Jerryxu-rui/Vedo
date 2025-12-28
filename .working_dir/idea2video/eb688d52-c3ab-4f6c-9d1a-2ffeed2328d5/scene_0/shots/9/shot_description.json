@@ -1,0 +1,20 @@
+{
+    "idx": 9,
+    "is_last": false,
+    "cam_idx": 4,
+    "visual_desc": "INT. LAMP ROOM - CONTINUOUS. <Sarah> (female, late 40s, short brown hair, wearing loose-fitting clothes) manages to stabilize the lamp. The beam shines brightly through the storm. She leans against the mechanism, exhausted. <Gus> (medium-sized, scruffy mixed-breed dog) is next to her. The lamp mechanism is in the center of the frame.",
+    "variation_type": "small",
+    "variation_reason": "The camera slightly zooms in on the scene, and the middle-aged woman's action of stabilizing the lamp results in minimal changes in composition.",
+    "ff_desc": "The lamp mechanism, a complex array of gears and lenses, dominates the center of the frame inside the lamp room. To the left, a middle-aged woman (short brown hair, wearing loose-fitting clothes) is stabilizing the lamp. Beside the woman is a medium-sized, scruffy mixed-breed dog. The beam from the lamp is shining brightly, cutting through the storm visible through the windows. The overall lighting is bright due to the lamp's powerful beam.",
+    "ff_vis_char_idxs": [
+        0,
+        1
+    ],
+    "lf_desc": "Close-up shot. The lamp mechanism remains in the center of the frame. The middle-aged woman (short brown hair, wearing loose-fitting clothes) is leaning against the mechanism, her expression exhausted. Beside her, the medium-sized, scruffy mixed-breed dog remains by her side. The lamp continues to shine brightly through the storm.",
+    "lf_vis_char_idxs": [
+        0,
+        1
+    ],
+    "motion_desc": "Static shot. The middle-aged woman (short brown hair, wearing loose-fitting clothes) manages to stabilize the lamp, the light then shines brightly. The shot slowly pushes in to a medium shot.",
+    "audio_desc": "[Sound Effect] Wind howling, crashing waves, steady beam of the lamp."
+}

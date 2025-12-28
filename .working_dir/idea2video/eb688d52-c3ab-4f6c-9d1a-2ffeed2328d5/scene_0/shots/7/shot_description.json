@@ -1,0 +1,18 @@
+{
+    "idx": 7,
+    "is_last": false,
+    "cam_idx": 5,
+    "visual_desc": "CLOSE UP - <Sarah>'s FACE (female, late 40s, short brown hair, wearing loose-fitting clothes). Illuminated by the lamp's flashing beam, her face shows determination mixed with fear. Spray from a rogue wave soaks her. The lamp is above <Sarah>. <Sarah>'s face is centered in the frame.",
+    "variation_type": "small",
+    "variation_reason": "This shot focuses on the facial expression changes of the person. The overall composition remains static, with only minor changes due to the water spray and flickering light.",
+    "ff_desc": "A close-up shot focuses on the face of a person (female, late 40s, with short brown hair and wearing loose-fitting clothes). The face, centered in the frame, is illuminated by a flashing beam of light from above. The person's expression is a mix of determination and fear. Splashes of water from a rogue wave are visible on their face.",
+    "ff_vis_char_idxs": [
+        0
+    ],
+    "lf_desc": "A close-up shot focuses on the face of a person (female, late 40s, with short brown hair and wearing loose-fitting clothes). The face, centered in the frame, is illuminated by a flashing beam of light from above. The person's expression is a mix of determination and fear. Splashes of water from a rogue wave are visible on their face.",
+    "lf_vis_char_idxs": [
+        0
+    ],
+    "motion_desc": "The camera is static. The flashing beam of light from the lamp above causes flickering illumination on the face of the person (female, late 40s, with short brown hair and wearing loose-fitting clothes). Spray from a rogue wave continues to splash over them.",
+    "audio_desc": "[Sound Effect] Wind howling, crashing waves, rhythmic flashing of the lamp."
+}

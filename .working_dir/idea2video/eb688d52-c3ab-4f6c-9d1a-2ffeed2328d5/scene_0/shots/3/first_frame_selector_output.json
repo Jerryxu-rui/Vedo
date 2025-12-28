@@ -1,0 +1,17 @@
+{
+    "reference_image_path_and_text_pairs": [
+        [
+            ".working_dir/idea2video/eb688d52-c3ab-4f6c-9d1a-2ffeed2328d5/character_portraits/0_Sarah/front.png",
+            "A front view portrait of Sarah."
+        ],
+        [
+            ".working_dir/idea2video/eb688d52-c3ab-4f6c-9d1a-2ffeed2328d5/character_portraits/1_Gus/front.png",
+            "A front view portrait of Gus."
+        ],
+        [
+            ".working_dir/idea2video/eb688d52-c3ab-4f6c-9d1a-2ffeed2328d5/scene_0/shots/0/first_frame.png",
+            "The scene is set inside the sparsely furnished lighthouse keeper's quarters. A wooden table sits in the center of the frame where a woman with short brown hair, wearing loose-fitting clothes, sits meticulously cleaning a nautical chart. A scruffy, medium-sized mixed-breed dog lies at the woman's feet. Sunlight streams in through a window on the right, casting long shadows across the room."
+        ]
+    ],
+    "text_prompt": "Create an image based on the following guidance: The interior of the lighthouse keeper's quarters should reference Image 6. Sarah should reference Image 0. Gus should reference Image 3."
+}

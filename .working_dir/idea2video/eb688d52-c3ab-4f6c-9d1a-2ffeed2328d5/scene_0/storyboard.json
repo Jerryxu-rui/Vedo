@@ -1,0 +1,107 @@
+[
+    {
+        "idx": 0,
+        "is_last": false,
+        "cam_idx": 0,
+        "visual_desc": "INT. LIGHTHOUSE KEEPER'S QUARTERS - DAY. <Sarah> (female, late 40s, short brown hair, wearing loose-fitting clothes) sits at a wooden table, meticulously cleaning a nautical chart. The room is sparsely furnished. <Gus> (medium-sized, scruffy mixed-breed dog) lies at her feet. Sunlight streams in through the window on the right, casting long shadows across the room. The table is in the center of the frame. The scene is lit by natural sunlight, creating a sense of isolation and routine.",
+        "audio_desc": "[Sound Effect] Ambient sounds of the sea and faint creaking of the lighthouse."
+    },
+    {
+        "idx": 1,
+        "is_last": false,
+        "cam_idx": 1,
+        "visual_desc": "CLOSE UP - <Sarah>'s HANDS (female, late 40s, short brown hair, wearing loose-fitting clothes). Her weathered hands, calloused and strong, smooth a crease in the chart. A simple WEDDING RING is visible on her finger. The focus is on the texture and detail of her hands and the chart. Soft, diffused lighting highlights the details. Her hands are located in the center of the frame.",
+        "audio_desc": "[Sound Effect] Soft rustling of the nautical chart."
+    },
+    {
+        "idx": 2,
+        "is_last": false,
+        "cam_idx": 2,
+        "visual_desc": "EXT. LIGHTHOUSE - DAY. The lighthouse, a tall white sentinel, stands prominently on a rocky outcrop against a deceptively calm sea. The sky is a pale, unsettling grey. The lighthouse occupies the center of the frame, with the sea stretching out to the horizon. The lighting is flat, reflecting the uneasy calm.",
+        "audio_desc": "[Sound Effect] Distant, gentle waves and the cry of seagulls."
+    },
+    {
+        "idx": 3,
+        "is_last": false,
+        "cam_idx": 0,
+        "visual_desc": "INT. LIGHTHOUSE KEEPER'S QUARTERS - DAY. <Sarah> (female, late 40s, short brown hair, wearing loose-fitting clothes) looks out the window on the right side of the frame, a flicker of unease in her eyes. <Gus> (medium-sized, scruffy mixed-breed dog) whines softly, nudging her hand. Soft indoor lighting with shadows. The window looks out to the sea.",
+        "audio_desc": "[Sound Effect] <Gus> whining softly.\n[Speaker] Sarah: Easy, boy."
+    },
+    {
+        "idx": 4,
+        "is_last": false,
+        "cam_idx": 2,
+        "visual_desc": "EXT. LIGHTHOUSE - DAY. The wind picks up, causing the sea to become choppy. The lighthouse (a tall white sentinel) GROANS faintly. Dark clouds gather ominously on the horizon. The lighthouse is positioned to the left of the frame. The sky is overcast, creating a sense of foreboding.",
+        "audio_desc": "[Sound Effect] Wind picking up, low groaning sound from the lighthouse structure."
+    },
+    {
+        "idx": 5,
+        "is_last": false,
+        "cam_idx": 3,
+        "visual_desc": "EXT. LIGHTHOUSE - NIGHT. A colossal wave crashes against the lighthouse base. The structure SHUDDERS violently. Rain lashes down, blurring the image. The lighthouse, illuminated by its lamp, is on the left of the frame. The sea is a churning mass of white foam. Strong backlighting from the lamp creates dramatic shadows.",
+        "audio_desc": "[Sound Effect] Crashing wave, violent shaking, heavy rain."
+    },
+    {
+        "idx": 6,
+        "is_last": false,
+        "cam_idx": 4,
+        "visual_desc": "INT. LAMP ROOM - NIGHT. <Sarah> (female, late 40s, short brown hair, wearing loose-fitting clothes) struggles to keep the lamp lit. Wind HOWLS, and rain streaks the glass. <Gus> (medium-sized, scruffy mixed-breed dog) barks frantically, tail between his legs. The lamp is behind <Sarah>. <Sarah> is in the center of the frame.",
+        "audio_desc": "[Sound Effect] Wind howling, rain lashing against the glass, <Gus> barking frantically."
+    },
+    {
+        "idx": 7,
+        "is_last": false,
+        "cam_idx": 5,
+        "visual_desc": "CLOSE UP - <Sarah>'s FACE (female, late 40s, short brown hair, wearing loose-fitting clothes). Illuminated by the lamp's flashing beam, her face shows determination mixed with fear. Spray from a rogue wave soaks her. The lamp is above <Sarah>. <Sarah>'s face is centered in the frame.",
+        "audio_desc": "[Sound Effect] Wind howling, crashing waves, rhythmic flashing of the lamp."
+    },
+    {
+        "idx": 8,
+        "is_last": false,
+        "cam_idx": 4,
+        "visual_desc": "INT. LAMP ROOM - NIGHT. The lamp flickers, threatening to extinguish. <Sarah> (female, late 40s, short brown hair, wearing loose-fitting clothes) desperately adjusts the fuel flow. <Gus> (medium-sized, scruffy mixed-breed dog) pushes against her leg. <Sarah> is positioned on the left of the frame.",
+        "audio_desc": "[Sound Effect] Wind howling, crashing waves, sputtering lamp.\n[Speaker] Sarah: Hold on, hold on..."
+    },
+    {
+        "idx": 9,
+        "is_last": false,
+        "cam_idx": 4,
+        "visual_desc": "INT. LAMP ROOM - CONTINUOUS. <Sarah> (female, late 40s, short brown hair, wearing loose-fitting clothes) manages to stabilize the lamp. The beam shines brightly through the storm. She leans against the mechanism, exhausted. <Gus> (medium-sized, scruffy mixed-breed dog) is next to her. The lamp mechanism is in the center of the frame.",
+        "audio_desc": "[Sound Effect] Wind howling, crashing waves, steady beam of the lamp."
+    },
+    {
+        "idx": 10,
+        "is_last": false,
+        "cam_idx": 3,
+        "visual_desc": "EXT. LIGHTHOUSE - DAWN. The coastline is ravaged. Debris litters the shore. The storm has passed, but the damage is evident. The sea is calmer, but churned. The lighthouse is on the left side of the frame. The scene is lit by the soft, diffused light of dawn.",
+        "audio_desc": "[Sound Effect] Distant waves, calmer than before, the cry of seagulls."
+    },
+    {
+        "idx": 11,
+        "is_last": false,
+        "cam_idx": 6,
+        "visual_desc": "EXT. LIGHTHOUSE - CONTINUOUS. <Sarah> (female, late 40s, short brown hair, wearing loose-fitting clothes) stands outside, looking at the sea. Her face is etched with exhaustion, but her eyes hold newfound strength. <Gus> (medium-sized, scruffy mixed-breed dog) sits beside her, panting, but alert. The lighthouse is behind her. The sea is on the right side of the frame. <Sarah> is in the center of the frame.",
+        "audio_desc": "[Sound Effect] Gentle waves, <Gus> panting."
+    },
+    {
+        "idx": 12,
+        "is_last": false,
+        "cam_idx": 6,
+        "visual_desc": "EXT. LIGHTHOUSE - CONTINUOUS. <Sarah> (female, late 40s, short brown hair, wearing loose-fitting clothes) reaches down and strokes <Gus>'s head (medium-sized, scruffy mixed-breed dog). This is a medium shot, focusing on their interaction. The lighthouse is behind them. <Sarah> is on the left of the frame.",
+        "audio_desc": "[Sound Effect] Gentle waves, <Gus> panting, <Sarah> petting <Gus>."
+    },
+    {
+        "idx": 13,
+        "is_last": false,
+        "cam_idx": 7,
+        "visual_desc": "EXT. SEA - DAWN. A distant SHIP sounds its horn in acknowledgement. The ship is small in the distance on the right side of the frame.",
+        "audio_desc": "[Sound Effect] Distant ship horn."
+    },
+    {
+        "idx": 14,
+        "is_last": true,
+        "cam_idx": 6,
+        "visual_desc": "EXT. LIGHTHOUSE - DAWN. <Sarah> (female, late 40s, short brown hair, wearing loose-fitting clothes) turns back to the lighthouse, a sense of purpose returning to her. <Gus> (medium-sized, scruffy mixed-breed dog) barks once, a sound of agreement and companionship. The light shines steadily from the lighthouse on the right. The sunlight brightens. <Sarah> is located on the left side of the frame.",
+        "audio_desc": "[Sound Effect] <Gus> barks once, the steady hum of the lighthouse lamp."
+    }
+]

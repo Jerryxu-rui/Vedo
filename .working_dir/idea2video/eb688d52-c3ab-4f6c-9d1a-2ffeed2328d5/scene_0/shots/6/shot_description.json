@@ -1,0 +1,20 @@
+{
+    "idx": 6,
+    "is_last": false,
+    "cam_idx": 4,
+    "visual_desc": "INT. LAMP ROOM - NIGHT. <Sarah> (female, late 40s, short brown hair, wearing loose-fitting clothes) struggles to keep the lamp lit. Wind HOWLS, and rain streaks the glass. <Gus> (medium-sized, scruffy mixed-breed dog) barks frantically, tail between his legs. The lamp is behind <Sarah>. <Sarah> is in the center of the frame.",
+    "variation_type": "small",
+    "variation_reason": "The shot primarily captures the internal struggle to keep the lamp lit, along with the dog's reaction to the storm. The changes are subtle, reflecting emotional tension rather than significant compositional shifts, thus the variation type is small.",
+    "ff_desc": "The scene is set inside a lamp room at night. A woman, identifiable as in her late 40s with short brown hair and wearing loose-fitting clothes, is centrally framed, positioned in front of a large lamp. The lamp stands behind her. The room is dimly lit. Rain streaks across the glass of the windows. A medium-sized, scruffy mixed-breed dog stands near the woman.",
+    "ff_vis_char_idxs": [
+        0,
+        1
+    ],
+    "lf_desc": "The scene is set inside a lamp room at night. A woman, identifiable as in her late 40s with short brown hair and wearing loose-fitting clothes, continues to struggle with the lamp, which remains lit behind her. Rain streaks across the glass of the windows. A medium-sized, scruffy mixed-breed dog cowers with its tail between its legs.",
+    "lf_vis_char_idxs": [
+        0,
+        1
+    ],
+    "motion_desc": "The camera remains static. The woman (in her late 40s with short brown hair and wearing loose-fitting clothes) struggles to keep the lamp lit. A medium-sized, scruffy mixed-breed dog barks frantically, its tail tucked between its legs.",
+    "audio_desc": "[Sound Effect] Wind howling, rain lashing against the glass, <Gus> barking frantically."
+}

@@ -1,0 +1,14 @@
+{
+    "idx": 2,
+    "is_last": false,
+    "cam_idx": 2,
+    "visual_desc": "EXT. LIGHTHOUSE - DAY. The lighthouse, a tall white sentinel, stands prominently on a rocky outcrop against a deceptively calm sea. The sky is a pale, unsettling grey. The lighthouse occupies the center of the frame, with the sea stretching out to the horizon. The lighting is flat, reflecting the uneasy calm.",
+    "variation_type": "small",
+    "variation_reason": "The camera is static, and there are no changes in the frame's composition.",
+    "ff_desc": "Exterior shot of a tall, white lighthouse positioned at the center of the frame, standing on a rocky outcrop. The sea stretches out to the horizon, appearing deceptively calm under a pale, unsettling grey sky. The lighting is flat, contributing to an uneasy mood.",
+    "ff_vis_char_idxs": [],
+    "lf_desc": "Exterior shot of a tall, white lighthouse positioned at the center of the frame, standing on a rocky outcrop. The sea stretches out to the horizon, appearing deceptively calm under a pale, unsettling grey sky. The lighting is flat, contributing to an uneasy mood.",
+    "lf_vis_char_idxs": [],
+    "motion_desc": "The camera is static, capturing the lighthouse and the surrounding environment.",
+    "audio_desc": "[Sound Effect] Distant, gentle waves and the cry of seagulls."
+}

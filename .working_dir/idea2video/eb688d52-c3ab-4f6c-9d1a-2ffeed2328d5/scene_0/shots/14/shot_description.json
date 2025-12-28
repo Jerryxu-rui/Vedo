@@ -1,0 +1,20 @@
+{
+    "idx": 14,
+    "is_last": true,
+    "cam_idx": 6,
+    "visual_desc": "EXT. LIGHTHOUSE - DAWN. <Sarah> (female, late 40s, short brown hair, wearing loose-fitting clothes) turns back to the lighthouse, a sense of purpose returning to her. <Gus> (medium-sized, scruffy mixed-breed dog) barks once, a sound of agreement and companionship. The light shines steadily from the lighthouse on the right. The sunlight brightens. <Sarah> is located on the left side of the frame.",
+    "variation_type": "medium",
+    "variation_reason": "The camera gradually zooms in from a wide shot to a medium shot, and the character's expression changes, showing her returning sense of purpose. So the variation type is medium.",
+    "ff_desc": "EXT. LIGHTHOUSE - DAWN. A wide shot shows a lighthouse on the right side of the frame, its light shining steadily. The early morning sunlight is just beginning to brighten the sky. On the left side of the frame stands a woman in her late 40s with short brown hair, wearing loose-fitting clothes. Beside her stands a medium-sized, scruffy mixed-breed dog.",
+    "ff_vis_char_idxs": [
+        0,
+        1
+    ],
+    "lf_desc": "EXT. LIGHTHOUSE - DAWN. A medium shot shows a lighthouse on the right side of the frame, its light shining steadily. The morning sunlight is brighter, illuminating the surrounding area. A woman in her late 40s with short brown hair, wearing loose-fitting clothes, is facing the lighthouse with a sense of purpose. Next to her, a medium-sized, scruffy mixed-breed dog is sitting quietly.",
+    "lf_vis_char_idxs": [
+        0,
+        1
+    ],
+    "motion_desc": "The camera slowly dollies in from a wide shot to a medium shot. The woman in her late 40s with short brown hair, wearing loose-fitting clothes, turns her head back towards the lighthouse. A medium-sized, scruffy mixed-breed dog barks once.",
+    "audio_desc": "[Sound Effect] <Gus> barks once, the steady hum of the lighthouse lamp."
+}

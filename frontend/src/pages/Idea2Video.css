@@ -13,20 +13,61 @@
   font-size: 16px;
 }
 
-.idea2video-layout {
-  display: grid;
-  grid-template-columns: 1fr 400px;
-  gap: 24px;
+.workflow-steps {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 32px;
+  padding: 0 20px;
 }
 
-@media (max-width: 900px) {
-  .idea2video-layout {
-    grid-template-columns: 1fr;
+.workflow-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-muted);
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.workflow-step.active {
+  background: rgba(138, 43, 226, 0.2);
+  color: var(--text-primary);
+}
+
+.workflow-step.current {
+  background: linear-gradient(135deg, rgba(138, 43, 226, 0.4), rgba(0, 191, 255, 0.4));
+  color: white;
+  font-weight: 600;
+}
+
+.step-number {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.workflow-step.active .step-number {
+  background: var(--primary);
+}
+
+.step-label {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .step-label {
+    display: inline;
   }
-}
-
-.input-section h3 {
-  margin-bottom: 20px;
 }
 
 .form-row {
@@ -40,57 +81,249 @@
   margin-top: 8px;
 }
 
-.status-section h3 {
-  margin-bottom: 20px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.status-idle {
+.generating-overlay {
   text-align: center;
-  padding: 40px 20px;
-  color: var(--text-muted);
+  padding: 60px 40px;
 }
 
-.status-icon {
-  font-size: 48px;
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid rgba(138, 43, 226, 0.2);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 24px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.error-card {
+  text-align: center;
+  padding: 40px;
+  border: 1px solid rgba(255, 82, 82, 0.3);
+  background: rgba(255, 82, 82, 0.1);
+}
+
+.error-card h3 {
+  color: #ff5252;
   margin-bottom: 16px;
 }
 
-.status-icon.success {
-  font-size: 64px;
-  color: var(--success);
+.step-content {
+  animation: fadeIn 0.3s ease;
 }
 
-.status-processing,
-.status-completed,
-.status-error {
-  text-align: center;
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.step-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.outline-content {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.outline-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.outline-header h3 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.genre-badge {
+  padding: 4px 12px;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.outline-section {
+  margin-bottom: 24px;
+}
+
+.outline-section h4 {
+  color: var(--text-muted);
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+}
+
+.outline-section p {
+  line-height: 1.7;
+}
+
+.character-list-simple {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.character-item-simple {
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+}
+
+.plot-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.plot-item {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+}
+
+.plot-number {
+  width: 28px;
+  height: 28px;
+  background: var(--primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.plot-item p {
+  margin: 4px 0 0;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.characters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.character-card {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.character-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(138, 43, 226, 0.3);
+}
+
+.character-image {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.character-info {
   padding: 20px;
 }
 
-.progress-container {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin: 20px 0;
+.character-info h3 {
+  margin: 0 0 8px;
+  font-size: 18px;
 }
 
-.progress-container .progress-bar {
-  flex: 1;
+.role-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  background: rgba(138, 43, 226, 0.2);
+  border-radius: 12px;
+  font-size: 12px;
+  color: var(--primary);
+  margin-bottom: 12px;
 }
 
-.progress-text {
-  font-weight: 600;
-  min-width: 45px;
-}
-
-.status-message {
+.character-info p {
   color: var(--text-muted);
-  margin-top: 12px;
+  font-size: 14px;
+  line-height: 1.6;
 }
 
-.status-completed .btn,
-.status-error .btn {
-  margin-top: 20px;
+.storyboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 20px;
+}
+
+.shot-card {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.shot-image {
+  width: 100%;
+  aspect-ratio: 16/9;
+  object-fit: cover;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.shot-info {
+  padding: 16px;
+}
+
+.shot-info .shot-number {
+  display: inline-block;
+  padding: 2px 8px;
+  background: var(--primary);
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.shot-info p {
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0 0 8px;
+}
+
+.camera-angle {
+  font-size: 11px;
+  color: var(--secondary);
+  text-transform: uppercase;
+}
+
+.video-preview {
+  margin: 24px 0;
+  text-align: center;
+}
+
+.video-player {
+  max-width: 100%;
+  width: 100%;
+  max-height: 500px;
+  border-radius: 12px;
+  background: #000;
 }

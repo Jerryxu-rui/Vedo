@@ -1,0 +1,20 @@
+{
+    "idx": 8,
+    "is_last": false,
+    "cam_idx": 4,
+    "visual_desc": "INT. LAMP ROOM - NIGHT. The lamp flickers, threatening to extinguish. <Sarah> (female, late 40s, short brown hair, wearing loose-fitting clothes) desperately adjusts the fuel flow. <Gus> (medium-sized, scruffy mixed-breed dog) pushes against her leg. <Sarah> is positioned on the left of the frame.",
+    "variation_type": "small",
+    "variation_reason": "The shot only depicts the woman adjusting the fuel flow of the lamp, thus the variation type is small.",
+    "ff_desc": "The interior of a lamp room at night. A flickering lamp is the primary light source, casting long shadows and threatening to go out. A woman in her late 40s, with short brown hair and dressed in loose-fitting clothing, is positioned on the left side of the frame near the lamp. A medium-sized, scruffy mixed-breed dog stands beside her, nudging against her leg.",
+    "ff_vis_char_idxs": [
+        0,
+        1
+    ],
+    "lf_desc": "The interior of a lamp room at night. The woman in her late 40s, with short brown hair and dressed in loose-fitting clothing, remains on the left side of the frame near the lamp. The medium-sized, scruffy mixed-breed dog remains stands beside her, nudging against her leg. The lamp's light may be slightly brighter.",
+    "lf_vis_char_idxs": [
+        0,
+        1
+    ],
+    "motion_desc": "Static shot. The woman in her late 40s, with short brown hair and dressed in loose-fitting clothing, adjusts the fuel flow of the lamp.",
+    "audio_desc": "[Sound Effect] Wind howling, crashing waves, sputtering lamp.\n[Speaker] Sarah: Hold on, hold on..."
+}

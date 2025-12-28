@@ -1,0 +1,17 @@
+{
+    "reference_image_path_and_text_pairs": [
+        [
+            ".working_dir/idea2video/eb688d52-c3ab-4f6c-9d1a-2ffeed2328d5/character_portraits/0_Sarah/front.png",
+            "A front view portrait of Sarah."
+        ],
+        [
+            ".working_dir/idea2video/eb688d52-c3ab-4f6c-9d1a-2ffeed2328d5/character_portraits/1_Gus/front.png",
+            "A front view portrait of Gus."
+        ],
+        [
+            ".working_dir/idea2video/eb688d52-c3ab-4f6c-9d1a-2ffeed2328d5/scene_0/shots/6/first_frame.png",
+            "The scene is set inside a lamp room at night. A woman, identifiable as in her late 40s with short brown hair and wearing loose-fitting clothes, is centrally framed, positioned in front of a large lamp. The lamp stands behind her. The room is dimly lit. Rain streaks across the glass of the windows. A medium-sized, scruffy mixed-breed dog stands near the woman."
+        ]
+    ],
+    "text_prompt": "Generate an image based on the following guidance: the scene is set inside a lamp room at night, referencing Image 6. A woman in her late 40s, with short brown hair and dressed in loose-fitting clothing, is positioned on the left side of the frame near the lamp. The woman's appearance should reference Image 0. A medium-sized, scruffy mixed-breed dog stands beside her, nudging against her leg, referencing Image 3."
+}

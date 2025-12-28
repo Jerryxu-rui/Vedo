@@ -1,0 +1,14 @@
+{
+    "idx": 13,
+    "is_last": false,
+    "cam_idx": 7,
+    "visual_desc": "EXT. SEA - DAWN. A distant SHIP sounds its horn in acknowledgement. The ship is small in the distance on the right side of the frame.",
+    "variation_type": "small",
+    "variation_reason": "The shot remains static, with only a minor detail of ship sounding its horn in the distance, making the variation type small.",
+    "ff_desc": "EXT. SEA - DAWN. The scene is composed as a wide shot, capturing the expansive sea at dawn. A distant ship is visible on the right side of the frame. The lighting is soft, with the first light of day gently illuminating the water.",
+    "ff_vis_char_idxs": [],
+    "lf_desc": "EXT. SEA - DAWN. The scene maintains the same wide shot, showing the sea at dawn. The distant ship remains small and positioned on the right side of the frame. The lighting remains soft with subtle changes in the ambient light as dawn progresses.",
+    "lf_vis_char_idxs": [],
+    "motion_desc": "Static shot. A distant ship sounds its horn.",
+    "audio_desc": "[Sound Effect] Distant ship horn."
+}

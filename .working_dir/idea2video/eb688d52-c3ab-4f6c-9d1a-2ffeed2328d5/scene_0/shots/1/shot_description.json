@@ -1,0 +1,18 @@
+{
+    "idx": 1,
+    "is_last": false,
+    "cam_idx": 1,
+    "visual_desc": "CLOSE UP - <Sarah>'s HANDS (female, late 40s, short brown hair, wearing loose-fitting clothes). Her weathered hands, calloused and strong, smooth a crease in the chart. A simple WEDDING RING is visible on her finger. The focus is on the texture and detail of her hands and the chart. Soft, diffused lighting highlights the details. Her hands are located in the center of the frame.",
+    "variation_type": "small",
+    "variation_reason": "The shot focuses on the hands of a person smoothing a chart. The primary action involves minor adjustments, resulting in minimal change between the first and last frames. Therefore, the variation type is small.",
+    "ff_desc": "A close-up shot focuses on the weathered hands of a person. The hands are positioned in the center of the frame. A simple wedding ring is visible on one of the fingers. The hands are smoothing a crease in a nautical chart. Soft, diffused lighting accentuates the texture and details of the hands and the chart.",
+    "ff_vis_char_idxs": [
+        0
+    ],
+    "lf_desc": "The close-up shot maintains its focus on the weathered hands of a person, still smoothing a crease in the nautical chart. The simple wedding ring remains visible. The soft, diffused lighting continues to highlight the texture and details of the hands and the chart, maintaining the central composition within the frame.",
+    "lf_vis_char_idxs": [
+        0
+    ],
+    "motion_desc": "The camera remains static. The person's weathered hands, adorned with a simple wedding ring, continue to smooth out a crease in the nautical chart.",
+    "audio_desc": "[Sound Effect] Soft rustling of the nautical chart."
+}

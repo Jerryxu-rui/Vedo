@@ -1,0 +1,20 @@
+{
+    "idx": 11,
+    "is_last": false,
+    "cam_idx": 6,
+    "visual_desc": "EXT. LIGHTHOUSE - CONTINUOUS. <Sarah> (female, late 40s, short brown hair, wearing loose-fitting clothes) stands outside, looking at the sea. Her face is etched with exhaustion, but her eyes hold newfound strength. <Gus> (medium-sized, scruffy mixed-breed dog) sits beside her, panting, but alert. The lighthouse is behind her. The sea is on the right side of the frame. <Sarah> is in the center of the frame.",
+    "variation_type": "small",
+    "variation_reason": "The shot is static, and the characters are still, so the variation type is small.",
+    "ff_desc": "A medium shot of a woman in her late 40s with short brown hair, standing outside and facing the camera. The woman, positioned in the center of the frame, is wearing loose-fitting clothes. Her face shows exhaustion, but her eyes reflect a newfound strength. A medium-sized, scruffy mixed-breed dog sits beside the woman on the left, panting, yet alert. A lighthouse looms behind the woman. The sea stretches out on the right side of the frame. The lighting is soft, suggesting early morning or late afternoon, casting a gentle glow on the scene. The color palette is muted, creating a serene and contemplative atmosphere.",
+    "ff_vis_char_idxs": [
+        0,
+        1
+    ],
+    "lf_desc": "A medium shot of a woman in her late 40s with short brown hair, standing outside and facing the camera. The woman, positioned in the center of the frame, is wearing loose-fitting clothes. Her face shows exhaustion, but her eyes reflect a newfound strength. A medium-sized, scruffy mixed-breed dog sits beside the woman on the left, panting, yet alert. A lighthouse looms behind the woman. The sea stretches out on the right side of the frame. The lighting is soft, suggesting early morning or late afternoon, casting a gentle glow on the scene. The color palette is muted, creating a serene and contemplative atmosphere.",
+    "lf_vis_char_idxs": [
+        0,
+        1
+    ],
+    "motion_desc": "The camera remains static. The woman with short brown hair, wearing loose-fitting clothes, stands still, looking at the sea with a determined expression. The medium-sized, scruffy mixed-breed dog sits beside the woman, panting, but alert.",
+    "audio_desc": "[Sound Effect] Gentle waves, <Gus> panting."
+}

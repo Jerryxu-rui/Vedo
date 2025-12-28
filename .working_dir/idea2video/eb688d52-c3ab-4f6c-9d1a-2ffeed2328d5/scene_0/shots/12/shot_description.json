@@ -1,0 +1,20 @@
+{
+    "idx": 12,
+    "is_last": false,
+    "cam_idx": 6,
+    "visual_desc": "EXT. LIGHTHOUSE - CONTINUOUS. <Sarah> (female, late 40s, short brown hair, wearing loose-fitting clothes) reaches down and strokes <Gus>'s head (medium-sized, scruffy mixed-breed dog). This is a medium shot, focusing on their interaction. The lighthouse is behind them. <Sarah> is on the left of the frame.",
+    "variation_type": "small",
+    "variation_reason": "The woman is petting the dog, and there are no significant changes in the composition. So the variation type is small.",
+    "ff_desc": "A medium shot shows a woman with short brown hair, dressed in loose-fitting attire, positioned on the left side of the frame. She is reaching down towards a medium-sized, scruffy mixed-breed dog. In the background stands a lighthouse. The lighting is soft, suggesting an overcast day, with desaturated colors creating a calm mood. The ground appears to be rough stone.",
+    "ff_vis_char_idxs": [
+        0,
+        1
+    ],
+    "lf_desc": "A medium shot shows a woman with short brown hair, dressed in loose-fitting attire, positioned on the left side of the frame. She is petting a medium-sized, scruffy mixed-breed dog. In the background stands a lighthouse. The lighting is soft, suggesting an overcast day, with desaturated colors creating a calm mood. The ground appears to be rough stone.",
+    "lf_vis_char_idxs": [
+        0,
+        1
+    ],
+    "motion_desc": "The woman with short brown hair and wearing loose-fitting clothes strokes the head of the medium-sized, scruffy mixed-breed dog.",
+    "audio_desc": "[Sound Effect] Gentle waves, <Gus> panting, <Sarah> petting <Gus>."
+}

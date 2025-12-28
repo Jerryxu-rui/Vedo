@@ -116,6 +116,11 @@ def convert_file_path_to_url(file_path: str) -> str:
     
     print(f"[URL Conversion] Input: {file_path}")
     
+    # If already an external URL (http/https), return as-is
+    if file_path.startswith('http://') or file_path.startswith('https://'):
+        print(f"[URL Conversion] External URL, returning as-is: {file_path}")
+        return file_path
+    
     # Remove leading ./ or .working_dir/
     if file_path.startswith('./'):
         file_path = file_path[2:]

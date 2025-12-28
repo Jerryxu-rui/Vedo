@@ -10,6 +10,14 @@ interface Character {
   image_url: string
 }
 
+interface Scene {
+  id: string
+  name: string
+  description: string
+  atmosphere: string
+  image_url: string
+}
+
 interface Shot {
   id: string
   shot_number: number
@@ -29,11 +37,12 @@ interface Outline {
 }
 
 interface WorkflowState {
-  step: 'input' | 'outline' | 'characters' | 'storyboard' | 'video' | 'completed'
+  step: 'input' | 'outline' | 'characters' | 'scenes' | 'storyboard' | 'video' | 'completed'
   status: 'idle' | 'generating' | 'ready' | 'error'
   episodeId: string | null
   outline: Outline | null
   characters: Character[]
+  scenes: Scene[]
   storyboard: Shot[]
   videoUrl: string | null
   error: string | null
@@ -52,6 +61,7 @@ function Idea2Video() {
     episodeId: null,
     outline: null,
     characters: [],
+    scenes: [],
     storyboard: [],
     videoUrl: null,
     error: null,
@@ -59,76 +69,83 @@ function Idea2Video() {
     progressMessage: ''
   })
 
-  const pollStatus = useCallback(async (episodeId: string, currentStep: string) => {
+  const determineStepFromState = (backendState: string): 'outline' | 'characters' | 'scenes' | 'storyboard' | 'video' | 'completed' => {
+    if (backendState === 'video_completed') return 'completed'
+    if (backendState.includes('video')) return 'video'
+    if (backendState.includes('storyboard')) return 'storyboard'
+    if (backendState.includes('scene')) return 'scenes'
+    if (backendState.includes('character')) return 'characters'
+    return 'outline'
+  }
+
+  const isStepComplete = (backendState: string, targetStep: string): boolean => {
+    const completedStates: Record<string, string[]> = {
+      'outline': ['outline_generated', 'outline_confirmed', 'refining_completed', 'refined'],
+      'characters': ['characters_generated', 'characters_confirmed'],
+      'scenes': ['scenes_generated', 'scenes_confirmed'],
+      'storyboard': ['storyboard_generated', 'storyboard_confirmed'],
+      'video': ['video_completed']
+    }
+    return completedStates[targetStep]?.includes(backendState) || false
+  }
+
+  const pollStatus = useCallback(async (episodeId: string, expectedStep: string) => {
     try {
       const response = await fetch(`/api/v1/conversational/episode/${episodeId}/state`)
-      if (!response.ok) return
+      if (!response.ok) {
+        setTimeout(() => pollStatus(episodeId, expectedStep), 3000)
+        return
+      }
       
       const data = await response.json()
-      const state = data.state
-      
-      if (state.includes('generating')) {
-        setWorkflow(prev => ({
-          ...prev,
-          status: 'generating',
-          progressMessage: `Generating ${currentStep}...`
-        }))
-        setTimeout(() => pollStatus(episodeId, currentStep), 2000)
-      } else if (state.includes('generated') || state.includes('confirmed')) {
-        await fetchWorkflowData(episodeId)
-      } else if (state === 'failed') {
+      const backendState = (data.state as string).toLowerCase()
+
+      console.log('Backend state:', backendState, 'Expected step:', expectedStep)
+
+      if (backendState === 'failed') {
         setWorkflow(prev => ({
           ...prev,
           status: 'error',
           error: data.error || 'Generation failed'
         }))
+        return
       }
+
+      if (backendState.includes('generating') || backendState.includes('refining')) {
+        setWorkflow(prev => ({
+          ...prev,
+          status: 'generating',
+          progressMessage: `Generating ${expectedStep}...`
+        }))
+        setTimeout(() => pollStatus(episodeId, expectedStep), 2000)
+        return
+      }
+
+      if (isStepComplete(backendState, expectedStep)) {
+        const newStep = determineStepFromState(backendState)
+        
+        const videoUrl = data.video_path || data.step_info?.video?.path || null
+        
+        setWorkflow(prev => ({
+          ...prev,
+          step: newStep === 'completed' ? 'completed' : expectedStep as typeof prev.step,
+          status: 'ready',
+          outline: data.outline || prev.outline,
+          characters: data.characters?.length > 0 ? data.characters : prev.characters,
+          scenes: data.scenes?.length > 0 ? data.scenes : prev.scenes,
+          storyboard: data.storyboard?.length > 0 ? data.storyboard : prev.storyboard,
+          videoUrl: videoUrl || prev.videoUrl
+        }))
+        return
+      }
+
+      setTimeout(() => pollStatus(episodeId, expectedStep), 2000)
+
     } catch (error) {
       console.error('Poll error:', error)
-      setTimeout(() => pollStatus(episodeId, currentStep), 3000)
+      setTimeout(() => pollStatus(episodeId, expectedStep), 3000)
     }
   }, [])
-
-  const fetchWorkflowData = async (episodeId: string) => {
-    try {
-      const response = await fetch(`/api/v1/conversational/episode/${episodeId}/state`)
-      if (!response.ok) return
-      
-      const data = await response.json()
-      
-      setWorkflow(prev => {
-        const newState = { ...prev }
-        
-        if (data.outline) {
-          newState.outline = data.outline
-          newState.step = 'outline'
-          newState.status = 'ready'
-        }
-        
-        if (data.characters && data.characters.length > 0) {
-          newState.characters = data.characters
-          newState.step = 'characters'
-          newState.status = 'ready'
-        }
-        
-        if (data.storyboard && data.storyboard.length > 0) {
-          newState.storyboard = data.storyboard
-          newState.step = 'storyboard'
-          newState.status = 'ready'
-        }
-        
-        if (data.state === 'video_completed') {
-          newState.step = 'completed'
-          newState.status = 'ready'
-          newState.videoUrl = `/api/v1/conversational/episode/${episodeId}/video`
-        }
-        
-        return newState
-      })
-    } catch (error) {
-      console.error('Fetch error:', error)
-    }
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -190,7 +207,6 @@ function Idea2Video() {
     setWorkflow(prev => ({
       ...prev,
       status: 'generating',
-      step: 'characters',
       progressMessage: 'Generating characters...'
     }))
 
@@ -220,12 +236,40 @@ function Idea2Video() {
     setWorkflow(prev => ({
       ...prev,
       status: 'generating',
-      step: 'storyboard',
-      progressMessage: 'Generating storyboard...'
+      progressMessage: 'Generating scenes...'
     }))
 
     try {
       await fetch(`/api/v1/conversational/episode/${workflow.episodeId}/characters/confirm`, {
+        method: 'POST'
+      })
+
+      await fetch(`/api/v1/conversational/episode/${workflow.episodeId}/scenes/generate`, {
+        method: 'POST'
+      })
+
+      pollStatus(workflow.episodeId, 'scenes')
+
+    } catch (error) {
+      setWorkflow(prev => ({
+        ...prev,
+        status: 'error',
+        error: 'Failed to generate scenes'
+      }))
+    }
+  }
+
+  const handleConfirmScenes = async () => {
+    if (!workflow.episodeId) return
+
+    setWorkflow(prev => ({
+      ...prev,
+      status: 'generating',
+      progressMessage: 'Generating storyboard...'
+    }))
+
+    try {
+      await fetch(`/api/v1/conversational/episode/${workflow.episodeId}/scenes/confirm`, {
         method: 'POST'
       })
 
@@ -250,7 +294,6 @@ function Idea2Video() {
     setWorkflow(prev => ({
       ...prev,
       status: 'generating',
-      step: 'video',
       progressMessage: 'Generating video (this may take a while)...'
     }))
 
@@ -281,6 +324,7 @@ function Idea2Video() {
       episodeId: null,
       outline: null,
       characters: [],
+      scenes: [],
       storyboard: [],
       videoUrl: null,
       error: null,
@@ -290,8 +334,8 @@ function Idea2Video() {
     setIdea('')
   }
 
-  const stepLabels = ['Input', 'Outline', 'Characters', 'Storyboard', 'Video']
-  const stepKeys = ['input', 'outline', 'characters', 'storyboard', 'video']
+  const stepLabels = ['Input', 'Outline', 'Characters', 'Scenes', 'Storyboard', 'Video']
+  const stepKeys = ['input', 'outline', 'characters', 'scenes', 'storyboard', 'video']
   const currentStepIndex = stepKeys.indexOf(workflow.step === 'completed' ? 'video' : workflow.step)
 
   return (
@@ -435,28 +479,67 @@ function Idea2Video() {
       {workflow.step === 'characters' && workflow.status === 'ready' && (
         <div className="card step-content">
           <h2>Characters</h2>
-          <div className="characters-grid">
-            {workflow.characters.map((char) => (
-              <div key={char.id} className="character-card">
-                {char.image_url && (
-                  <img 
-                    src={char.image_url} 
-                    alt={char.name}
-                    className="character-image"
-                  />
-                )}
-                <div className="character-info">
-                  <h3>{char.name}</h3>
-                  <span className="role-badge">{char.role}</span>
-                  <p>{char.description}</p>
+          {workflow.characters.length === 0 ? (
+            <p className="no-data">No characters generated yet.</p>
+          ) : (
+            <div className="characters-grid">
+              {workflow.characters.map((char) => (
+                <div key={char.id} className="character-card">
+                  {char.image_url && (
+                    <img 
+                      src={char.image_url} 
+                      alt={char.name}
+                      className="character-image"
+                    />
+                  )}
+                  <div className="character-info">
+                    <h3>{char.name}</h3>
+                    <span className="role-badge">{char.role}</span>
+                    <p>{char.description}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
 
           <div className="step-actions">
             <button className="btn btn-secondary" onClick={handleReset}>Start Over</button>
             <button className="btn btn-primary" onClick={handleConfirmCharacters}>
+              Confirm & Generate Scenes
+            </button>
+          </div>
+        </div>
+      )}
+
+      {workflow.step === 'scenes' && workflow.status === 'ready' && (
+        <div className="card step-content">
+          <h2>Scenes</h2>
+          {workflow.scenes.length === 0 ? (
+            <p className="no-data">No scenes generated yet.</p>
+          ) : (
+            <div className="scenes-grid">
+              {workflow.scenes.map((scene) => (
+                <div key={scene.id} className="scene-card">
+                  {scene.image_url && (
+                    <img 
+                      src={scene.image_url} 
+                      alt={scene.name}
+                      className="scene-image"
+                    />
+                  )}
+                  <div className="scene-info">
+                    <h3>{scene.name}</h3>
+                    <p>{scene.description}</p>
+                    <span className="atmosphere-badge">{scene.atmosphere}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="step-actions">
+            <button className="btn btn-secondary" onClick={handleReset}>Start Over</button>
+            <button className="btn btn-primary" onClick={handleConfirmScenes}>
               Confirm & Generate Storyboard
             </button>
           </div>
@@ -466,24 +549,28 @@ function Idea2Video() {
       {workflow.step === 'storyboard' && workflow.status === 'ready' && (
         <div className="card step-content">
           <h2>Storyboard</h2>
-          <div className="storyboard-grid">
-            {workflow.storyboard.map((shot) => (
-              <div key={shot.id} className="shot-card">
-                {shot.image_url && (
-                  <img 
-                    src={shot.image_url} 
-                    alt={`Shot ${shot.shot_number}`}
-                    className="shot-image"
-                  />
-                )}
-                <div className="shot-info">
-                  <span className="shot-number">Shot {shot.shot_number}</span>
-                  <p>{shot.description}</p>
-                  <span className="camera-angle">{shot.camera_angle}</span>
+          {workflow.storyboard.length === 0 ? (
+            <p className="no-data">No storyboard generated yet.</p>
+          ) : (
+            <div className="storyboard-grid">
+              {workflow.storyboard.map((shot, index) => (
+                <div key={shot.id || index} className="shot-card">
+                  {shot.image_url && (
+                    <img 
+                      src={shot.image_url} 
+                      alt={`Shot ${shot.shot_number || index + 1}`}
+                      className="shot-image"
+                    />
+                  )}
+                  <div className="shot-info">
+                    <span className="shot-number">Shot {shot.shot_number || index + 1}</span>
+                    <p>{shot.description}</p>
+                    {shot.camera_angle && <span className="camera-angle">{shot.camera_angle}</span>}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
 
           <div className="step-actions">
             <button className="btn btn-secondary" onClick={handleReset}>Start Over</button>

@@ -268,6 +268,57 @@
   line-height: 1.6;
 }
 
+.scenes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+.scene-card {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.scene-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(0, 191, 255, 0.3);
+}
+
+.scene-image {
+  width: 100%;
+  aspect-ratio: 16/9;
+  object-fit: cover;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.scene-info {
+  padding: 20px;
+}
+
+.scene-info h3 {
+  margin: 0 0 12px;
+  font-size: 18px;
+}
+
+.scene-info p {
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+
+.atmosphere-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  background: rgba(0, 191, 255, 0.2);
+  border-radius: 12px;
+  font-size: 12px;
+  color: var(--secondary);
+}
+
 .storyboard-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -326,4 +377,11 @@
   max-height: 500px;
   border-radius: 12px;
   background: #000;
+}
+
+.no-data {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 40px;
+  font-size: 16px;
 }

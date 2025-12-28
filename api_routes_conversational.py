@@ -402,6 +402,10 @@ async def generate_characters_async(
         workflow.characters = characters
         workflow.transition_to(WorkflowState.CHARACTERS_GENERATED)
         
+        # Delete old characters for this episode before creating new ones
+        db.query(CharacterDesign).filter(CharacterDesign.episode_id == episode_id_str).delete()
+        db.flush()
+        
         # 保存到数据库并收集图片URLs
         character_images = []
         print(f"[Character Generation] Saving to database...")
@@ -520,6 +524,10 @@ async def generate_scenes_async(
         workflow.scenes = scenes
         workflow.transition_to(WorkflowState.SCENES_GENERATED)
         
+        # Delete old scenes for this episode before creating new ones
+        db.query(SceneDesign).filter(SceneDesign.episode_id == episode_id_str).delete()
+        db.flush()
+        
         # 保存到数据库并收集图片URLs
         scene_images = []
         for scene in scenes:
@@ -613,6 +621,13 @@ async def generate_storyboard_async(
         
         # Save storyboard shots to database
         episode_id_str = workflow.context.get("episode_id_str", str(workflow.episode_id))
+        
+        # Delete old storyboard scenes/shots for this episode before creating new ones
+        old_scenes = db.query(Scene).filter(Scene.episode_id == episode_id_str).all()
+        for old_scene in old_scenes:
+            db.query(Shot).filter(Shot.scene_id == old_scene.id).delete()
+        db.query(Scene).filter(Scene.episode_id == episode_id_str).delete()
+        db.flush()
         
         # Group shots by scene name
         scene_shots = {}

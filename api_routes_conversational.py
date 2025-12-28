@@ -402,9 +402,16 @@ async def generate_characters_async(
         workflow.characters = characters
         workflow.transition_to(WorkflowState.CHARACTERS_GENERATED)
         
-        # Delete old characters for this episode before creating new ones
-        db.query(CharacterDesign).filter(CharacterDesign.episode_id == episode_id_str).delete()
-        db.flush()
+        # Check if we should clear existing or merge
+        existing_count = db.query(CharacterDesign).filter(CharacterDesign.episode_id == episode_id_str).count()
+        if existing_count == 0:
+            # First generation - just add new characters
+            pass
+        else:
+            # Re-generation - delete old characters (full regenerate mode)
+            # In future, this could be changed to merge/update mode
+            db.query(CharacterDesign).filter(CharacterDesign.episode_id == episode_id_str).delete()
+            db.flush()
         
         # 保存到数据库并收集图片URLs
         character_images = []
@@ -524,9 +531,15 @@ async def generate_scenes_async(
         workflow.scenes = scenes
         workflow.transition_to(WorkflowState.SCENES_GENERATED)
         
-        # Delete old scenes for this episode before creating new ones
-        db.query(SceneDesign).filter(SceneDesign.episode_id == episode_id_str).delete()
-        db.flush()
+        # Check if we should clear existing or merge
+        existing_count = db.query(SceneDesign).filter(SceneDesign.episode_id == episode_id_str).count()
+        if existing_count == 0:
+            # First generation - just add new scenes
+            pass
+        else:
+            # Re-generation - delete old scenes (full regenerate mode)
+            db.query(SceneDesign).filter(SceneDesign.episode_id == episode_id_str).delete()
+            db.flush()
         
         # 保存到数据库并收集图片URLs
         scene_images = []
@@ -622,12 +635,15 @@ async def generate_storyboard_async(
         # Save storyboard shots to database
         episode_id_str = workflow.context.get("episode_id_str", str(workflow.episode_id))
         
-        # Delete old storyboard scenes/shots for this episode before creating new ones
-        old_scenes = db.query(Scene).filter(Scene.episode_id == episode_id_str).all()
-        for old_scene in old_scenes:
-            db.query(Shot).filter(Shot.scene_id == old_scene.id).delete()
-        db.query(Scene).filter(Scene.episode_id == episode_id_str).delete()
-        db.flush()
+        # Check if we should clear existing or merge
+        existing_count = db.query(Scene).filter(Scene.episode_id == episode_id_str).count()
+        if existing_count > 0:
+            # Re-generation - delete old storyboard scenes/shots
+            old_scenes = db.query(Scene).filter(Scene.episode_id == episode_id_str).all()
+            for old_scene in old_scenes:
+                db.query(Shot).filter(Shot.scene_id == old_scene.id).delete()
+            db.query(Scene).filter(Scene.episode_id == episode_id_str).delete()
+            db.flush()
         
         # Group shots by scene name
         scene_shots = {}
@@ -2244,4 +2260,418 @@ async def list_all_scenes(
         }
         
     except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ============================================================================
+# Granular Edit/Regenerate Endpoints
+# ============================================================================
+
+class UpdateCharacterRequest(BaseModel):
+    """更新单个角色请求"""
+    name: Optional[str] = None
+    description: Optional[str] = None
+    appearance: Optional[str] = None
+    personality: Optional[List[str]] = None
+    role: Optional[str] = None
+
+
+class UpdateSceneRequest(BaseModel):
+    """更新单个场景请求"""
+    name: Optional[str] = None
+    description: Optional[str] = None
+    atmosphere: Optional[str] = None
+
+
+class UpdateShotRequest(BaseModel):
+    """更新单个分镜请求"""
+    visual_desc: Optional[str] = None
+    camera_angle: Optional[str] = None
+    camera_movement: Optional[str] = None
+    dialogue: Optional[str] = None
+    voice_actor: Optional[str] = None
+
+
+@router.patch("/episode/{episode_id}/characters/{character_id}")
+async def update_character(
+    episode_id: str,
+    character_id: str,
+    request: UpdateCharacterRequest,
+    db: Session = Depends(get_db)
+):
+    """
+    编辑单个角色的属性（不重新生成图片）
+    
+    Update a single character's properties without regenerating the image
+    """
+    try:
+        character = db.query(CharacterDesign).filter(
+            CharacterDesign.id == character_id,
+            CharacterDesign.episode_id == episode_id
+        ).first()
+        
+        if not character:
+            raise HTTPException(status_code=404, detail="Character not found")
+        
+        # Update only provided fields
+        if request.name is not None:
+            character.name = request.name
+        if request.description is not None:
+            character.description = request.description
+        if request.appearance is not None:
+            character.appearance = request.appearance
+        if request.personality is not None:
+            character.personality = request.personality
+        if request.role is not None:
+            character.role = request.role
+        
+        character.updated_at = datetime.utcnow()
+        db.commit()
+        
+        return {"message": "Character updated", "character": character.to_dict()}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/episode/{episode_id}/characters/{character_id}/regenerate")
+async def regenerate_character(
+    episode_id: str,
+    character_id: str,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db)
+):
+    """
+    重新生成单个角色的图片
+    
+    Regenerate a single character's image using AI
+    """
+    try:
+        character = db.query(CharacterDesign).filter(
+            CharacterDesign.id == character_id,
+            CharacterDesign.episode_id == episode_id
+        ).first()
+        
+        if not character:
+            raise HTTPException(status_code=404, detail="Character not found")
+        
+        # Mark as regenerating
+        character.status = "regenerating"
+        db.commit()
+        
+        # Get workflow for style info
+        session = db.query(EpisodeWorkflowSession).filter(
+            EpisodeWorkflowSession.episode_id == episode_id
+        ).first()
+        style = session.style if session else "cinematic"
+        
+        # Start background regeneration
+        background_tasks.add_task(
+            regenerate_single_character,
+            character_id, episode_id, style, db
+        )
+        
+        return {"message": "Character regeneration started", "character_id": character_id}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+async def regenerate_single_character(character_id: str, episode_id: str, style: str, db: Session):
+    """后台重新生成单个角色"""
+    try:
+        from workflows.pipeline_adapter import create_adapter
+        from workflows.conversational_episode_workflow import WorkflowMode
+        
+        character = db.query(CharacterDesign).filter(CharacterDesign.id == character_id).first()
+        if not character:
+            return
+        
+        # Create adapter and generate portrait
+        adapter = create_adapter(WorkflowMode.IDEA, "configs/idea2video.yaml")
+        await adapter.initialize_pipeline()
+        
+        # Generate new portrait for this character
+        char_info = type('CharacterInfo', (), {
+            'name': character.name,
+            'description': character.description,
+            'appearance': character.appearance,
+            'role': character.role
+        })()
+        
+        new_image_url = await adapter.generate_character_portrait(char_info, style)
+        
+        # Update database
+        character.image_url = convert_file_path_to_url(new_image_url)
+        character.status = "completed"
+        character.updated_at = datetime.utcnow()
+        db.commit()
+        
+        print(f"✅ Regenerated character {character.name} portrait")
+        
+    except Exception as e:
+        print(f"❌ Error regenerating character: {e}")
+        character = db.query(CharacterDesign).filter(CharacterDesign.id == character_id).first()
+        if character:
+            character.status = "failed"
+            db.commit()
+
+
+@router.delete("/episode/{episode_id}/characters/{character_id}")
+async def delete_character(
+    episode_id: str,
+    character_id: str,
+    db: Session = Depends(get_db)
+):
+    """删除单个角色"""
+    try:
+        character = db.query(CharacterDesign).filter(
+            CharacterDesign.id == character_id,
+            CharacterDesign.episode_id == episode_id
+        ).first()
+        
+        if not character:
+            raise HTTPException(status_code=404, detail="Character not found")
+        
+        db.delete(character)
+        db.commit()
+        
+        return {"message": "Character deleted", "character_id": character_id}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.patch("/episode/{episode_id}/scenes/{scene_id}")
+async def update_scene(
+    episode_id: str,
+    scene_id: str,
+    request: UpdateSceneRequest,
+    db: Session = Depends(get_db)
+):
+    """
+    编辑单个场景的属性（不重新生成图片）
+    
+    Update a single scene's properties without regenerating the image
+    """
+    try:
+        scene = db.query(SceneDesign).filter(
+            SceneDesign.id == scene_id,
+            SceneDesign.episode_id == episode_id
+        ).first()
+        
+        if not scene:
+            raise HTTPException(status_code=404, detail="Scene not found")
+        
+        # Update only provided fields
+        if request.name is not None:
+            scene.name = request.name
+        if request.description is not None:
+            scene.description = request.description
+        if request.atmosphere is not None:
+            scene.atmosphere = request.atmosphere
+        
+        scene.updated_at = datetime.utcnow()
+        db.commit()
+        
+        return {"message": "Scene updated", "scene": scene.to_dict()}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/episode/{episode_id}/scenes/{scene_id}/regenerate")
+async def regenerate_scene(
+    episode_id: str,
+    scene_id: str,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db)
+):
+    """
+    重新生成单个场景的图片
+    
+    Regenerate a single scene's image using AI
+    """
+    try:
+        scene = db.query(SceneDesign).filter(
+            SceneDesign.id == scene_id,
+            SceneDesign.episode_id == episode_id
+        ).first()
+        
+        if not scene:
+            raise HTTPException(status_code=404, detail="Scene not found")
+        
+        # Mark as regenerating
+        scene.status = "regenerating"
+        db.commit()
+        
+        # Get workflow for style info
+        session = db.query(EpisodeWorkflowSession).filter(
+            EpisodeWorkflowSession.episode_id == episode_id
+        ).first()
+        style = session.style if session else "cinematic"
+        
+        # Start background regeneration
+        background_tasks.add_task(
+            regenerate_single_scene,
+            scene_id, episode_id, style, db
+        )
+        
+        return {"message": "Scene regeneration started", "scene_id": scene_id}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+async def regenerate_single_scene(scene_id: str, episode_id: str, style: str, db: Session):
+    """后台重新生成单个场景"""
+    try:
+        from workflows.pipeline_adapter import create_adapter
+        from workflows.conversational_episode_workflow import WorkflowMode
+        
+        scene = db.query(SceneDesign).filter(SceneDesign.id == scene_id).first()
+        if not scene:
+            return
+        
+        # Create adapter and generate scene image
+        adapter = create_adapter(WorkflowMode.IDEA, "configs/idea2video.yaml")
+        await adapter.initialize_pipeline()
+        
+        # Generate new image for this scene
+        prompt = f"{scene.description}. 氛围: {scene.atmosphere}. 风格: {style}"
+        new_image_url = await adapter.generate_scene_image(prompt, style)
+        
+        # Update database
+        scene.image_url = convert_file_path_to_url(new_image_url) if new_image_url else scene.image_url
+        scene.status = "completed"
+        scene.updated_at = datetime.utcnow()
+        db.commit()
+        
+        print(f"✅ Regenerated scene {scene.name} image")
+        
+    except Exception as e:
+        print(f"❌ Error regenerating scene: {e}")
+        scene = db.query(SceneDesign).filter(SceneDesign.id == scene_id).first()
+        if scene:
+            scene.status = "failed"
+            db.commit()
+
+
+@router.delete("/episode/{episode_id}/scenes/{scene_id}")
+async def delete_scene(
+    episode_id: str,
+    scene_id: str,
+    db: Session = Depends(get_db)
+):
+    """删除单个场景"""
+    try:
+        scene = db.query(SceneDesign).filter(
+            SceneDesign.id == scene_id,
+            SceneDesign.episode_id == episode_id
+        ).first()
+        
+        if not scene:
+            raise HTTPException(status_code=404, detail="Scene not found")
+        
+        db.delete(scene)
+        db.commit()
+        
+        return {"message": "Scene deleted", "scene_id": scene_id}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.patch("/episode/{episode_id}/shots/{shot_id}")
+async def update_shot(
+    episode_id: str,
+    shot_id: str,
+    request: UpdateShotRequest,
+    db: Session = Depends(get_db)
+):
+    """
+    编辑单个分镜的属性
+    
+    Update a single shot's properties
+    """
+    try:
+        shot = db.query(Shot).filter(Shot.id == shot_id).first()
+        
+        if not shot:
+            raise HTTPException(status_code=404, detail="Shot not found")
+        
+        # Verify shot belongs to this episode
+        scene = db.query(Scene).filter(Scene.id == shot.scene_id).first()
+        if not scene or scene.episode_id != episode_id:
+            raise HTTPException(status_code=404, detail="Shot not found in this episode")
+        
+        # Update only provided fields
+        if request.visual_desc is not None:
+            shot.visual_desc = request.visual_desc
+        if request.camera_angle is not None:
+            shot.camera_angle = request.camera_angle
+        if request.camera_movement is not None:
+            shot.camera_movement = request.camera_movement
+        if request.dialogue is not None:
+            shot.dialogue = request.dialogue
+        if request.voice_actor is not None:
+            shot.voice_actor = request.voice_actor
+        
+        shot.updated_at = datetime.utcnow()
+        db.commit()
+        
+        return {"message": "Shot updated", "shot": shot.to_dict()}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.delete("/episode/{episode_id}/shots/{shot_id}")
+async def delete_shot(
+    episode_id: str,
+    shot_id: str,
+    db: Session = Depends(get_db)
+):
+    """删除单个分镜"""
+    try:
+        shot = db.query(Shot).filter(Shot.id == shot_id).first()
+        
+        if not shot:
+            raise HTTPException(status_code=404, detail="Shot not found")
+        
+        # Verify shot belongs to this episode
+        scene = db.query(Scene).filter(Scene.id == shot.scene_id).first()
+        if not scene or scene.episode_id != episode_id:
+            raise HTTPException(status_code=404, detail="Shot not found in this episode")
+        
+        db.delete(shot)
+        db.commit()
+        
+        return {"message": "Shot deleted", "shot_id": shot_id}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
         raise HTTPException(status_code=500, detail=str(e))

@@ -517,6 +517,108 @@ class PipelineAdapter:
                 )
             ]
     
+    async def generate_character_portrait(
+        self,
+        character_info: Any,
+        style: str = "写实电影感"
+    ) -> Optional[str]:
+        """
+        生成单个角色肖像
+        
+        Args:
+            character_info: Character information object with name, description, appearance, role
+            style: Visual style
+            
+        Returns:
+            Path to generated portrait image, or None if failed
+        """
+        if not self.pipeline:
+            await self.initialize_pipeline()
+        
+        try:
+            from agents.character_info import CharacterInfo
+            
+            # Convert to CharacterInfo if needed
+            if not isinstance(character_info, CharacterInfo):
+                char = CharacterInfo(
+                    identifier_in_scene=character_info.name,
+                    name=character_info.name,
+                    role_type=character_info.role,
+                    description=character_info.description,
+                    visual_description=character_info.appearance,
+                    base_features={
+                        "species": "unknown",
+                        "body_type": "average",
+                        "skin_tone": "unknown",
+                        "hair_color": "unknown"
+                    },
+                    dynamic_features={}
+                )
+            else:
+                char = character_info
+            
+            # Generate portraits for this single character
+            portrait_registry = await self.pipeline.generate_character_portraits(
+                characters=[char],
+                character_portraits_registry=None,
+                style=style
+            )
+            
+            # Extract the front portrait path
+            char_portraits = portrait_registry.get(char.identifier_in_scene, {})
+            front_portrait = char_portraits.get("front", {})
+            return front_portrait.get("path", None)
+            
+        except Exception as e:
+            print(f"Error generating character portrait: {e}")
+            import traceback
+            traceback.print_exc()
+            return None
+    
+    async def generate_scene_image(
+        self,
+        prompt: str,
+        style: str = "写实电影感"
+    ) -> Optional[str]:
+        """
+        生成单个场景图片
+        
+        Args:
+            prompt: Scene description/prompt
+            style: Visual style
+            
+        Returns:
+            Path or URL to generated scene image, or None if failed
+        """
+        if not self.pipeline:
+            await self.initialize_pipeline()
+        
+        try:
+            # Use the scene generator if available
+            if self.scene_generator:
+                result = await self.scene_generator.generate_scene_image(
+                    description=prompt,
+                    style=style
+                )
+                return result.get("image_url") if isinstance(result, dict) else result
+            
+            # Fallback to using image generator directly
+            if hasattr(self.pipeline, 'image_generator') and self.pipeline.image_generator:
+                full_prompt = f"{prompt}. 风格: {style}, 高质量, 电影级画面"
+                result = await self.pipeline.image_generator.generate(prompt=full_prompt)
+                if result and hasattr(result, 'image_url'):
+                    return result.image_url
+                elif isinstance(result, dict):
+                    return result.get("image_url") or result.get("url")
+            
+            return None
+            
+        except Exception as e:
+            print(f"Error generating scene image: {e}")
+            import traceback
+            traceback.print_exc()
+            return None
+    
     async def generate_video(
         self,
         storyboard: List[ShotData],

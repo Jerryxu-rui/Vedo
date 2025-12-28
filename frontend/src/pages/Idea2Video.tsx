@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import './Idea2Video.css'
 
 interface Character {
@@ -24,6 +24,7 @@ interface Shot {
   description: string
   camera_angle: string
   image_url: string
+  video_url?: string
 }
 
 interface Outline {
@@ -34,6 +35,13 @@ interface Outline {
   characters_summary: Array<{name: string, role: string}>
   plot_summary: Array<{scene: string, description: string}>
   highlights: string[]
+}
+
+interface ChatMessage {
+  id: string
+  role: 'assistant' | 'user' | 'system'
+  content: string
+  timestamp: Date
 }
 
 interface WorkflowState {
@@ -50,10 +58,25 @@ interface WorkflowState {
   progressMessage: string
 }
 
+interface WorkflowStep {
+  id: string
+  label: string
+  sublabel?: string
+  completed: boolean
+  active: boolean
+}
+
 function Idea2Video() {
   const [idea, setIdea] = useState('')
   const [style, setStyle] = useState('cinematic')
-  const [duration, setDuration] = useState('30')
+  const [messages, setMessages] = useState<ChatMessage[]>([
+    {
+      id: '1',
+      role: 'assistant',
+      content: '你好！我是Seko，很高兴能为您策划这部充满史诗感的短片。请告诉我您想要创作的视频主题或想法。',
+      timestamp: new Date()
+    }
+  ])
   
   const [workflow, setWorkflow] = useState<WorkflowState>({
     step: 'input',
@@ -68,6 +91,24 @@ function Idea2Video() {
     progress: 0,
     progressMessage: ''
   })
+
+  const [selectedShot, setSelectedShot] = useState<number>(0)
+  const [activeTab, setActiveTab] = useState<'video' | 'audio' | 'music'>('video')
+  const chatEndRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
+
+  const workflowSteps: WorkflowStep[] = [
+    { id: 'outline', label: '根据本集内容，生成详细的故事大纲', completed: workflow.step !== 'input' && workflow.step !== 'outline', active: workflow.step === 'outline' },
+    { id: 'style', label: '定义写实电影感的视觉风格和美术元素', completed: workflow.step !== 'input' && workflow.step !== 'outline', active: false },
+    { id: 'characters', label: '细化本集出场角色的造型和特点', sublabel: '设计角色特征', completed: ['scenes', 'storyboard', 'video', 'completed'].includes(workflow.step), active: workflow.step === 'characters' },
+    { id: 'character_gen', sublabel: '调用工具生成角色图', completed: ['scenes', 'storyboard', 'video', 'completed'].includes(workflow.step), active: workflow.step === 'characters', label: '' },
+    { id: 'scenes', label: '设计本集所需的关键场景细节', completed: ['storyboard', 'video', 'completed'].includes(workflow.step), active: workflow.step === 'scenes' },
+    { id: 'scene_gen', sublabel: '调用工具生成场景图', completed: ['storyboard', 'video', 'completed'].includes(workflow.step), active: workflow.step === 'scenes', label: '' },
+    { id: 'storyboard', label: '绘制本集详细的分镜剧本', completed: ['video', 'completed'].includes(workflow.step), active: workflow.step === 'storyboard' },
+  ]
 
   const determineStepFromState = (backendState: string): 'outline' | 'characters' | 'scenes' | 'storyboard' | 'video' | 'completed' => {
     if (backendState === 'video_completed') return 'completed'
@@ -89,6 +130,15 @@ function Idea2Video() {
     return completedStates[targetStep]?.includes(backendState) || false
   }
 
+  const addMessage = (role: 'assistant' | 'user' | 'system', content: string) => {
+    setMessages(prev => [...prev, {
+      id: Date.now().toString(),
+      role,
+      content,
+      timestamp: new Date()
+    }])
+  }
+
   const pollStatus = useCallback(async (episodeId: string, expectedStep: string) => {
     try {
       const response = await fetch(`/api/v1/conversational/episode/${episodeId}/state`)
@@ -100,30 +150,23 @@ function Idea2Video() {
       const data = await response.json()
       const backendState = (data.state as string).toLowerCase()
 
-      console.log('Backend state:', backendState, 'Expected step:', expectedStep)
-
       if (backendState === 'failed') {
         setWorkflow(prev => ({
           ...prev,
           status: 'error',
           error: data.error || 'Generation failed'
         }))
+        addMessage('system', `生成失败: ${data.error || '未知错误'}`)
         return
       }
 
       if (backendState.includes('generating') || backendState.includes('refining')) {
-        setWorkflow(prev => ({
-          ...prev,
-          status: 'generating',
-          progressMessage: `Generating ${expectedStep}...`
-        }))
         setTimeout(() => pollStatus(episodeId, expectedStep), 2000)
         return
       }
 
       if (isStepComplete(backendState, expectedStep)) {
         const newStep = determineStepFromState(backendState)
-        
         const videoUrl = data.video_path || data.step_info?.video?.path || null
         
         setWorkflow(prev => ({
@@ -136,6 +179,17 @@ function Idea2Video() {
           storyboard: data.storyboard?.length > 0 ? data.storyboard : prev.storyboard,
           videoUrl: videoUrl || prev.videoUrl
         }))
+
+        const stepMessages: Record<string, string> = {
+          'outline': '剧本大纲已生成完成，请在右侧查看并确认',
+          'characters': '角色设计已完成，请在右侧查看角色卡片',
+          'scenes': '场景设计已完成，请在右侧查看场景列表',
+          'storyboard': '分镜剧本已完成，请在右侧查看分镜表',
+          'video': '视频生成完成！'
+        }
+        if (stepMessages[expectedStep]) {
+          addMessage('assistant', stepMessages[expectedStep])
+        }
         return
       }
 
@@ -150,6 +204,9 @@ function Idea2Video() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!idea.trim()) return
+
+    addMessage('user', idea)
+    addMessage('assistant', '好的，我将为您精心打造这个视频项目。让我开始生成故事大纲...')
 
     setWorkflow(prev => ({
       ...prev,
@@ -178,11 +235,7 @@ function Idea2Video() {
       const createData = await createResponse.json()
       const episodeId = createData.episode_id
 
-      setWorkflow(prev => ({
-        ...prev,
-        episodeId,
-        progressMessage: 'Generating story outline...'
-      }))
+      setWorkflow(prev => ({ ...prev, episodeId }))
 
       const outlineResponse = await fetch(`/api/v1/conversational/episode/${episodeId}/outline/generate`, {
         method: 'POST'
@@ -191,6 +244,7 @@ function Idea2Video() {
       if (!outlineResponse.ok) throw new Error('Failed to start outline generation')
 
       pollStatus(episodeId, 'outline')
+      setIdea('')
 
     } catch (error) {
       setWorkflow(prev => ({
@@ -198,413 +252,411 @@ function Idea2Video() {
         status: 'error',
         error: error instanceof Error ? error.message : 'Failed to start generation'
       }))
+      addMessage('system', '创建项目失败，请重试')
     }
   }
 
   const handleConfirmOutline = async () => {
     if (!workflow.episodeId) return
 
-    setWorkflow(prev => ({
-      ...prev,
-      status: 'generating',
-      progressMessage: 'Generating characters...'
-    }))
+    addMessage('assistant', '正在生成角色设计...')
+    setWorkflow(prev => ({ ...prev, status: 'generating' }))
 
     try {
-      await fetch(`/api/v1/conversational/episode/${workflow.episodeId}/outline/confirm`, {
-        method: 'POST'
-      })
-
-      await fetch(`/api/v1/conversational/episode/${workflow.episodeId}/characters/generate`, {
-        method: 'POST'
-      })
-
+      await fetch(`/api/v1/conversational/episode/${workflow.episodeId}/outline/confirm`, { method: 'POST' })
+      await fetch(`/api/v1/conversational/episode/${workflow.episodeId}/characters/generate`, { method: 'POST' })
       pollStatus(workflow.episodeId, 'characters')
-
     } catch (error) {
-      setWorkflow(prev => ({
-        ...prev,
-        status: 'error',
-        error: 'Failed to generate characters'
-      }))
+      setWorkflow(prev => ({ ...prev, status: 'error', error: 'Failed to generate characters' }))
     }
   }
 
   const handleConfirmCharacters = async () => {
     if (!workflow.episodeId) return
 
-    setWorkflow(prev => ({
-      ...prev,
-      status: 'generating',
-      progressMessage: 'Generating scenes...'
-    }))
+    addMessage('assistant', '正在生成场景设计...')
+    setWorkflow(prev => ({ ...prev, status: 'generating' }))
 
     try {
-      await fetch(`/api/v1/conversational/episode/${workflow.episodeId}/characters/confirm`, {
-        method: 'POST'
-      })
-
-      await fetch(`/api/v1/conversational/episode/${workflow.episodeId}/scenes/generate`, {
-        method: 'POST'
-      })
-
+      await fetch(`/api/v1/conversational/episode/${workflow.episodeId}/characters/confirm`, { method: 'POST' })
+      await fetch(`/api/v1/conversational/episode/${workflow.episodeId}/scenes/generate`, { method: 'POST' })
       pollStatus(workflow.episodeId, 'scenes')
-
     } catch (error) {
-      setWorkflow(prev => ({
-        ...prev,
-        status: 'error',
-        error: 'Failed to generate scenes'
-      }))
+      setWorkflow(prev => ({ ...prev, status: 'error', error: 'Failed to generate scenes' }))
     }
   }
 
   const handleConfirmScenes = async () => {
     if (!workflow.episodeId) return
 
-    setWorkflow(prev => ({
-      ...prev,
-      status: 'generating',
-      progressMessage: 'Generating storyboard...'
-    }))
+    addMessage('assistant', '正在生成分镜剧本...')
+    setWorkflow(prev => ({ ...prev, status: 'generating' }))
 
     try {
-      await fetch(`/api/v1/conversational/episode/${workflow.episodeId}/scenes/confirm`, {
-        method: 'POST'
-      })
-
-      await fetch(`/api/v1/conversational/episode/${workflow.episodeId}/storyboard/generate`, {
-        method: 'POST'
-      })
-
+      await fetch(`/api/v1/conversational/episode/${workflow.episodeId}/scenes/confirm`, { method: 'POST' })
+      await fetch(`/api/v1/conversational/episode/${workflow.episodeId}/storyboard/generate`, { method: 'POST' })
       pollStatus(workflow.episodeId, 'storyboard')
-
     } catch (error) {
-      setWorkflow(prev => ({
-        ...prev,
-        status: 'error',
-        error: 'Failed to generate storyboard'
-      }))
+      setWorkflow(prev => ({ ...prev, status: 'error', error: 'Failed to generate storyboard' }))
     }
   }
 
   const handleConfirmStoryboard = async () => {
     if (!workflow.episodeId) return
 
-    setWorkflow(prev => ({
-      ...prev,
-      status: 'generating',
-      progressMessage: 'Generating video (this may take a while)...'
-    }))
+    addMessage('assistant', '正在生成视频，这可能需要一些时间...')
+    setWorkflow(prev => ({ ...prev, status: 'generating' }))
 
     try {
-      await fetch(`/api/v1/conversational/episode/${workflow.episodeId}/storyboard/confirm`, {
-        method: 'POST'
-      })
-
-      await fetch(`/api/v1/conversational/episode/${workflow.episodeId}/video/generate`, {
-        method: 'POST'
-      })
-
+      await fetch(`/api/v1/conversational/episode/${workflow.episodeId}/storyboard/confirm`, { method: 'POST' })
+      await fetch(`/api/v1/conversational/episode/${workflow.episodeId}/video/generate`, { method: 'POST' })
       pollStatus(workflow.episodeId, 'video')
-
     } catch (error) {
-      setWorkflow(prev => ({
-        ...prev,
-        status: 'error',
-        error: 'Failed to generate video'
-      }))
+      setWorkflow(prev => ({ ...prev, status: 'error', error: 'Failed to generate video' }))
     }
   }
 
-  const handleReset = () => {
-    setWorkflow({
-      step: 'input',
-      status: 'idle',
-      episodeId: null,
-      outline: null,
-      characters: [],
-      scenes: [],
-      storyboard: [],
-      videoUrl: null,
-      error: null,
-      progress: 0,
-      progressMessage: ''
-    })
-    setIdea('')
-  }
+  const renderRightPanel = () => {
+    if (workflow.step === 'input' || workflow.status === 'generating') {
+      return (
+        <div className="right-panel-empty">
+          {workflow.status === 'generating' ? (
+            <div className="generating-state">
+              <div className="spinner-large"></div>
+              <p>正在生成中...</p>
+            </div>
+          ) : (
+            <p>输入您的想法后，内容将在此处显示</p>
+          )}
+        </div>
+      )
+    }
 
-  const stepLabels = ['Input', 'Outline', 'Characters', 'Scenes', 'Storyboard', 'Video']
-  const stepKeys = ['input', 'outline', 'characters', 'scenes', 'storyboard', 'video']
-  const currentStepIndex = stepKeys.indexOf(workflow.step === 'completed' ? 'video' : workflow.step)
-
-  return (
-    <div className="container">
-      <div className="page-header">
-        <h1>Idea to Video</h1>
-        <p>Transform your idea into a video step by step</p>
-      </div>
-
-      <div className="workflow-steps">
-        {stepLabels.map((label, index) => (
-          <div 
-            key={label}
-            className={`workflow-step ${index <= currentStepIndex ? 'active' : ''} ${index === currentStepIndex ? 'current' : ''}`}
-          >
-            <div className="step-number">{index + 1}</div>
-            <span className="step-label">{label}</span>
+    if (workflow.step === 'outline' && workflow.outline) {
+      return (
+        <div className="right-panel-content">
+          <div className="panel-header">
+            <h3>第1集: {workflow.outline.title}</h3>
+            <span className="badge badge-success">已有视频</span>
+            <span className="badge badge-info">内容由 AI 生成</span>
           </div>
-        ))}
-      </div>
-
-      {workflow.status === 'generating' && (
-        <div className="card generating-overlay">
-          <div className="spinner"></div>
-          <p>{workflow.progressMessage}</p>
-        </div>
-      )}
-
-      {workflow.status === 'error' && (
-        <div className="card error-card">
-          <h3>Error</h3>
-          <p>{workflow.error}</p>
-          <button className="btn btn-secondary" onClick={handleReset}>Start Over</button>
-        </div>
-      )}
-
-      {workflow.step === 'input' && workflow.status !== 'generating' && (
-        <div className="card">
-          <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label className="label">Your Video Idea</label>
-              <textarea
-                className="textarea"
-                placeholder="Describe your video idea in detail..."
-                value={idea}
-                onChange={(e) => setIdea(e.target.value)}
-                rows={6}
-              />
-            </div>
-
-            <div className="form-row">
-              <div className="form-group">
-                <label className="label">Visual Style</label>
-                <select 
-                  className="input"
-                  value={style}
-                  onChange={(e) => setStyle(e.target.value)}
-                >
-                  <option value="cinematic">Cinematic</option>
-                  <option value="anime">Anime</option>
-                  <option value="realistic">Realistic</option>
-                  <option value="cartoon">Cartoon</option>
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label className="label">Target Duration</label>
-                <select 
-                  className="input"
-                  value={duration}
-                  onChange={(e) => setDuration(e.target.value)}
-                >
-                  <option value="15">15 seconds</option>
-                  <option value="30">30 seconds</option>
-                  <option value="60">1 minute</option>
-                </select>
-              </div>
-            </div>
-
-            <button 
-              type="submit" 
-              className="btn btn-primary btn-full"
-              disabled={!idea.trim()}
-            >
-              Generate Outline
-            </button>
-          </form>
-        </div>
-      )}
-
-      {workflow.step === 'outline' && workflow.status === 'ready' && workflow.outline && (
-        <div className="card step-content">
-          <h2>Story Outline</h2>
-          <div className="outline-content">
-            <div className="outline-header">
-              <h3>{workflow.outline.title}</h3>
-              <span className="genre-badge">{workflow.outline.genre}</span>
-            </div>
-            
-            <div className="outline-section">
-              <h4>Synopsis</h4>
+          
+          <div className="content-section">
+            <h4 className="section-title">故事梗概</h4>
+            <div className="synopsis-box">
+              <p className="label">内容概要:</p>
               <p>{workflow.outline.synopsis}</p>
             </div>
-
-            <div className="outline-section">
-              <h4>Characters</h4>
-              <div className="character-list-simple">
-                {workflow.outline.characters_summary?.map((char, index) => (
-                  <div key={index} className="character-item-simple">
-                    <strong>{char.name}</strong> - {char.role}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="outline-section">
-              <h4>Plot Points</h4>
-              <div className="plot-list">
-                {workflow.outline.plot_summary?.map((plot, index) => (
-                  <div key={index} className="plot-item">
-                    <span className="plot-number">{index + 1}</span>
-                    <div>
-                      <strong>{plot.scene}</strong>
-                      <p>{plot.description}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
           </div>
 
-          <div className="step-actions">
-            <button className="btn btn-secondary" onClick={handleReset}>Start Over</button>
-            <button className="btn btn-primary" onClick={handleConfirmOutline}>
-              Confirm & Generate Characters
+          <div className="content-section">
+            <h4 className="section-title">剧本亮点</h4>
+            {workflow.outline.plot_summary?.map((plot, index) => (
+              <div key={index} className="highlight-item">
+                <span className="highlight-marker">亮点{index + 1}:</span>
+                <strong>{plot.scene}</strong>
+                <p>{plot.description}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="panel-footer">
+            <div className="footer-options">
+              <span>模型</span>
+              <span>智能选择</span>
+              <span>画面比例</span>
+              <span>9:16</span>
+            </div>
+            <button className="btn-primary-action" onClick={handleConfirmOutline}>
+              确认分镜大纲
             </button>
           </div>
         </div>
-      )}
+      )
+    }
 
-      {workflow.step === 'characters' && workflow.status === 'ready' && (
-        <div className="card step-content">
-          <h2>Characters</h2>
-          {workflow.characters.length === 0 ? (
-            <p className="no-data">No characters generated yet.</p>
-          ) : (
-            <div className="characters-grid">
-              {workflow.characters.map((char) => (
-                <div key={char.id} className="character-card">
-                  {char.image_url && (
-                    <img 
-                      src={char.image_url} 
-                      alt={char.name}
-                      className="character-image"
-                    />
-                  )}
-                  <div className="character-info">
-                    <h3>{char.name}</h3>
-                    <span className="role-badge">{char.role}</span>
-                    <p>{char.description}</p>
-                  </div>
+    if (workflow.step === 'characters' && workflow.characters.length > 0) {
+      return (
+        <div className="right-panel-content">
+          <div className="panel-header">
+            <h3>角色设计</h3>
+            <span className="badge badge-info">内容由 AI 生成</span>
+          </div>
+          
+          <div className="characters-grid-new">
+            {workflow.characters.map((char) => (
+              <div key={char.id} className="character-card-new">
+                {char.image_url && (
+                  <img src={char.image_url} alt={char.name} className="character-image-new" />
+                )}
+                <div className="character-overlay">
+                  <span className="character-name">{char.name}</span>
                 </div>
-              ))}
-            </div>
-          )}
+              </div>
+            ))}
+          </div>
 
-          <div className="step-actions">
-            <button className="btn btn-secondary" onClick={handleReset}>Start Over</button>
-            <button className="btn btn-primary" onClick={handleConfirmCharacters}>
-              Confirm & Generate Scenes
+          <div className="panel-footer">
+            <button className="btn-primary-action" onClick={handleConfirmCharacters}>
+              确认角色设计
             </button>
           </div>
         </div>
-      )}
+      )
+    }
 
-      {workflow.step === 'scenes' && workflow.status === 'ready' && (
-        <div className="card step-content">
-          <h2>Scenes</h2>
-          {workflow.scenes.length === 0 ? (
-            <p className="no-data">No scenes generated yet.</p>
-          ) : (
-            <div className="scenes-grid">
+    if (workflow.step === 'scenes' && workflow.scenes.length > 0) {
+      return (
+        <div className="right-panel-content">
+          <div className="panel-header">
+            <h3>第1集: {workflow.outline?.title}</h3>
+            <span className="badge badge-success">已有视频</span>
+            <span className="badge badge-info">内容由 AI 生成</span>
+          </div>
+          
+          <div className="content-section">
+            <h4 className="section-title highlight">场景列表</h4>
+            <div className="scene-descriptions">
               {workflow.scenes.map((scene) => (
-                <div key={scene.id} className="scene-card">
-                  {scene.image_url && (
-                    <img 
-                      src={scene.image_url} 
-                      alt={scene.name}
-                      className="scene-image"
-                    />
-                  )}
-                  <div className="scene-info">
-                    <h3>{scene.name}</h3>
-                    <p>{scene.description}</p>
-                    <span className="atmosphere-badge">{scene.atmosphere}</span>
-                  </div>
-                </div>
+                <p key={scene.id}>
+                  <strong>{scene.name}</strong>: {scene.description}
+                </p>
               ))}
             </div>
-          )}
+          </div>
 
-          <div className="step-actions">
-            <button className="btn btn-secondary" onClick={handleReset}>Start Over</button>
-            <button className="btn btn-primary" onClick={handleConfirmScenes}>
-              Confirm & Generate Storyboard
+          <div className="scenes-grid-new">
+            {workflow.scenes.map((scene) => (
+              <div key={scene.id} className="scene-card-new">
+                {scene.image_url && (
+                  <img src={scene.image_url} alt={scene.name} className="scene-image-new" />
+                )}
+                <div className="scene-overlay">
+                  <span>{scene.name}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="panel-footer">
+            <button className="btn-primary-action" onClick={handleConfirmScenes}>
+              确认场景设计
             </button>
           </div>
         </div>
-      )}
+      )
+    }
 
-      {workflow.step === 'storyboard' && workflow.status === 'ready' && (
-        <div className="card step-content">
-          <h2>Storyboard</h2>
-          {workflow.storyboard.length === 0 ? (
-            <p className="no-data">No storyboard generated yet.</p>
-          ) : (
-            <div className="storyboard-grid">
-              {workflow.storyboard.map((shot, index) => (
-                <div key={shot.id || index} className="shot-card">
-                  {shot.image_url && (
-                    <img 
-                      src={shot.image_url} 
-                      alt={`Shot ${shot.shot_number || index + 1}`}
-                      className="shot-image"
-                    />
-                  )}
-                  <div className="shot-info">
-                    <span className="shot-number">Shot {shot.shot_number || index + 1}</span>
-                    <p>{shot.description}</p>
-                    {shot.camera_angle && <span className="camera-angle">{shot.camera_angle}</span>}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          <div className="step-actions">
-            <button className="btn btn-secondary" onClick={handleReset}>Start Over</button>
-            <button className="btn btn-primary" onClick={handleConfirmStoryboard}>
-              Confirm & Generate Video
-            </button>
+    if (workflow.step === 'storyboard' && workflow.storyboard.length > 0) {
+      const currentShot = workflow.storyboard[selectedShot]
+      return (
+        <div className="right-panel-content storyboard-view">
+          <div className="storyboard-header">
+            <button className="btn-icon">裁剪分镜</button>
+            <button className="btn-icon">对口型</button>
           </div>
-        </div>
-      )}
+          
+          <div className="main-preview">
+            {currentShot?.image_url && (
+              <img src={currentShot.image_url} alt={`Shot ${selectedShot + 1}`} className="preview-image" />
+            )}
+            <div className="shot-label">{currentShot?.description}</div>
+          </div>
 
-      {(workflow.step === 'video' || workflow.step === 'completed') && workflow.status === 'ready' && (
-        <div className="card step-content">
-          <h2>Your Video is Ready!</h2>
-          <div className="video-preview">
-            {workflow.videoUrl && (
-              <video 
-                controls 
-                src={workflow.videoUrl}
-                className="video-player"
+          <div className="playback-controls">
+            <label className="subtitle-toggle">
+              <span>字幕</span>
+              <input type="checkbox" />
+            </label>
+            <button className="btn-play">▶</button>
+            <span className="time-display">00:00/{String(workflow.storyboard.length * 3).padStart(2, '0')}:00</span>
+            <button className="btn-storyboard-view">故事版视图</button>
+          </div>
+
+          <div className="timeline">
+            {workflow.storyboard.map((shot, index) => (
+              <div 
+                key={shot.id || index} 
+                className={`timeline-item ${selectedShot === index ? 'active' : ''}`}
+                onClick={() => setSelectedShot(index)}
               >
-                Your browser does not support video playback.
-              </video>
-            )}
+                {shot.image_url && (
+                  <img src={shot.image_url} alt={`Shot ${index + 1}`} />
+                )}
+                <span className="shot-time">分镜{index + 1}</span>
+              </div>
+            ))}
           </div>
-          <div className="step-actions">
-            <button className="btn btn-secondary" onClick={handleReset}>Create Another</button>
-            {workflow.videoUrl && (
-              <a href={workflow.videoUrl} download className="btn btn-primary">
-                Download Video
-              </a>
-            )}
+
+          <div className="panel-footer">
+            <button className="btn-primary-action" onClick={handleConfirmStoryboard}>
+              一键转视频
+            </button>
           </div>
         </div>
-      )}
+      )
+    }
+
+    if ((workflow.step === 'video' || workflow.step === 'completed') && workflow.videoUrl) {
+      return (
+        <div className="right-panel-content video-view">
+          <div className="video-preview-large">
+            <video controls src={workflow.videoUrl} className="main-video">
+              Your browser does not support video playback.
+            </video>
+          </div>
+          
+          <div className="video-actions">
+            <a href={workflow.videoUrl} download className="btn-primary-action">
+              导出
+            </a>
+          </div>
+        </div>
+      )
+    }
+
+    return null
+  }
+
+  return (
+    <div className="studio-layout">
+      <div className="episode-sidebar">
+        <div className="sidebar-header">
+          <span className="back-link">← 返回策划</span>
+          <span className="episode-title">第1集: 视频项目</span>
+        </div>
+        <div className="episode-list">
+          <div className="episode-section">
+            <span className="section-label">剧集</span>
+            <div className="episode-item active">
+              <span className="episode-number">01</span>
+            </div>
+            <button className="add-episode">+</button>
+          </div>
+        </div>
+      </div>
+
+      <div className="nav-sidebar">
+        <button 
+          className={`nav-item ${activeTab === 'video' ? 'active' : ''}`}
+          onClick={() => setActiveTab('video')}
+        >
+          <span className="nav-icon">🎬</span>
+          <span className="nav-label">画面</span>
+        </button>
+        <button 
+          className={`nav-item ${activeTab === 'audio' ? 'active' : ''}`}
+          onClick={() => setActiveTab('audio')}
+        >
+          <span className="nav-icon">🎙</span>
+          <span className="nav-label">配音</span>
+        </button>
+        <button 
+          className={`nav-item ${activeTab === 'music' ? 'active' : ''}`}
+          onClick={() => setActiveTab('music')}
+        >
+          <span className="nav-icon">🎵</span>
+          <span className="nav-label">音乐</span>
+        </button>
+      </div>
+
+      <div className="chat-panel">
+        <div className="shot-selector">
+          <span>■ 分镜{selectedShot + 1}</span>
+          <button className="btn-generate-video">图片生成视频</button>
+        </div>
+
+        <div className="chat-brand">
+          <span className="brand-icon">⚡</span>
+          <span className="brand-name">Seko</span>
+        </div>
+
+        <div className="chat-messages">
+          {messages.map((msg) => (
+            <div key={msg.id} className={`chat-message ${msg.role}`}>
+              {msg.role === 'assistant' && (
+                <div className="message-content">
+                  <p>{msg.content}</p>
+                </div>
+              )}
+              {msg.role === 'user' && (
+                <div className="user-message">
+                  <p>{msg.content}</p>
+                </div>
+              )}
+              {msg.role === 'system' && (
+                <div className="system-message">
+                  <p>{msg.content}</p>
+                </div>
+              )}
+            </div>
+          ))}
+          <div ref={chatEndRef} />
+        </div>
+
+        <div className="workflow-steps-list">
+          {workflowSteps.filter(step => step.label).map((step) => (
+            <div key={step.id} className={`workflow-step-item ${step.completed ? 'completed' : ''} ${step.active ? 'active' : ''}`}>
+              <span className={`step-checkbox ${step.completed ? 'checked' : ''}`}>
+                {step.completed ? '✓' : '○'}
+              </span>
+              <div className="step-content">
+                <span className="step-label">{step.label}</span>
+                {step.sublabel && <span className="step-sublabel">{step.sublabel}</span>}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {workflow.episodeId && (
+          <div className="episode-link">
+            <span className="link-icon">📄</span>
+            <div className="link-info">
+              <span className="link-title">第1集: {workflow.outline?.title || '视频项目'}</span>
+              <span className="link-date">{new Date().toLocaleString()}</span>
+            </div>
+            <button className="btn-copy">📋</button>
+          </div>
+        )}
+
+        <div className="chat-input-area">
+          <form onSubmit={handleSubmit}>
+            <div className="input-wrapper">
+              <button type="button" className="btn-attach">📎</button>
+              <input
+                type="text"
+                placeholder="输入你的问题，Shift+Enter换行"
+                value={idea}
+                onChange={(e) => setIdea(e.target.value)}
+                disabled={workflow.status === 'generating'}
+              />
+              <button 
+                type="submit" 
+                className="btn-send"
+                disabled={!idea.trim() || workflow.status === 'generating'}
+              >
+                ➤
+              </button>
+            </div>
+            <div className="input-options">
+              <select 
+                value={style} 
+                onChange={(e) => setStyle(e.target.value)}
+                className="style-select"
+              >
+                <option value="cinematic">视频生成</option>
+                <option value="anime">动漫风格</option>
+                <option value="realistic">写实风格</option>
+              </select>
+              <span className="char-count">+10</span>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div className="content-panel">
+        {renderRightPanel()}
+      </div>
     </div>
   )
 }

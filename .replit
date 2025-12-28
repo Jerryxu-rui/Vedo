@@ -1,4 +1,4 @@
-modules = ["python-3.12"]
+modules = ["python-3.12", "nodejs-20"]
 [nix]
 channel = "stable-25_05"
 packages = ["ffmpeg-full", "imagemagickBig", "libGL", "libGLU", "libxcrypt", "unzip"]
@@ -18,13 +18,29 @@ author = "agent"
 task = "workflow.run"
 args = "API Server"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Frontend"
+
 [[workflows.workflow]]
 name = "API Server"
 author = "agent"
 
+[workflows.workflow.metadata]
+outputType = "console"
+
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "python api_server.py"
+waitForPort = 3001
+
+[[workflows.workflow]]
+name = "Frontend"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd frontend && npm run dev"
 waitForPort = 5000
 
 [workflows.workflow.metadata]

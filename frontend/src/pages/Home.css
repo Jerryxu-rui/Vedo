@@ -1,13 +1,13 @@
 .hero {
   text-align: center;
-  padding: 60px 0 80px;
+  padding: 40px 0 30px;
 }
 
 .hero-title {
   font-size: 48px;
   font-weight: 700;
   line-height: 1.2;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .gradient-text {
@@ -21,35 +21,145 @@
   font-size: 18px;
   color: var(--text-muted);
   max-width: 600px;
-  margin: 0 auto 32px;
+  margin: 0 auto;
   line-height: 1.6;
 }
 
-.hero-actions {
+.idea-input-section {
+  padding: 20px 0 40px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.idea-card {
+  padding: 32px;
+}
+
+.idea-input-wrapper {
+  margin-bottom: 20px;
+}
+
+.idea-textarea {
+  width: 100%;
+  padding: 16px;
+  background: var(--surface-light);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: var(--text);
+  font-size: 16px;
+  line-height: 1.6;
+  resize: vertical;
+  min-height: 120px;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.idea-textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.idea-textarea::placeholder {
+  color: var(--text-muted);
+}
+
+.idea-actions {
   display: flex;
-  gap: 16px;
+  align-items: center;
   justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.or-divider {
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.workflow-section {
+  padding: 60px 0;
 }
 
 .section-title {
   text-align: center;
-  font-size: 32px;
+  font-size: 28px;
   margin-bottom: 40px;
 }
 
-.features {
-  padding: 60px 0;
+.workflow-steps {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.workflow-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 180px;
+}
+
+.step-number {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.step-content h3 {
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.step-content p {
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.workflow-arrow {
+  color: var(--primary);
+  font-size: 24px;
+  padding-top: 12px;
+}
+
+@media (max-width: 768px) {
+  .workflow-arrow {
+    display: none;
+  }
+  
+  .workflow-steps {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .workflow-step {
+    max-width: 300px;
+  }
+}
+
+.features-section {
+  padding: 40px 0 60px;
 }
 
 .feature-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 24px;
+  gap: 20px;
 }
 
 .feature-card {
   background: var(--surface);
-  padding: 32px;
+  padding: 28px;
   border-radius: 16px;
   text-align: center;
   border: 1px solid rgba(255, 255, 255, 0.05);
@@ -62,51 +172,17 @@
 }
 
 .feature-icon {
-  width: 48px;
-  height: 48px;
-  margin: 0 auto 20px;
-  background: linear-gradient(135deg, var(--primary), var(--secondary));
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-  font-weight: 700;
+  font-size: 36px;
+  margin-bottom: 16px;
 }
 
 .feature-card h3 {
-  font-size: 20px;
-  margin-bottom: 12px;
+  font-size: 18px;
+  margin-bottom: 10px;
 }
 
 .feature-card p {
   color: var(--text-muted);
-  line-height: 1.6;
-}
-
-.capabilities {
-  padding: 60px 0;
-}
-
-.capability-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 16px;
-  max-width: 800px;
-  margin: 0 auto;
-}
-
-.capability-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 16px 20px;
-  background: var(--surface);
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.capability-check {
-  color: var(--success);
-  font-size: 18px;
+  font-size: 14px;
+  line-height: 1.5;
 }

@@ -12,6 +12,21 @@ The platform supports two main workflows:
 
 Preferred communication style: Simple, everyday language.
 
+## Running the Application
+
+The application consists of two parts:
+1. **Backend API** (Python/FastAPI) - Runs on port 3001
+2. **Frontend** (React/Vite) - Runs on port 5000 (user-facing)
+
+### Workflows
+- `API Server`: `python api_server.py` - Starts the backend API on port 3001
+- `Frontend`: `cd frontend && npm run dev` - Starts the React frontend on port 5000
+
+### Required Environment Variables
+- `YUNWU_API_KEY` - API key for Yunwu.ai services (image/video generation)
+- `DATABASE_URL` - PostgreSQL connection string (optional, defaults to SQLite)
+- `CORS_ORIGINS` - Comma-separated list of allowed origins (optional, defaults to "*")
+
 ## System Architecture
 
 ### Backend Architecture (Python/FastAPI)
@@ -19,7 +34,7 @@ Preferred communication style: Simple, everyday language.
 The backend uses FastAPI with a modular architecture:
 
 - **API Layer**: Multiple route modules handle different concerns:
-  - `api_server.py` - Main server with character management and chat endpoints
+  - `api_server.py` - Main server with character management and chat endpoints (port 3001)
   - `seko_api_routes.py` - Series/Episode/Character management for multi-episode support
   - `api_routes_conversational.py` - Conversational workflow for step-by-step video generation
   - `api_routes_direct_pipeline.py` - Direct pipeline execution endpoints
@@ -46,7 +61,7 @@ The backend uses FastAPI with a modular architecture:
 
 ### Database Layer
 
-- **SQLAlchemy ORM** with SQLite as default database
+- **SQLAlchemy ORM** with PostgreSQL (default) or SQLite fallback
 - **Models** (`database_models.py`):
   - `Series` - Multi-episode video series
   - `Episode` - Individual episodes within a series
@@ -59,10 +74,15 @@ The backend uses FastAPI with a modular architecture:
 ### Frontend Architecture (React/TypeScript/Vite)
 
 Located in `frontend/` directory:
-- React with TypeScript
-- Vite as build tool
-- Features: Explore, Create, Chat, Characters, Library navigation
-- WebSocket integration for real-time progress updates
+- React 18 with TypeScript
+- Vite 5 as build tool with React Router v6
+- Modern dark theme UI with gradient accents
+- Pages:
+  - **Home** - Main landing with idea input and workflow overview
+  - **Idea to Video** - Enter creative ideas, select style/duration, generate video
+  - **Script to Video** - Upload or paste scripts for video generation
+  - **Library** - Browse and manage generated videos
+- Proxies API calls to backend on port 3001
 
 ### Key Design Patterns
 
@@ -97,12 +117,13 @@ Located in `frontend/` directory:
 
 ### Database
 - **SQLAlchemy**: ORM for database operations
-- **SQLite**: Default database (configurable via DATABASE_URL environment variable)
+- **PostgreSQL**: Default database via psycopg2-binary
+- **SQLite**: Fallback database option
 
 ### Web Framework
 - **FastAPI**: REST API with async support
 - **WebSocket**: Real-time progress updates via `utils/websocket_manager.py`
-- **Pydantic**: Request/response validation
+- **Pydantic**: Request/response validation with modern `.model_dump()` syntax
 
 ### Package Management
 - **uv**: Python package manager (uv sync for dependencies)
@@ -111,4 +132,13 @@ Located in `frontend/` directory:
 ### Configuration Files
 - `configs/idea2video.yaml` - Idea2Video pipeline configuration
 - `configs/script2video.yaml` - Script2Video pipeline configuration
-- Required API keys: Chat model, Image generator, Video generator
+- Required API keys: Set via `YUNWU_API_KEY` environment variable
+
+## Recent Changes
+
+- Added React frontend with modern dark theme UI
+- Fixed API key security - moved from hardcoded to environment variables
+- Fixed file upload handling with aiofiles
+- Updated to Pydantic v2 conventions (.model_dump())
+- Added PostgreSQL support with psycopg2-binary
+- Configured CORS for flexible origin handling

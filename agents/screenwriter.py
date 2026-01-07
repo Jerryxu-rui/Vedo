@@ -5,23 +5,25 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain.chat_models import init_chat_model
 from pydantic import BaseModel, Field
-from tenacity import retry, stop_after_attempt
+from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
+import asyncio
+from openai import RateLimitError, APIError
 
 
 
 system_prompt_template_develop_story = \
 """
 [Role]
-You are a seasoned creative story generation expert. You possess the following core skills:
-- Idea Expansion and Conceptualization: The ability to expand a vague idea, a one-line inspiration, or a concept into a fleshed-out, logically coherent story world.
-- Story Structure Design: Mastery of classic narrative models like the three-act structure, the hero's journey, etc., enabling you to construct engaging story arcs with a beginning, middle, and end, tailored to the story's genre.
-- Character Development: Expertise in creating three-dimensional characters with motivations, flaws, and growth arcs, and designing complex relationships between them.
-- Scene Depiction and Pacing: The skill to vividly depict various settings and precisely control the narrative rhythm, allocating detail appropriately based on the required number of scenes.
-- Audience Adaptation: The ability to adjust the language style, thematic depth, and content suitability based on the target audience (e.g., children, teenagers, adults).
-- Screenplay-Oriented Thinking: When the story is intended for short film or movie adaptation, you can naturally incorporate visual elements (e.g., scene atmosphere, key actions, dialogue) into the narrative, making the story more cinematic and filmable.
+You are a Creative Screenwriter specializing in heartwarming short films and visual storytelling. You possess the following core skills:
+- Idea Expansion and Conceptualization: The ability to expand a vague idea, a one-line inspiration, or a concept into a fleshed-out, logically coherent story world with rich sensory details.
+- Story Structure Design: Mastery of the three-act structure (Setup, Development, Resolution), enabling you to construct engaging story arcs with clear emotional beats and character growth.
+- Character Development: Expertise in creating three-dimensional characters (including animals as full characters) with specific visual descriptions, motivations, personality traits, and emotional arcs.
+- Scene Depiction and Pacing: The skill to vividly depict 5-8 distinct scenes with specific actions, environmental details (lighting, weather, props), and emotional progression.
+- Visual Storytelling: The ability to write "filmable" content - using concrete actions instead of abstract emotions, incorporating camera-ready descriptions.
+- Emotional Depth: Creating natural conflict/resolution and ending with emotional payoff.
 
 [Task]
-Your core task is to generate a complete, engaging story that conforms to the specified requirements, based on the user's provided "Idea" and "Requirements."
+Your core task is to expand the user's brief concept into a fully developed 3-act narrative with emotional depth and visual richness, suitable for video production.
 
 [Input]
 The user will provide an idea within <IDEA> and </IDEA> tags and a user requirement within <USER_REQUIREMENT> and </USER_REQUIREMENT> tags.
@@ -36,23 +38,66 @@ The user will provide an idea within <IDEA> and </IDEA> tags and a user requirem
     - Other: e.g., Needs a twist ending, Theme about love and sacrifice, Include a piece of compelling dialogue.
 
 [Output]
-You must output a well-structured and clearly formatted story document as follows:
-- Story Title: An engaging and relevant story name.
-- Target Audience & Genre: Start by explicitly restating: "This story is targeted at [User-Specified Audience], in the [User-Specified Genre] genre."
-- Story Outline/Summary: Provide a one-paragraph (100-200 words) summary of the entire story, covering the core plot, central conflict, and outcome.
-Main Characters Introduction: Briefly introduce the core characters, including their names, key traits, and motivations.
-- Full Story Narrative:
-    - If the number of scenes is unspecified, narrate the story naturally in paragraphs following the "Introduction - Development - Climax - Conclusion" structure.
-    - If a specific number of scenes (e.g., N scenes) is specified, clearly divide the story into N scenes, giving each a subheading (e.g., Scene One: Code at Midnight). The description for each scene should be relatively balanced, including atmosphere, character actions, and dialogue, all working together to advance the plot.
-- The narrative should be vivid and detailed, matching the specified genre and target audience.
-- The output should begin directly with the story, without any extra words.
+You must output a well-structured story with the following sections:
+
+1. **Story Title**: An engaging, specific title (not generic like "新故事")
+
+2. **Story Summary** (100-200 words): Cover the complete arc - setup, conflict, climax, resolution
+
+3. **Main Characters** (ALL characters including animals):
+   For each character provide:
+   - Name (specific, not "主角" or "角色")
+   - Age/Species (for animals: breed, age)
+   - Physical appearance (clothing, build, distinctive features)
+   - Personality traits (3-5 specific traits)
+   - Motivation (what drives them in this story)
+   - Relationship to other characters
+
+4. **Full Story Narrative** - Divided into 5-8 distinct scenes:
+   
+   **Scene Structure** (for each scene):
+   - Scene Title: [Specific location] - [Time of day]
+   - Setting Details: Describe lighting, weather, environmental elements
+   - Character Actions: Specific, filmable actions (not abstract emotions)
+   - Dialogue: Natural conversations that reveal character
+   - Emotional Beat: What changes emotionally in this scene
+   - Visual Elements: Key props, colors, movements
+   - Transition: How this scene leads to the next
+
+   **Example Scene Format**:
+   Scene 1: Beach Arrival - Golden Hour
+   The sun hangs low over the empty beach, casting long shadows across the sand. Sarah, a 32-year-old woman in casual linen shorts and a tank top, unclips the leash from Max, her energetic 3-year-old Golden Retriever. Max's tail wags furiously as he immediately sprints toward the crashing waves, kicking up sand. Sarah laughs, her hair catching the breeze, and jogs after him, her bare feet leaving prints in the wet sand. The sound of waves and seagulls fills the air. (Emotion: Joyful anticipation and freedom)
+
+5. **Story Arc Summary**:
+   - Act 1 (Setup): [What happens]
+   - Act 2 (Development): [3-4 scenes of escalating action]
+   - Act 3 (Resolution): [Emotional conclusion]
 
 [Guidelines]
-- The language of output should be same as the input.
-- Idea-Centric: Keep the user's core idea as the foundation; do not deviate from its essence. If the user's idea is vague, you can use creativity to make reasonable expansions.
-- Logical Consistency: Ensure that event progression and character actions within the story have logical motives and internal consistency, avoiding abrupt or contradictory plots.
-- Show, Don't Tell: Reveal characters' personalities and emotions through their actions, dialogues, and details, rather than stating them flatly. For example, use "He clenched - his fist, nails digging deep into his palm" instead of "He was very angry."
-- Originality & Compliance: Generate original content based on the user's idea, avoiding direct plagiarism of well-known existing works. The generated content must be positive, healthy, and comply with general content safety policies.
+- **Language**: Output in the same language as the input
+- **Idea-Centric**: Expand the user's core idea with rich details while staying true to its essence
+- **Minimum 5 Scenes**: Always create at least 5 distinct scenes showing clear progression
+- **Specific Details**: Every element must be concrete and specific:
+  - Character names (not "主角", "角色", "人物")
+  - Locations (not "场景", "地点" - use actual place names)
+  - Actions (not "做某事" - describe the exact action)
+  - Appearances (not "待定" - provide full descriptions)
+- **Show, Don't Tell**: Use concrete actions and sensory details:
+  - ✅ "She bites her lip, hands trembling"
+  - ❌ "She feels nervous"
+  - ✅ "He slams the door, fists clenched"
+  - ❌ "He is angry"
+- **Visual Filmability**: Every description must be something a camera can capture
+- **Cause and Effect**: Each scene naturally leads to the next
+- **Emotional Progression**: Clear emotional arc from beginning to end
+- **Character Consistency**: Maintain character traits and motivations throughout
+
+**FORBIDDEN**:
+- Generic placeholders: "主角", "角色", "待定", "开端", "发展"
+- Repeating user input verbatim without expansion
+- Abstract emotions without physical manifestation
+- Single-scene stories or stories with fewer than 5 scenes
+- Vague descriptions that aren't filmable
 """
 
 human_prompt_template_develop_story = \
@@ -119,21 +164,128 @@ class Screenwriter:
     def __init__(
         self,
         chat_model: str,
+        fallback_chat_model: Optional[str] = None,
     ):
         self.chat_model = chat_model
+        self.fallback_chat_model = fallback_chat_model
 
     async def develop_story(
         self,
         idea: str,
         user_requirement: Optional[str] = None,
     ) -> str:
+        print(f"\n{'='*80}")
+        print(f"[Screenwriter.develop_story] CALLED")
+        print(f"{'='*80}")
+        print(f"[Screenwriter.develop_story] Input idea length: {len(idea)} chars")
+        print(f"[Screenwriter.develop_story] Input idea preview: {idea[:200]}...")
+        print(f"[Screenwriter.develop_story] User requirement length: {len(user_requirement) if user_requirement else 0} chars")
+        if user_requirement:
+            print(f"[Screenwriter.develop_story] User requirement preview: {user_requirement[:300]}...")
+        print(f"[Screenwriter.develop_story] Chat model type: {type(self.chat_model).__name__}")
+        print(f"[Screenwriter.develop_story] Chat model: {self.chat_model}")
+        
         messages = [
             ("system", system_prompt_template_develop_story),
             ("human", human_prompt_template_develop_story.format(idea=idea, user_requirement=user_requirement)),
         ]
-        response = await self.chat_model.ainvoke(messages)
-        story = response.content
-        return story
+        
+        print(f"[Screenwriter.develop_story] System prompt length: {len(system_prompt_template_develop_story)} chars")
+        print(f"[Screenwriter.develop_story] Human prompt length: {len(messages[1][1])} chars")
+        
+        # Retry logic with exponential backoff for rate limits
+        max_retries = 3  # Retries for primary model
+        base_delay = 2  # seconds
+        
+        # Try primary model first
+        for attempt in range(max_retries):
+            try:
+                print(f"[Screenwriter.develop_story] Attempt {attempt + 1}/{max_retries} (Primary Model): Calling LLM with {len(messages)} messages...")
+                
+                response = await self.chat_model.ainvoke(messages)
+                print(f"[Screenwriter.develop_story] ✅ LLM response received")
+                print(f"[Screenwriter.develop_story] Response type: {type(response)}")
+                print(f"[Screenwriter.develop_story] Response has content: {hasattr(response, 'content')}")
+                
+                if hasattr(response, 'content'):
+                    story = response.content
+                    print(f"[Screenwriter.develop_story] Story length: {len(story)} chars")
+                    print(f"[Screenwriter.develop_story] Story preview (first 500 chars):")
+                    print(f"{story[:500]}")
+                    print(f"[Screenwriter.develop_story] Story preview (last 200 chars):")
+                    print(f"{story[-200:]}")
+                    print(f"{'='*80}\n")
+                    return story
+                else:
+                    print(f"[Screenwriter.develop_story] ❌ ERROR: Response has no 'content' attribute")
+                    print(f"[Screenwriter.develop_story] Response object: {response}")
+                    print(f"{'='*80}\n")
+                    raise AttributeError(f"LLM response has no 'content' attribute: {type(response)}")
+                    
+            except RateLimitError as e:
+                if attempt < max_retries - 1:
+                    # Calculate exponential backoff delay
+                    delay = base_delay * (2 ** attempt)
+                    print(f"[Screenwriter.develop_story] ⚠️ Rate limit hit (429) on primary model")
+                    print(f"[Screenwriter.develop_story] Retrying in {delay} seconds... (attempt {attempt + 1}/{max_retries})")
+                    await asyncio.sleep(delay)
+                    continue
+                else:
+                    # Primary model failed after retries, try fallback
+                    if self.fallback_chat_model:
+                        print(f"[Screenwriter.develop_story] ⚠️ Primary model rate limited after {max_retries} attempts")
+                        print(f"[Screenwriter.develop_story] 🔄 Switching to fallback model (DeepSeek)...")
+                        print(f"{'='*80}\n")
+                        break  # Exit retry loop to try fallback
+                    else:
+                        print(f"[Screenwriter.develop_story] ❌ Rate limit error after {max_retries} attempts, no fallback available")
+                        print(f"[Screenwriter.develop_story] Exception: {str(e)}")
+                        print(f"{'='*80}\n")
+                        raise
+                    
+            except Exception as e:
+                print(f"[Screenwriter.develop_story] ❌ EXCEPTION during LLM call")
+                print(f"[Screenwriter.develop_story] Exception type: {type(e).__name__}")
+                print(f"[Screenwriter.develop_story] Exception message: {str(e)}")
+                import traceback
+                print(f"[Screenwriter.develop_story] Traceback:")
+                traceback.print_exc()
+                print(f"{'='*80}\n")
+                raise
+        
+        # Try fallback model if primary failed
+        if self.fallback_chat_model:
+            try:
+                print(f"\n{'='*80}")
+                print(f"[Screenwriter.develop_story] FALLBACK MODEL ATTEMPT")
+                print(f"{'='*80}")
+                print(f"[Screenwriter.develop_story] Using DeepSeek as fallback...")
+                
+                response = await self.fallback_chat_model.ainvoke(messages)
+                print(f"[Screenwriter.develop_story] ✅ Fallback LLM response received")
+                print(f"[Screenwriter.develop_story] Response type: {type(response)}")
+                
+                if hasattr(response, 'content'):
+                    story = response.content
+                    print(f"[Screenwriter.develop_story] Story length: {len(story)} chars")
+                    print(f"[Screenwriter.develop_story] Story preview (first 500 chars):")
+                    print(f"{story[:500]}")
+                    print(f"[Screenwriter.develop_story] ✅ Successfully generated story using fallback model")
+                    print(f"{'='*80}\n")
+                    return story
+                else:
+                    print(f"[Screenwriter.develop_story] ❌ Fallback response has no 'content' attribute")
+                    print(f"{'='*80}\n")
+                    raise AttributeError(f"Fallback LLM response has no 'content' attribute: {type(response)}")
+                    
+            except Exception as fallback_error:
+                print(f"[Screenwriter.develop_story] ❌ Fallback model also failed")
+                print(f"[Screenwriter.develop_story] Fallback error: {type(fallback_error).__name__}: {str(fallback_error)}")
+                print(f"{'='*80}\n")
+                raise Exception(f"Both primary and fallback models failed. Primary: RateLimitError, Fallback: {type(fallback_error).__name__}")
+        
+        # Should never reach here, but just in case
+        raise Exception("Failed to generate story after all retry attempts")
 
 
     async def write_script_based_on_story(

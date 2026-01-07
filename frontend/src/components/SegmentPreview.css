@@ -1,0 +1,520 @@
+/* SegmentPreview Component Styles */
+
+.segment-preview {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.segment-preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 20px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.segment-info h3 {
+  margin: 0 0 10px 0;
+  font-size: 1.5rem;
+  color: #1f2937;
+}
+
+.segment-metadata {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: white;
+}
+
+.quality-score {
+  padding: 4px 12px;
+  background: #f3f4f6;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 4px 8px;
+  transition: color 0.2s;
+}
+
+.close-button:hover {
+  color: #1f2937;
+}
+
+/* Video Container */
+.video-container {
+  position: relative;
+  background: #000;
+  aspect-ratio: 16 / 9;
+}
+
+.video-player {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.video-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #1f2937;
+}
+
+.video-placeholder img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.no-video {
+  color: #9ca3af;
+  font-size: 1.25rem;
+}
+
+/* Video Controls */
+.video-controls {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.video-container:hover .video-controls {
+  opacity: 1;
+}
+
+.control-button {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.control-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.time-display {
+  color: white;
+  font-size: 0.875rem;
+  min-width: 100px;
+  text-align: center;
+}
+
+.seek-bar {
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.3);
+  outline: none;
+  cursor: pointer;
+}
+
+.seek-bar::-webkit-slider-thumb {
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: white;
+  cursor: pointer;
+}
+
+.seek-bar::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: white;
+  cursor: pointer;
+  border: none;
+}
+
+.volume-slider {
+  width: 80px;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.3);
+  outline: none;
+  cursor: pointer;
+}
+
+.volume-slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: white;
+  cursor: pointer;
+}
+
+.volume-slider::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: white;
+  cursor: pointer;
+  border: none;
+}
+
+.playback-rate-select {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.playback-rate-select option {
+  background: #1f2937;
+  color: white;
+}
+
+/* Description and Prompt */
+.segment-description,
+.segment-prompt {
+  padding: 20px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.segment-description h4,
+.segment-prompt h4 {
+  margin: 0 0 10px 0;
+  font-size: 1rem;
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.segment-description p,
+.segment-prompt p {
+  margin: 0;
+  color: #6b7280;
+  line-height: 1.6;
+}
+
+/* Review Controls */
+.review-controls {
+  padding: 20px;
+}
+
+.review-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.approve-button,
+.reject-button,
+.regenerate-button,
+.cancel-button {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.approve-button {
+  background: #10b981;
+  color: white;
+}
+
+.approve-button:hover:not(:disabled) {
+  background: #059669;
+}
+
+.reject-button {
+  background: #ef4444;
+  color: white;
+}
+
+.reject-button:hover:not(:disabled) {
+  background: #dc2626;
+}
+
+.regenerate-button {
+  background: #3b82f6;
+  color: white;
+}
+
+.regenerate-button:hover {
+  background: #2563eb;
+}
+
+.cancel-button {
+  background: #6b7280;
+  color: white;
+}
+
+.cancel-button:hover {
+  background: #4b5563;
+}
+
+.approve-button:disabled,
+.reject-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Review Form */
+.review-form {
+  background: #f9fafb;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.review-form h4 {
+  margin: 0 0 20px 0;
+  font-size: 1.25rem;
+  color: #1f2937;
+}
+
+.rating-section,
+.feedback-section,
+.reject-section {
+  margin-bottom: 20px;
+}
+
+.rating-section label,
+.feedback-section label,
+.reject-section label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.star-rating {
+  display: flex;
+  gap: 8px;
+}
+
+.star {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: #d1d5db;
+  cursor: pointer;
+  transition: color 0.2s;
+  padding: 0;
+}
+
+.star.active {
+  color: #fbbf24;
+}
+
+.star:hover {
+  color: #fbbf24;
+}
+
+.feedback-section textarea,
+.reject-section textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.feedback-section textarea:focus,
+.reject-section textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+/* Edit Button */
+.edit-button {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.edit-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+/* Edit Form */
+.edit-form {
+  background: #f9fafb;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.edit-form h4 {
+  margin: 0 0 20px 0;
+  font-size: 1.25rem;
+  color: #1f2937;
+}
+
+.edit-section {
+  margin-bottom: 20px;
+}
+
+.edit-section label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.edit-input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.edit-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.edit-textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 100px;
+  transition: border-color 0.2s;
+}
+
+.edit-textarea:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.edit-hint {
+  margin-top: 8px;
+  padding: 12px;
+  background: rgba(102, 126, 234, 0.1);
+  border-left: 3px solid #667eea;
+  border-radius: 4px;
+  color: #4b5563;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.save-button {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.save-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.save-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .segment-preview-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .close-button {
+    align-self: flex-end;
+  }
+
+  .video-controls {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px;
+  }
+
+  .seek-bar {
+    order: -1;
+    width: 100%;
+  }
+
+  .review-buttons {
+    flex-direction: column;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .approve-button,
+  .reject-button,
+  .regenerate-button,
+  .edit-button,
+  .cancel-button,
+  .save-button {
+    width: 100%;
+  }
+}

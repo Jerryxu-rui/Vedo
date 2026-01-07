@@ -1,0 +1,146 @@
+/**
+ * Agent Status Card Component Styles
+ * Part of Week 3: Frontend WebSocket Integration - Phase 2
+ */
+
+.agent-status-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.2s;
+}
+
+.agent-status-card:hover {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.agent-status-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.agent-status-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.agent-status-indicator {
+  font-size: 16px;
+  line-height: 1;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.agent-status-name {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.agent-status-badge {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.agent-status-capabilities {
+  margin-bottom: 12px;
+  font-size: 13px;
+}
+
+.agent-status-capabilities strong {
+  display: block;
+  margin-bottom: 6px;
+  color: #374151;
+}
+
+.agent-status-capability-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.agent-status-capability-tag {
+  padding: 4px 8px;
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #4b5563;
+}
+
+.agent-status-current-task {
+  margin-bottom: 12px;
+  padding: 8px;
+  background: #fef3c7;
+  border-left: 3px solid #f59e0b;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.agent-status-current-task strong {
+  display: block;
+  margin-bottom: 4px;
+  color: #92400e;
+}
+
+.agent-status-current-task p {
+  margin: 0;
+  color: #78350f;
+}
+
+.agent-status-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 12px;
+  background: #f9fafb;
+  border-radius: 4px;
+}
+
+.agent-status-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.agent-status-metric-label {
+  font-size: 11px;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.agent-status-metric-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.agent-status-footer {
+  padding-top: 8px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.agent-status-last-update {
+  font-size: 11px;
+  color: #9ca3af;
+  font-style: italic;
+}

@@ -26,13 +26,28 @@ class MessageType(Enum):
 
 
 class WebSocketManager:
-    """WebSocket连接管理器"""
+    """
+    Enhanced WebSocket Manager with Room Support
+    
+    Features:
+    - Room-based broadcasting
+    - Connection pooling
+    - Heartbeat monitoring
+    - Message history
+    - Automatic cleanup
+    """
     
     def __init__(self):
         # 活跃连接: {client_id: WebSocket}
         self.active_connections: Dict[str, WebSocket] = {}
         
-        # 订阅关系: {topic: Set[client_id]}
+        # Room membership: {room: Set[client_id]}
+        self.rooms: Dict[str, Set[str]] = {}
+        
+        # Client rooms: {client_id: Set[room]}
+        self.client_rooms: Dict[str, Set[str]] = {}
+        
+        # 订阅关系: {topic: Set[client_id]} (legacy support)
         self.subscriptions: Dict[str, Set[str]] = {}
         
         # 心跳任务
@@ -41,17 +56,39 @@ class WebSocketManager:
         # 消息历史: {topic: List[message]}
         self.message_history: Dict[str, list] = {}
         self.max_history_size = 100
+        
+        # Connection metadata
+        self.connection_metadata: Dict[str, Dict[str, Any]] = {}
     
-    async def connect(self, client_id: str, websocket: WebSocket):
+    async def connect(
+        self,
+        client_id: str,
+        websocket: WebSocket,
+        room: Optional[str] = None,
+        metadata: Optional[Dict[str, Any]] = None
+    ):
         """
-        连接客户端
+        Connect client with optional room assignment
         
         Args:
-            client_id: 客户端ID
-            websocket: WebSocket连接
+            client_id: Client ID
+            websocket: WebSocket connection
+            room: Optional room to join immediately
+            metadata: Optional connection metadata
         """
         await websocket.accept()
         self.active_connections[client_id] = websocket
+        
+        # Store metadata
+        self.connection_metadata[client_id] = metadata or {}
+        self.connection_metadata[client_id]["connected_at"] = datetime.utcnow().isoformat()
+        
+        # Initialize client rooms
+        self.client_rooms[client_id] = set()
+        
+        # Join room if specified
+        if room:
+            self.join_room(client_id, room)
         
         # 启动心跳
         self.heartbeat_tasks[client_id] = asyncio.create_task(
@@ -66,16 +103,18 @@ class WebSocketManager:
             {
                 "type": MessageType.INFO.value,
                 "message": "Connected to ViMax WebSocket server",
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.utcnow().isoformat(),
+                "client_id": client_id,
+                "room": room
             }
         )
     
     def disconnect(self, client_id: str):
         """
-        断开客户端连接
+        Disconnect client and cleanup all resources
         
         Args:
-            client_id: 客户端ID
+            client_id: Client ID
         """
         # 取消心跳任务
         if client_id in self.heartbeat_tasks:
@@ -86,12 +125,22 @@ class WebSocketManager:
         if client_id in self.active_connections:
             del self.active_connections[client_id]
         
-        # 取消所有订阅
+        # Remove from all rooms
+        if client_id in self.client_rooms:
+            for room in list(self.client_rooms[client_id]):
+                self.leave_room(client_id, room)
+            del self.client_rooms[client_id]
+        
+        # 取消所有订阅 (legacy)
         for topic in list(self.subscriptions.keys()):
             if client_id in self.subscriptions[topic]:
                 self.subscriptions[topic].remove(client_id)
                 if not self.subscriptions[topic]:
                     del self.subscriptions[topic]
+        
+        # Remove metadata
+        if client_id in self.connection_metadata:
+            del self.connection_metadata[client_id]
         
         logger.info(f"Client {client_id} disconnected. Total connections: {len(self.active_connections)}")
     
@@ -165,6 +214,90 @@ class WebSocketManager:
                 del self.subscriptions[topic]
             
             logger.info(f"Client {client_id} unsubscribed from topic: {topic}")
+    
+    def join_room(self, client_id: str, room: str):
+        """
+        Add client to a room
+        
+        Args:
+            client_id: Client ID
+            room: Room name
+        """
+        if room not in self.rooms:
+            self.rooms[room] = set()
+        
+        self.rooms[room].add(client_id)
+        
+        if client_id not in self.client_rooms:
+            self.client_rooms[client_id] = set()
+        
+        self.client_rooms[client_id].add(room)
+        
+        logger.info(f"Client {client_id} joined room: {room}")
+    
+    def leave_room(self, client_id: str, room: str):
+        """
+        Remove client from a room
+        
+        Args:
+            client_id: Client ID
+            room: Room name
+        """
+        if room in self.rooms and client_id in self.rooms[room]:
+            self.rooms[room].remove(client_id)
+            
+            if not self.rooms[room]:
+                del self.rooms[room]
+        
+        if client_id in self.client_rooms and room in self.client_rooms[client_id]:
+            self.client_rooms[client_id].remove(room)
+        
+        logger.info(f"Client {client_id} left room: {room}")
+    
+    def get_room_clients(self, room: str) -> Set[str]:
+        """
+        Get all clients in a room
+        
+        Args:
+            room: Room name
+        
+        Returns:
+            Set of client IDs
+        """
+        return self.rooms.get(room, set()).copy()
+    
+    async def broadcast_to_room(self, room: str, message: Dict[str, Any]):
+        """
+        Broadcast message to all clients in a room
+        
+        Args:
+            room: Room name
+            message: Message content
+        """
+        if "timestamp" not in message:
+            message["timestamp"] = datetime.utcnow().isoformat()
+        
+        if room not in self.rooms:
+            logger.debug(f"No clients in room: {room}")
+            return
+        
+        disconnected_clients = []
+        
+        for client_id in list(self.rooms[room]):
+            if client_id in self.active_connections:
+                try:
+                    websocket = self.active_connections[client_id]
+                    if websocket.client_state.name == "CONNECTED":
+                        await websocket.send_json(message)
+                    else:
+                        disconnected_clients.append(client_id)
+                except Exception as e:
+                    logger.error(f"Error broadcasting to {client_id} in room {room}: {e}")
+                    disconnected_clients.append(client_id)
+        
+        # Cleanup disconnected clients
+        for client_id in disconnected_clients:
+            self.disconnect(client_id)
     
     async def publish(self, topic: str, message: Dict[str, Any]):
         """
@@ -378,14 +511,43 @@ class WebSocketManager:
                 logger.error(f"Error sending history to {client_id}: {e}")
     
     def get_stats(self) -> Dict[str, Any]:
-        """获取统计信息"""
+        """Get comprehensive statistics"""
         return {
             "total_connections": len(self.active_connections),
+            "total_rooms": len(self.rooms),
             "total_subscriptions": sum(len(subs) for subs in self.subscriptions.values()),
+            "rooms": list(self.rooms.keys()),
+            "room_client_count": {
+                room: len(clients) for room, clients in self.rooms.items()
+            },
             "topics": list(self.subscriptions.keys()),
             "topic_subscriber_count": {
                 topic: len(subs) for topic, subs in self.subscriptions.items()
             }
+        }
+    
+    def get_client_info(self, client_id: str) -> Optional[Dict[str, Any]]:
+        """
+        Get client information
+        
+        Args:
+            client_id: Client ID
+        
+        Returns:
+            Client info dict or None
+        """
+        if client_id not in self.active_connections:
+            return None
+        
+        return {
+            "client_id": client_id,
+            "connected": True,
+            "rooms": list(self.client_rooms.get(client_id, set())),
+            "subscriptions": [
+                topic for topic, subs in self.subscriptions.items()
+                if client_id in subs
+            ],
+            "metadata": self.connection_metadata.get(client_id, {})
         }
 
 

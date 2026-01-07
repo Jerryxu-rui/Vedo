@@ -16,6 +16,7 @@ function Library() {
   const [videos, setVideos] = useState<VideoItem[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('all')
+  const [deleting, setDeleting] = useState<string | null>(null)
 
   useEffect(() => {
     fetchVideos()
@@ -51,6 +52,33 @@ function Library() {
       console.error('Failed to fetch videos:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleDelete = async (videoId: string, e: React.MouseEvent) => {
+    e.stopPropagation()
+    
+    if (!confirm('确定要删除这个草稿吗？此操作无法撤销。')) {
+      return
+    }
+
+    setDeleting(videoId)
+    try {
+      const response = await fetch(`/api/v1/seko/episodes/${videoId}`, {
+        method: 'DELETE'
+      })
+
+      if (response.ok) {
+        // Remove from local state
+        setVideos(videos.filter(v => v.id !== videoId))
+      } else {
+        alert('删除失败，请重试')
+      }
+    } catch (error) {
+      console.error('Failed to delete video:', error)
+      alert('删除失败，请重试')
+    } finally {
+      setDeleting(null)
     }
   }
 
@@ -137,15 +165,24 @@ function Library() {
               </div>
               <div className="video-actions">
                 {video.status === 'draft' && (
-                  <button 
-                    className="btn btn-primary btn-sm"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      navigate(`/idea2video?episode=${video.id}`)
-                    }}
-                  >
-                    继续编辑
-                  </button>
+                  <>
+                    <button
+                      className="btn btn-primary btn-sm"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        navigate(`/idea2video?episode=${video.id}`)
+                      }}
+                    >
+                      继续编辑
+                    </button>
+                    <button
+                      className="btn btn-danger btn-sm"
+                      onClick={(e) => handleDelete(video.id, e)}
+                      disabled={deleting === video.id}
+                    >
+                      {deleting === video.id ? '删除中...' : '删除'}
+                    </button>
+                  </>
                 )}
                 {video.status === 'completed' && (
                   <>

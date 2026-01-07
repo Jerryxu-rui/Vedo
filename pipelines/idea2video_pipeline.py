@@ -20,14 +20,19 @@ class Idea2VideoPipeline:
         image_generator: str,
         video_generator: str,
         working_dir: str,
+        fallback_chat_model: Optional[str] = None,
     ):
         self.chat_model = chat_model
+        self.fallback_chat_model = fallback_chat_model
         self.image_generator = image_generator
         self.video_generator = video_generator
         self.working_dir = working_dir
         os.makedirs(self.working_dir, exist_ok=True)
 
-        self.screenwriter = Screenwriter(chat_model=self.chat_model)
+        self.screenwriter = Screenwriter(
+            chat_model=self.chat_model,
+            fallback_chat_model=self.fallback_chat_model
+        )
         self.character_extractor = CharacterExtractor(
             chat_model=self.chat_model)
         self.character_portraits_generator = CharacterPortraitsGenerator(
@@ -43,8 +48,20 @@ class Idea2VideoPipeline:
         config_str = os.path.expandvars(config_str)
         config = yaml.safe_load(config_str)
 
+        # Initialize primary chat model
         chat_model_args = config["chat_model"]["init_args"]
         chat_model = init_chat_model(**chat_model_args)
+        
+        # Initialize fallback chat model (DeepSeek) if configured
+        fallback_chat_model = None
+        if "fallback_chat_model" in config:
+            try:
+                fallback_model_args = config["fallback_chat_model"]["init_args"]
+                fallback_chat_model = init_chat_model(**fallback_model_args)
+                print(f"✅ Fallback chat model initialized: {fallback_model_args.get('model', 'unknown')}")
+            except Exception as e:
+                print(f"⚠️ Failed to initialize fallback chat model: {e}")
+                fallback_chat_model = None
 
         # Create separate rate limiters for each service
         chat_model_rpm = config.get("chat_model", {}).get("max_requests_per_minute", None)
@@ -115,6 +132,7 @@ class Idea2VideoPipeline:
             image_generator=image_generator,
             video_generator=video_generator,
             working_dir=config["working_dir"],
+            fallback_chat_model=fallback_chat_model,
         )
 
     async def extract_characters(
@@ -208,6 +226,13 @@ class Idea2VideoPipeline:
         force_regenerate: bool = False,
         variation_seed: Optional[str] = None,
     ):
+        print(f"\n{'='*80}")
+        print(f"[Idea2VideoPipeline.develop_story] CALLED")
+        print(f"{'='*80}")
+        print(f"[Idea2VideoPipeline.develop_story] Idea: {idea[:200]}...")
+        print(f"[Idea2VideoPipeline.develop_story] User requirement length: {len(user_requirement)} chars")
+        print(f"[Idea2VideoPipeline.develop_story] Force regenerate: {force_regenerate}")
+        
         # Create a hash of inputs to use as cache key, include variation seed for diversity
         import hashlib
         import time
@@ -217,20 +242,42 @@ class Idea2VideoPipeline:
         if variation_seed is None:
             variation_seed = str(time.time())[-6:] + str(random.randint(0, 9999)).zfill(4)
         
+        print(f"[Idea2VideoPipeline.develop_story] Variation seed: {variation_seed}")
+        
         cache_key = f"{idea}_{user_requirement}_{variation_seed}"
         input_hash = hashlib.md5(cache_key.encode()).hexdigest()[:12]  # Longer hash for more uniqueness
         save_path = os.path.join(self.working_dir, f"story_{input_hash}.txt")
+        
+        print(f"[Idea2VideoPipeline.develop_story] Cache path: {save_path}")
+        print(f"[Idea2VideoPipeline.develop_story] Cache exists: {os.path.exists(save_path)}")
         
         if os.path.exists(save_path) and not force_regenerate:
             with open(save_path, "r", encoding="utf-8") as f:
                 story = f.read()
             print(f"🚀 Loaded story from cache (hash: {input_hash}, seed: {variation_seed}).")
+            print(f"[Idea2VideoPipeline.develop_story] Cached story length: {len(story)} chars")
+            print(f"{'='*80}\n")
         else:
             print(f"🧠 Developing story with variation seed: {variation_seed}...")
-            story = await self.screenwriter.develop_story(idea=idea, user_requirement=user_requirement)
-            with open(save_path, "w", encoding="utf-8") as f:
-                f.write(story)
-            print(f"✅ Developed story and saved to {save_path} (hash: {input_hash}, seed: {variation_seed}).")
+            print(f"[Idea2VideoPipeline.develop_story] Calling screenwriter.develop_story()...")
+            
+            try:
+                story = await self.screenwriter.develop_story(idea=idea, user_requirement=user_requirement)
+                print(f"[Idea2VideoPipeline.develop_story] ✅ Screenwriter returned story")
+                print(f"[Idea2VideoPipeline.develop_story] Story length: {len(story)} chars")
+                print(f"[Idea2VideoPipeline.develop_story] Story preview: {story[:300]}...")
+                
+                with open(save_path, "w", encoding="utf-8") as f:
+                    f.write(story)
+                print(f"✅ Developed story and saved to {save_path} (hash: {input_hash}, seed: {variation_seed}).")
+                print(f"{'='*80}\n")
+            except Exception as e:
+                print(f"[Idea2VideoPipeline.develop_story] ❌ ERROR calling screenwriter")
+                print(f"[Idea2VideoPipeline.develop_story] Exception: {type(e).__name__}: {str(e)}")
+                import traceback
+                traceback.print_exc()
+                print(f"{'='*80}\n")
+                raise
 
         return story
 

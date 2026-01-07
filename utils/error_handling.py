@@ -474,3 +474,99 @@ def format_error_for_log(error: ViMaxError) -> str:
         log_message += f"\nStack Trace:\n{error.stack_trace}\n"
     
     return log_message
+
+
+def handle_llm_error(error: Exception, provider: str, operation: str) -> ViMaxError:
+    """
+    Handle LLM-specific errors and convert them to ViMaxError
+    
+    Args:
+        error: Original exception
+        provider: LLM provider name (google, alibaba, anthropic, openai, deepseek)
+        operation: Operation being performed (chat, stream, etc.)
+    
+    Returns:
+        ViMaxError instance with appropriate categorization
+    """
+    error_message = str(error)
+    
+    # Check for common LLM error patterns
+    if "rate limit" in error_message.lower() or "quota" in error_message.lower():
+        return APIError(
+            message=f"{provider} API rate limit exceeded: {error_message}",
+            api_name=provider,
+            original_exception=error,
+            details={"operation": operation}
+        )
+    elif "authentication" in error_message.lower() or "api key" in error_message.lower():
+        return APIError(
+            message=f"{provider} API authentication failed: {error_message}",
+            api_name=provider,
+            original_exception=error,
+            details={"operation": operation, "hint": "Check your API key configuration"}
+        )
+    elif "timeout" in error_message.lower():
+        return OperationTimeoutError(
+            message=f"{provider} API request timed out: {error_message}",
+            operation=f"{provider}_{operation}",
+            original_exception=error
+        )
+    elif "connection" in error_message.lower() or "network" in error_message.lower():
+        return NetworkError(
+            message=f"{provider} API connection error: {error_message}",
+            original_exception=error,
+            details={"provider": provider, "operation": operation}
+        )
+    else:
+        return APIError(
+            message=f"{provider} API error during {operation}: {error_message}",
+            api_name=provider,
+            original_exception=error,
+            details={"operation": operation}
+        )
+
+
+def handle_agent_error(error: Exception, agent_name: str, task_type: str) -> ViMaxError:
+    """
+    Handle agent-specific errors and convert them to ViMaxError
+    
+    Args:
+        error: Original exception
+        agent_name: Name of the agent that encountered the error
+        task_type: Type of task being performed
+    
+    Returns:
+        ViMaxError instance with appropriate categorization
+    """
+    error_message = str(error)
+    
+    # Check for common agent error patterns
+    if "timeout" in error_message.lower():
+        return OperationTimeoutError(
+            message=f"Agent {agent_name} timed out during {task_type}: {error_message}",
+            operation=f"{agent_name}_{task_type}",
+            original_exception=error
+        )
+    elif "validation" in error_message.lower() or "invalid" in error_message.lower():
+        return ValidationError(
+            message=f"Agent {agent_name} validation error in {task_type}: {error_message}",
+            original_exception=error,
+            details={"agent": agent_name, "task_type": task_type}
+        )
+    elif "generation" in error_message.lower() or "llm" in error_message.lower():
+        return GenerationError(
+            message=f"Agent {agent_name} generation error in {task_type}: {error_message}",
+            generation_type=task_type,
+            original_exception=error,
+            details={"agent": agent_name}
+        )
+    else:
+        return ViMaxError(
+            message=f"Agent {agent_name} error during {task_type}: {error_message}",
+            category=ErrorCategory.UNKNOWN,
+            severity=ErrorSeverity.HIGH,
+            original_exception=error,
+            details={"agent": agent_name, "task_type": task_type},
+            recoverable=True,
+            retry_suggested=True
+        )

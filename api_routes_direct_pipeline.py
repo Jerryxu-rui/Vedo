@@ -233,7 +233,7 @@ async def run_script2video_pipeline(
 # API Endpoints
 # ============================================================================
 
-@router.post("/idea2video", response_model=PipelineJobResponse)
+@router.post("/idea2video", response_model=PipelineJobResponse, deprecated=True)
 async def create_idea2video_job(
     request: Idea2VideoRequest,
     background_tasks: BackgroundTasks,
@@ -241,6 +241,27 @@ async def create_idea2video_job(
 ):
     """
     创建Idea转视频任务
+    
+    **⚠️ DEPRECATED**: 此端点已弃用，将在v4.0中移除。
+    请使用统一端点: `POST /api/v1/videos/generate`
+    
+    **迁移指南**:
+    ```python
+    # 旧方式 (已弃用)
+    POST /api/v1/direct-pipeline/idea2video
+    {
+        "idea": "your idea",
+        "style": "Cartoon style"
+    }
+    
+    # 新方式 (推荐)
+    POST /api/v1/videos/generate
+    {
+        "mode": "idea",
+        "content": "your idea",
+        "style": "Cartoon style"
+    }
+    ```
     
     从创意想法直接生成完整视频，包含以下步骤：
     1. 根据idea生成故事
@@ -297,7 +318,7 @@ async def create_idea2video_job(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/script2video", response_model=PipelineJobResponse)
+@router.post("/script2video", response_model=PipelineJobResponse, deprecated=True)
 async def create_script2video_job(
     request: Script2VideoRequest,
     background_tasks: BackgroundTasks,
@@ -305,6 +326,27 @@ async def create_script2video_job(
 ):
     """
     创建Script转视频任务
+    
+    **⚠️ DEPRECATED**: 此端点已弃用，将在v4.0中移除。
+    请使用统一端点: `POST /api/v1/videos/generate`
+    
+    **迁移指南**:
+    ```python
+    # 旧方式 (已弃用)
+    POST /api/v1/direct-pipeline/script2video
+    {
+        "script": "your script",
+        "style": "Anime Style"
+    }
+    
+    # 新方式 (推荐)
+    POST /api/v1/videos/generate
+    {
+        "mode": "script",
+        "content": "your script",
+        "style": "Anime Style"
+    }
+    ```
     
     从完整剧本直接生成视频，包含以下步骤：
     1. 提取角色并生成角色肖像

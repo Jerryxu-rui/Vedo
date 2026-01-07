@@ -63,18 +63,44 @@ class PipelineAdapter:
             await self.initialize_pipeline()
         
         try:
-            # Enhanced user requirement that emphasizes the user's specific idea
+            # Enhanced user requirement following prompt engineering best practices
             user_requirement = (
-                f"请基于用户提供的创意，创作一个{style}风格的故事。"
-                f"重要：必须紧密围绕用户的核心创意展开，充分体现创意中的关键元素、场景和情节。"
-                f"故事应该生动、具体，包含丰富的视觉细节和角色互动。"
+                f"请基于用户提供的创意，创作一个{style}风格的完整故事。\n\n"
+                f"**核心要求：**\n"
+                f"1. **故事结构**：必须包含完整的三幕结构（开端-发展-高潮-结局），至少5-8个不同的场景\n"
+                f"2. **角色塑造**：为每个角色（包括动物）提供具体的外貌、性格和动机描述\n"
+                f"3. **场景细节**：每个场景必须包含：\n"
+                f"   - 具体的动作和互动（避免抽象描述）\n"
+                f"   - 环境细节（光线、天气、道具）\n"
+                f"   - 情感节奏（角色的表情、肢体语言）\n"
+                f"4. **视觉化**：所有描述必须是可拍摄的，使用具体动作而非抽象情感\n"
+                f"5. **情感弧线**：故事要有明确的情感起伏和角色成长\n\n"
+                f"**禁止使用：**\n"
+                f"- 占位符文本（如\"待定\"、\"主角\"、\"开端\"）\n"
+                f"- 过于简短或重复用户输入的描述\n"
+                f"- 抽象的情感描述（用具体动作表现）\n\n"
+                f"**示例场景结构：**\n"
+                f"场景1：[具体地点] - [时间] - [天气/光线]\n"
+                f"[角色名]做了什么具体动作，表情如何，说了什么话。环境中有什么细节。\n"
+                f"这个场景推动了什么情节发展，角色有什么情感变化。"
             )
+            
+            print(f"\n{'='*80}")
+            print(f"[PipelineAdapter.generate_outline_from_idea] Calling pipeline.develop_story()")
+            print(f"{'='*80}")
+            print(f"[PipelineAdapter] Idea: {idea[:200]}...")
+            print(f"[PipelineAdapter] User requirement length: {len(user_requirement)} chars")
             
             # 调用pipeline的develop_story方法生成故事
             story = await self.pipeline.develop_story(
                 idea=idea,
                 user_requirement=user_requirement
             )
+            
+            print(f"[PipelineAdapter] ✅ Received story from pipeline")
+            print(f"[PipelineAdapter] Story length: {len(story)} chars")
+            print(f"[PipelineAdapter] Story preview: {story[:300]}...")
+            print(f"{'='*80}\n")
             
             # 从故事中提取角色信息
             characters = await self.pipeline.extract_characters(story=story)
@@ -113,18 +139,88 @@ class PipelineAdapter:
             return outline
             
         except Exception as e:
-            print(f"Error generating outline from idea: {e}")
-            # 返回基础大纲
-            return OutlineData(
-                title="新故事",
-                genre="未分类",
-                style=style,
-                episode_count=1,
-                synopsis=idea[:300],
-                characters_summary=[],
-                plot_summary=[{"act": "开端", "description": idea[:200]}],
-                highlights=[style]
-            )
+            print(f"\n{'='*80}")
+            print(f"[PipelineAdapter.generate_outline_from_idea] ❌ EXCEPTION CAUGHT")
+            print(f"{'='*80}")
+            print(f"[PipelineAdapter] Exception type: {type(e).__name__}")
+            print(f"[PipelineAdapter] Exception message: {str(e)}")
+            import traceback
+            print(f"[PipelineAdapter] Full traceback:")
+            traceback.print_exc()
+            
+            # Check if it's a rate limit error (including wrapped in RetryError)
+            from openai import RateLimitError
+            from tenacity import RetryError
+            
+            is_rate_limit = isinstance(e, RateLimitError)
+            if isinstance(e, RetryError):
+                # Check if the underlying exception is a RateLimitError
+                if hasattr(e, 'last_attempt') and e.last_attempt:
+                    try:
+                        underlying_exception = e.last_attempt.exception()
+                        is_rate_limit = isinstance(underlying_exception, RateLimitError)
+                    except:
+                        pass
+            
+            if is_rate_limit:
+                print(f"[PipelineAdapter] Rate limit error detected - providing user-friendly message")
+                print(f"{'='*80}\n")
+                
+                # Return informative error outline instead of echoing input
+                return OutlineData(
+                    title="⚠️ AI服务暂时繁忙",
+                    genre="系统提示",
+                    style=style,
+                    episode_count=1,
+                    synopsis=(
+                        "AI服务当前负载较高，正在处理大量请求。\n\n"
+                        "您的创意已收到：\n"
+                        f'"{idea}"\n\n'
+                        "建议操作：\n"
+                        "1. 等待1-2分钟后重试\n"
+                        "2. 或点击'重新生成'按钮\n"
+                        "3. 系统已自动重试5次，但API仍然繁忙\n\n"
+                        "我们正在努力为您生成精彩的故事内容。"
+                    ),
+                    characters_summary=[],
+                    plot_summary=[
+                        {
+                            "act": "系统状态",
+                            "description": "AI服务暂时繁忙，已自动重试5次（等待时间：3秒、6秒、12秒、24秒、48秒）"
+                        },
+                        {
+                            "act": "您的创意",
+                            "description": idea[:300]
+                        },
+                        {
+                            "act": "建议",
+                            "description": "请稍后重试，或联系技术支持。API通常会在几分钟内恢复正常。"
+                        }
+                    ],
+                    highlights=["API繁忙", "请重试", "已自动重试5次"]
+                )
+            else:
+                print(f"[PipelineAdapter] Non-rate-limit error - providing generic error message")
+                print(f"{'='*80}\n")
+                
+                # For other errors, provide technical details
+                return OutlineData(
+                    title="❌ 生成失败",
+                    genre="错误",
+                    style=style,
+                    episode_count=1,
+                    synopsis=(
+                        f"生成故事大纲时发生错误。\n\n"
+                        f"错误类型：{type(e).__name__}\n"
+                        f"错误信息：{str(e)[:200]}\n\n"
+                        f"您的创意：{idea[:200]}"
+                    ),
+                    characters_summary=[],
+                    plot_summary=[
+                        {"act": "错误详情", "description": f"{type(e).__name__}: {str(e)[:300]}"}
+                    ],
+                    highlights=["生成失败", "请重试"]
+                )
     
     async def generate_outline_from_script(
         self,

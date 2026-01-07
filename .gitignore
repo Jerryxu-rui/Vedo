@@ -68,6 +68,16 @@ generated_images/
 # Cache
 .cache/
 *.cache
-
+*.working_dir
+.working_dir/
+attached_assets/
 # uv
 .uv/
+
+#test
+*.test/
+test_output/
+test_screenshots/
+test_results/
+screenshots/
+benchmark_results.json

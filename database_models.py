@@ -453,3 +453,420 @@ class Project(Base):
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'updated_at': self.updated_at.isoformat() if self.updated_at else None,
         }
+
+
+class UserModelPreference(Base):
+    """User model preference - stores user's preferred models"""
+    __tablename__ = 'user_model_preferences'
+    
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    user_id = Column(String(36), nullable=False, unique=True)
+    video_model = Column(String(100), default='veo3-fast')
+    image_model = Column(String(100), default='doubao-seedream-4-0-250828')
+    chat_model = Column(String(100), default='gemini-2.0-flash-001')
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'video_model': self.video_model,
+            'image_model': self.image_model,
+            'chat_model': self.chat_model,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None,
+        }
+
+
+class AvailableModel(Base):
+    """Available model - stores information about available models"""
+    __tablename__ = 'available_models'
+    
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    name = Column(String(100), nullable=False, unique=True)
+    category = Column(String(50), nullable=False)  # video, image, chat
+    provider = Column(String(100), nullable=False)
+    description = Column(Text)
+    capabilities = Column(JSON)  # Store model capabilities as JSON
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'category': self.category,
+            'provider': self.provider,
+            'description': self.description,
+            'capabilities': self.capabilities or {},
+            'is_active': self.is_active,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None,
+        }
+
+
+class ConversationThread(Base):
+    """Conversation thread - stores chat conversation history"""
+    __tablename__ = 'conversation_threads'
+    
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    user_id = Column(String(36), nullable=False)
+    episode_id = Column(String(36), ForeignKey('episodes.id', ondelete='SET NULL'), nullable=True)
+    title = Column(String(255))
+    llm_model = Column(String(100), nullable=False)  # Which LLM is being used
+    system_prompt = Column(Text)  # System prompt for the conversation
+    context = Column(JSON)  # Additional context data
+    status = Column(String(50), default='active')  # active, archived, deleted
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    messages = relationship("ConversationMessage", back_populates="thread", cascade="all, delete-orphan")
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'episode_id': self.episode_id,
+            'title': self.title,
+            'llm_model': self.llm_model,
+            'system_prompt': self.system_prompt,
+            'context': self.context or {},
+            'status': self.status,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None,
+        }
+
+
+class ConversationMessage(Base):
+    """Conversation message - individual message in a conversation"""
+    __tablename__ = 'conversation_messages'
+    
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    thread_id = Column(String(36), ForeignKey('conversation_threads.id', ondelete='CASCADE'), nullable=False)
+    role = Column(String(20), nullable=False)  # user, assistant, system
+    content = Column(Text, nullable=False)
+    message_metadata = Column(JSON)  # Store additional metadata (tokens, model, etc.) - renamed to avoid SQLAlchemy conflict
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    thread = relationship("ConversationThread", back_populates="messages")
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'thread_id': self.thread_id,
+            'role': self.role,
+            'content': self.content,
+            'metadata': self.message_metadata or {},
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+        }
+
+
+class AgentTask(Base):
+    """Agent task - tracks multi-agent workflow tasks"""
+    __tablename__ = 'agent_tasks'
+    
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    thread_id = Column(String(36), ForeignKey('conversation_threads.id', ondelete='CASCADE'), nullable=True)
+    episode_id = Column(String(36), ForeignKey('episodes.id', ondelete='CASCADE'), nullable=True)
+    
+    # Task info
+    task_type = Column(String(100), nullable=False)  # dialogue_interpretation, scene_design, etc.
+    agent_name = Column(String(100), nullable=False)  # Which agent is handling this
+    input_data = Column(JSON)  # Input parameters for the task
+    output_data = Column(JSON)  # Results from the task
+    
+    # Status tracking
+    status = Column(String(50), default='pending')  # pending, in_progress, completed, failed
+    progress_percentage = Column(Integer, default=0)
+    error_message = Column(Text)
+    
+    # Timestamps
+    started_at = Column(DateTime)
+    completed_at = Column(DateTime)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'thread_id': self.thread_id,
+            'episode_id': self.episode_id,
+            'task_type': self.task_type,
+            'agent_name': self.agent_name,
+            'input_data': self.input_data or {},
+            'output_data': self.output_data or {},
+            'status': self.status,
+            'progress_percentage': self.progress_percentage,
+            'error_message': self.error_message,
+            'started_at': self.started_at.isoformat() if self.started_at else None,
+            'completed_at': self.completed_at.isoformat() if self.completed_at else None,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None,
+        }
+
+
+class LLMAPIKey(Base):
+    """LLM API Key - stores API keys for different LLM providers"""
+    __tablename__ = 'llm_api_keys'
+    
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    user_id = Column(String(36), nullable=False)
+    provider = Column(String(50), nullable=False)  # google, alibaba, anthropic, openai, deepseek
+    api_key = Column(String(500), nullable=False)  # Encrypted API key
+    api_endpoint = Column(String(500))  # Custom endpoint if needed
+    is_active = Column(Boolean, default=True)
+    usage_count = Column(Integer, default=0)
+    last_used_at = Column(DateTime)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'provider': self.provider,
+            'api_key': '***' + self.api_key[-4:] if self.api_key else None,  # Masked for security
+            'api_endpoint': self.api_endpoint,
+            'is_active': self.is_active,
+            'usage_count': self.usage_count,
+            'last_used_at': self.last_used_at.isoformat() if self.last_used_at else None,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None,
+        }
+
+
+class VideoGenerationJob(Base):
+    """Video generation job - unified storage for all video generation jobs"""
+    __tablename__ = 'video_generation_jobs'
+    
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    
+    # Job metadata
+    job_type = Column(String(50), nullable=False)  # idea2video, script2video, conversational
+    mode = Column(String(20))  # idea, script (for unified API)
+    status = Column(String(50), default='queued')  # queued, processing, completed, failed, cancelled
+    
+    # Input data
+    content = Column(Text)  # idea or script content
+    user_requirement = Column(Text)
+    style = Column(String(255))
+    project_title = Column(String(255))
+    
+    # Context and metadata
+    request_data = Column(JSON)  # Full request payload
+    context = Column(JSON)  # Additional context
+    
+    # Progress tracking
+    progress = Column(Float, default=0.0)  # 0-100
+    current_stage = Column(String(255))
+    
+    # Results
+    working_dir = Column(String(500))
+    result_data = Column(JSON)  # Final results
+    error_message = Column(Text)
+    
+    # Shot tracking
+    total_shots = Column(Integer, default=0)
+    completed_shots = Column(Integer, default=0)
+    
+    # Relationships
+    episode_id = Column(String(36), ForeignKey('episodes.id', ondelete='SET NULL'), nullable=True)
+    series_id = Column(String(36), ForeignKey('series.id', ondelete='SET NULL'), nullable=True)
+    
+    # Timestamps
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    started_at = Column(DateTime)
+    completed_at = Column(DateTime)
+    
+    def to_dict(self):
+        return {
+            'job_id': self.id,
+            'job_type': self.job_type,
+            'mode': self.mode,
+            'status': self.status,
+            'content': self.content,
+            'user_requirement': self.user_requirement,
+            'style': self.style,
+            'project_title': self.project_title,
+            'request_data': self.request_data or {},
+            'context': self.context or {},
+            'progress': self.progress,
+            'current_stage': self.current_stage,
+            'working_dir': self.working_dir,
+            'result': self.result_data,
+            'error': self.error_message,
+            'total_shots': self.total_shots,
+            'completed_shots': self.completed_shots,
+            'episode_id': self.episode_id,
+            'series_id': self.series_id,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None,
+            'started_at': self.started_at.isoformat() if self.started_at else None,
+            'completed_at': self.completed_at.isoformat() if self.completed_at else None,
+        }
+
+
+class VideoSegment(Base):
+    """Video segment - represents an individual video segment for step-by-step generation"""
+    __tablename__ = 'video_segments'
+    
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    episode_id = Column(String(36), ForeignKey('episodes.id', ondelete='CASCADE'), nullable=True)
+    scene_id = Column(String(36), ForeignKey('scenes.id', ondelete='SET NULL'), nullable=True)
+    shot_id = Column(String(36), ForeignKey('shots.id', ondelete='SET NULL'), nullable=True)
+    
+    # Segment info
+    segment_number = Column(Integer, nullable=False)
+    segment_type = Column(String(50), default='shot')  # 'scene', 'shot', 'transition'
+    
+    # Generation parameters
+    generation_params = Column(JSON)  # Stores prompt, style, seed, etc.
+    
+    # Status
+    status = Column(String(50), default='pending')  # pending, generating, completed, approved, rejected, failed
+    approval_status = Column(String(50))  # null, approved, rejected, needs_revision
+    
+    # Generated assets
+    video_url = Column(String(500))
+    thumbnail_url = Column(String(500))
+    duration = Column(Float)  # in seconds
+    
+    # Quality metrics
+    quality_score = Column(Float)
+    consistency_score = Column(Float)
+    
+    # Metadata
+    file_size = Column(Integer)
+    resolution = Column(String(20))  # e.g., "1920x1080"
+    format = Column(String(20))  # e.g., "mp4"
+    
+    # Versioning
+    version = Column(Integer, default=1)
+    parent_segment_id = Column(String(36), ForeignKey('video_segments.id', ondelete='SET NULL'), nullable=True)
+    
+    # User feedback
+    user_notes = Column(Text)
+    rejection_reason = Column(Text)
+    
+    # Timestamps
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    approved_at = Column(DateTime)
+    
+    # Relationships
+    parent_segment = relationship("VideoSegment", remote_side=[id], backref="child_versions")
+    reviews = relationship("SegmentReview", back_populates="segment", cascade="all, delete-orphan")
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'episode_id': self.episode_id,
+            'scene_id': self.scene_id,
+            'shot_id': self.shot_id,
+            'segment_number': self.segment_number,
+            'segment_type': self.segment_type,
+            'generation_params': self.generation_params or {},
+            'status': self.status,
+            'approval_status': self.approval_status,
+            'video_url': self.video_url,
+            'thumbnail_url': self.thumbnail_url,
+            'duration': self.duration,
+            'quality_score': self.quality_score,
+            'consistency_score': self.consistency_score,
+            'file_size': self.file_size,
+            'resolution': self.resolution,
+            'format': self.format,
+            'version': self.version,
+            'parent_segment_id': self.parent_segment_id,
+            'user_notes': self.user_notes,
+            'rejection_reason': self.rejection_reason,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None,
+            'approved_at': self.approved_at.isoformat() if self.approved_at else None,
+        }
+
+
+class SegmentCompilationJob(Base):
+    """Segment compilation job - tracks compilation of approved segments into final video"""
+    __tablename__ = 'segment_compilation_jobs'
+    
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    episode_id = Column(String(36), ForeignKey('episodes.id', ondelete='CASCADE'), nullable=False)
+    
+    # Compilation config
+    segment_ids = Column(JSON)  # Array of segment IDs in order
+    transition_style = Column(String(100), default='cut')  # cut, fade, dissolve
+    audio_config = Column(JSON)  # Audio mixing configuration
+    
+    # Status
+    status = Column(String(50), default='pending')  # pending, processing, completed, failed
+    progress = Column(Float, default=0.0)  # 0-100
+    
+    # Output
+    output_video_url = Column(String(500))
+    output_duration = Column(Float)
+    output_file_size = Column(Integer)
+    
+    # Error tracking
+    error_message = Column(Text)
+    
+    # Timestamps
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    completed_at = Column(DateTime)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'episode_id': self.episode_id,
+            'segment_ids': self.segment_ids or [],
+            'transition_style': self.transition_style,
+            'audio_config': self.audio_config or {},
+            'status': self.status,
+            'progress': self.progress,
+            'output_video_url': self.output_video_url,
+            'output_duration': self.output_duration,
+            'output_file_size': self.output_file_size,
+            'error_message': self.error_message,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None,
+            'completed_at': self.completed_at.isoformat() if self.completed_at else None,
+        }
+
+
+class SegmentReview(Base):
+    """Segment review - stores user feedback and review history for video segments"""
+    __tablename__ = 'segment_reviews'
+    
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    segment_id = Column(String(36), ForeignKey('video_segments.id', ondelete='CASCADE'), nullable=False)
+    user_id = Column(String(36))  # User who performed the review
+    
+    # Review data
+    action = Column(String(50), nullable=False)  # 'approve', 'reject', 'request_regeneration'
+    rating = Column(Integer)  # 1-5 stars
+    feedback = Column(Text)
+    suggested_changes = Column(JSON)  # Structured suggestions for improvement
+    
+    # Timestamp
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    segment = relationship("VideoSegment", back_populates="reviews")
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'segment_id': self.segment_id,
+            'user_id': self.user_id,
+            'action': self.action,
+            'rating': self.rating,
+            'feedback': self.feedback,
+            'suggested_changes': self.suggested_changes or {},
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+        }

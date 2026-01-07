@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { useWorkflowWebSocket } from '../hooks/useWebSocket'
+import WorkflowProgress from '../components/WorkflowProgress'
 import './Script2Video.css'
 
 interface GenerationStatus {
@@ -17,6 +19,23 @@ function Script2Video() {
     progress: 0,
     message: ''
   })
+
+  // WebSocket connection for real-time progress updates
+  const { isConnected: wsConnected } = useWorkflowWebSocket(
+    generation.jobId || 'pending',
+    (message) => {
+      if (message.type === 'progress' && message.workflow_id === generation.jobId) {
+        setGeneration(prev => ({
+          ...prev,
+          progress: Math.round((message.progress || 0) * 100),
+          message: message.message || prev.message,
+          status: message.state === 'completed' ? 'completed' :
+                  message.state === 'failed' ? 'error' :
+                  message.state === 'running' ? 'processing' : prev.status
+        }))
+      }
+    }
+  )
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -185,7 +204,28 @@ function Script2Video() {
         </div>
 
         <div className="card status-section">
-          <h3>Generation Progress</h3>
+          <div className="status-header">
+            <h3>Generation Progress</h3>
+            {generation.jobId && (
+              <span className="ws-status-badge" title={wsConnected ? 'WebSocket已连接' : 'WebSocket未连接'}>
+                {wsConnected ? '🟢 实时' : '🔴 离线'}
+              </span>
+            )}
+          </div>
+
+          {/* Real-time WebSocket Progress */}
+          {generation.status === 'processing' && generation.jobId && (
+            <div className="websocket-progress-wrapper">
+              <WorkflowProgress
+                workflowId={generation.jobId}
+                state={generation.status === 'processing' ? 'running' :
+                       generation.status === 'completed' ? 'completed' :
+                       generation.status === 'error' ? 'failed' : 'pending'}
+                progress={generation.progress / 100}
+                message={generation.message}
+              />
+            </div>
+          )}
           
           {generation.status === 'idle' && (
             <div className="status-idle">

@@ -7,6 +7,18 @@ echo "Starting ViMax API Server..."
 echo "================================"
 echo ""
 
+# Load environment variables from .env file if it exists
+if [ -f ".env" ]; then
+    echo "Loading environment variables from .env..."
+    export $(cat .env | grep -v '^#' | xargs)
+    echo "✓ Environment variables loaded"
+else
+    echo "Warning: .env file not found"
+    echo "Please create a .env file with your API keys"
+fi
+
+echo ""
+
 # Activate Python virtual environment
 echo "Activating Python virtual environment..."
 if [ -f "venv/bin/activate" ]; then

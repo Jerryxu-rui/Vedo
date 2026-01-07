@@ -21,14 +21,39 @@ from pipelines.idea2video_pipeline import Idea2VideoPipeline
 from pipelines.script2video_pipeline import Script2VideoPipeline
 from services.nlp_service import nlp_service, Intent, EditAction
 from services.character_service import character_service
+from services.job_manager import job_manager
 from models.character import Character, CharacterAppearance, CharacterAppearanceRecord
 
-# Import Seko routes, conversational routes, direct pipeline routes, WebSocket routes, video routes, and database
+# Import Seko routes, conversational routes (modular), direct pipeline routes, WebSocket routes, video routes, model routes, chat routes, unified video routes, unified character routes, segment workflow routes, and database
 from seko_api_routes import router as seko_router
-from api_routes_conversational import router as conversational_router
+
+# Import NEW modular conversational routers (Phase 2 Refactoring Complete)
+from api_routes_conv_episodes import router as conv_episodes_router
+from api_routes_conv_outline import router as conv_outline_router
+from api_routes_conv_characters import router as conv_characters_router
+from api_routes_conv_scenes import router as conv_scenes_router
+from api_routes_conv_storyboard import router as conv_storyboard_router
+from api_routes_conv_video import router as conv_video_router
+from api_routes_conv_progress import router as conv_progress_router
+from api_routes_conv_assets import router as conv_assets_router
+
+# Import OLD monolithic conversational router (DEPRECATED - will be removed in Phase 4)
+# from api_routes_conversational import router as conversational_router
+
 from api_routes_direct_pipeline import router as direct_pipeline_router
 from api_routes_websocket import router as websocket_router
+from api_routes_websocket_enhanced import router as websocket_enhanced_router
 from api_routes_video import router as video_router
+from api_routes_models import router as models_router
+from api_routes_chat import router as chat_router
+from api_routes_unified_video import router as unified_video_router
+from api_routes_unified_characters import router as unified_characters_router
+
+# Import NEW segment workflow routers (Step-by-Step Video Generation)
+from api_routes_segments import router as segments_router
+from api_routes_segment_review import router as segment_review_router
+from api_routes_compilation import router as compilation_router
+
 from database import init_db
 
 
@@ -61,20 +86,46 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include Seko router for series/episode management
+# Include unified routers (NEW - replace duplicate endpoints)
+app.include_router(unified_video_router)
+app.include_router(unified_characters_router)
+
+# Include Seko router for series/episode management (character endpoints deprecated)
 app.include_router(seko_router)
 
-# Include conversational workflow router
-app.include_router(conversational_router)
+# Include NEW modular conversational workflow routers (Phase 2 Refactoring - 8 modules)
+app.include_router(conv_episodes_router)
+app.include_router(conv_outline_router)
+app.include_router(conv_characters_router)
+app.include_router(conv_scenes_router)
+app.include_router(conv_storyboard_router)
+app.include_router(conv_video_router)
+app.include_router(conv_progress_router)
+app.include_router(conv_assets_router)
 
-# Include direct pipeline router
+# OLD monolithic conversational router (DEPRECATED - commented out, will be removed in Phase 4)
+# app.include_router(conversational_router)
+
+# Include direct pipeline router (DEPRECATED - use /api/v1/videos/generate instead)
 app.include_router(direct_pipeline_router)
 
-# Include WebSocket router
-app.include_router(websocket_router)
+# Include WebSocket routers (both old and new enhanced)
+app.include_router(websocket_router)  # Old basic WebSocket routes
+app.include_router(websocket_enhanced_router)  # NEW enhanced WebSocket routes (Week 3)
 
 # Include video management router
 app.include_router(video_router)
+
+# Include model management router
+app.include_router(models_router)
+
+# Include chat and LLM router
+app.include_router(chat_router)
+
+# Include NEW segment workflow routers (Step-by-Step Video Generation - Phase 2)
+app.include_router(segments_router)
+app.include_router(segment_review_router)
+app.include_router(compilation_router)
 
 # Add validation error handler
 @app.exception_handler(RequestValidationError)
@@ -97,8 +148,19 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 if os.path.exists(".working_dir"):
     app.mount("/media", StaticFiles(directory=".working_dir"), name="media")
 
-# In-memory storage for job status (in production, use a database)
+# DEPRECATED: In-memory storage replaced by database-backed job_manager
+# Keeping for backward compatibility during migration
 jobs: Dict[str, Dict[str, Any]] = {}
+
+# Migrate existing jobs to database on startup
+def migrate_legacy_jobs():
+    """Migrate in-memory jobs to database"""
+    if jobs:
+        try:
+            job_manager.migrate_from_dict(jobs)
+            print(f"[Migration] Migrated {len(jobs)} legacy jobs to database")
+        except Exception as e:
+            print(f"[Migration] Failed to migrate legacy jobs: {e}")
 
 
 class ShotInfo(BaseModel):
@@ -319,16 +381,26 @@ def _scan_shots_directory(shots_dir: str) -> List[ShotInfo]:
 async def run_idea2video_pipeline(job_id: str, request: Idea2VideoRequest):
     """Background task to run idea2video pipeline"""
     try:
-        jobs[job_id]["status"] = "processing"
-        jobs[job_id]["current_stage"] = "Developing story"
-        jobs[job_id]["updated_at"] = datetime.now().isoformat()
+        # Update both legacy dict and database
+        if job_id in jobs:
+            jobs[job_id]["status"] = "processing"
+            jobs[job_id]["current_stage"] = "Developing story"
+            jobs[job_id]["updated_at"] = datetime.now().isoformat()
+        
+        job_manager.update_job(job_id, {
+            'status': 'processing',
+            'current_stage': 'Developing story'
+        })
         
         pipeline = Idea2VideoPipeline.init_from_config(
             config_path="configs/idea2video.yaml"
         )
         
-        # Update working directory in job
-        jobs[job_id]["working_dir"] = pipeline.working_dir
+        # Update working directory in both storages
+        if job_id in jobs:
+            jobs[job_id]["working_dir"] = pipeline.working_dir
+        
+        job_manager.update_job(job_id, {'working_dir': pipeline.working_dir})
         
         result = await pipeline(
             idea=request.idea,
@@ -339,35 +411,56 @@ async def run_idea2video_pipeline(job_id: str, request: Idea2VideoRequest):
         # Scan for shots
         shots = scan_working_directory(pipeline.working_dir)
         
-        jobs[job_id]["status"] = "completed"
-        jobs[job_id]["shots"] = [shot.model_dump() for shot in shots]
-        jobs[job_id]["result"] = {
+        result_data = {
             "message": "Video generated successfully",
             "project_title": request.project_title or "Untitled Project",
             "final_video_path": f"/media/{os.path.relpath(result, '.working_dir')}",
             "total_shots": len(shots)
         }
-        jobs[job_id]["updated_at"] = datetime.now().isoformat()
+        
+        # Update both storages
+        if job_id in jobs:
+            jobs[job_id]["status"] = "completed"
+            jobs[job_id]["shots"] = [shot.model_dump() for shot in shots]
+            jobs[job_id]["result"] = result_data
+            jobs[job_id]["updated_at"] = datetime.now().isoformat()
+        
+        job_manager.mark_completed(job_id, result_data)
+        job_manager.update_job(job_id, {'total_shots': len(shots)})
         
     except Exception as e:
-        jobs[job_id]["status"] = "failed"
-        jobs[job_id]["error"] = str(e)
-        jobs[job_id]["updated_at"] = datetime.now().isoformat()
+        # Update both storages
+        if job_id in jobs:
+            jobs[job_id]["status"] = "failed"
+            jobs[job_id]["error"] = str(e)
+            jobs[job_id]["updated_at"] = datetime.now().isoformat()
+        
+        job_manager.mark_failed(job_id, str(e))
 
 
 async def run_script2video_pipeline(job_id: str, request: Script2VideoRequest):
     """Background task to run script2video pipeline"""
     try:
-        jobs[job_id]["status"] = "processing"
-        jobs[job_id]["current_stage"] = "Extracting characters"
-        jobs[job_id]["updated_at"] = datetime.now().isoformat()
+        # Update both legacy dict and database
+        if job_id in jobs:
+            jobs[job_id]["status"] = "processing"
+            jobs[job_id]["current_stage"] = "Extracting characters"
+            jobs[job_id]["updated_at"] = datetime.now().isoformat()
+        
+        job_manager.update_job(job_id, {
+            'status': 'processing',
+            'current_stage': 'Extracting characters'
+        })
         
         pipeline = Script2VideoPipeline.init_from_config(
             config_path="configs/script2video.yaml"
         )
         
-        # Update working directory in job
-        jobs[job_id]["working_dir"] = pipeline.working_dir
+        # Update working directory in both storages
+        if job_id in jobs:
+            jobs[job_id]["working_dir"] = pipeline.working_dir
+        
+        job_manager.update_job(job_id, {'working_dir': pipeline.working_dir})
         
         result = await pipeline(
             script=request.script,
@@ -378,20 +471,31 @@ async def run_script2video_pipeline(job_id: str, request: Script2VideoRequest):
         # Scan for shots
         shots = scan_working_directory(pipeline.working_dir)
         
-        jobs[job_id]["status"] = "completed"
-        jobs[job_id]["shots"] = [shot.model_dump() for shot in shots]
-        jobs[job_id]["result"] = {
+        result_data = {
             "message": "Video generated successfully",
             "project_title": request.project_title or "Untitled Project",
             "final_video_path": f"/media/{os.path.relpath(result, '.working_dir')}",
             "total_shots": len(shots)
         }
-        jobs[job_id]["updated_at"] = datetime.now().isoformat()
+        
+        # Update both storages
+        if job_id in jobs:
+            jobs[job_id]["status"] = "completed"
+            jobs[job_id]["shots"] = [shot.model_dump() for shot in shots]
+            jobs[job_id]["result"] = result_data
+            jobs[job_id]["updated_at"] = datetime.now().isoformat()
+        
+        job_manager.mark_completed(job_id, result_data)
+        job_manager.update_job(job_id, {'total_shots': len(shots)})
         
     except Exception as e:
-        jobs[job_id]["status"] = "failed"
-        jobs[job_id]["error"] = str(e)
-        jobs[job_id]["updated_at"] = datetime.now().isoformat()
+        # Update both storages
+        if job_id in jobs:
+            jobs[job_id]["status"] = "failed"
+            jobs[job_id]["error"] = str(e)
+            jobs[job_id]["updated_at"] = datetime.now().isoformat()
+        
+        job_manager.mark_failed(job_id, str(e))
 
 
 @app.get("/")
@@ -410,7 +514,13 @@ async def root():
             "Direct pipeline execution (idea2video & script2video)",
             "Comprehensive error handling and recovery",
             "Video generation with shot-by-shot progress",
-            "Video download and streaming"
+            "Video download and streaming",
+            "Multi-LLM chat interface with streaming",
+            "Multi-agent orchestration for video generation",
+            "LLM API key management",
+            "Step-by-step video segment generation with preview",
+            "Segment review and approval workflow",
+            "Video compilation from approved segments"
         ],
         "endpoints": {
             "idea2video": "/api/v1/generate/idea2video",
@@ -429,6 +539,13 @@ async def root():
             "video_stats": "/api/v1/videos/stats",
             "websocket": "ws://localhost:3001/api/v1/ws/connect",
             "websocket_stats": "/api/v1/ws/stats",
+            "chat_models": "/api/v1/chat/models",
+            "chat_threads": "/api/v1/chat/threads",
+            "chat_websocket": "ws://localhost:3001/api/v1/chat/ws/{thread_id}",
+            "chat_workflows": "/api/v1/chat/workflows",
+            "segment_generate": "/api/v1/segments/generate",
+            "segment_review": "/api/v1/segment-review/{segment_id}/approve",
+            "segment_compilation": "/api/v1/compilation/compile",
             "seko_docs": "/docs"
         }
     }
@@ -445,12 +562,35 @@ async def health_check():
     }
 
 
-@app.post("/api/v1/generate/idea2video", response_model=JobResponse)
+@app.post("/api/v1/generate/idea2video", response_model=JobResponse, deprecated=True)
 async def generate_idea2video(
     request: Idea2VideoRequest,
     background_tasks: BackgroundTasks
 ):
-    """Generate video from an idea with shot-level tracking"""
+    """
+    Generate video from an idea with shot-level tracking
+    
+    **⚠️ DEPRECATED**: This endpoint is deprecated and will be removed in v4.0.
+    Please use the unified endpoint instead: `POST /api/v1/videos/generate`
+    
+    **Migration Guide**:
+    ```python
+    # Old way (deprecated)
+    POST /api/v1/generate/idea2video
+    {
+        "idea": "your idea",
+        "style": "Cartoon style"
+    }
+    
+    # New way (recommended)
+    POST /api/v1/videos/generate
+    {
+        "mode": "idea",
+        "content": "your idea",
+        "style": "Cartoon style"
+    }
+    ```
+    """
     # Log incoming request for debugging
     print(f"[DEBUG] Received idea2video request: {request.model_dump()}")
     print(f"[DEBUG] Idea length: {len(request.idea)}")
@@ -463,7 +603,9 @@ async def generate_idea2video(
     
     # Create working directory
     working_dir = f".working_dir/idea2video/{job_id}"
+    os.makedirs(working_dir, exist_ok=True)
     
+    # Store in both legacy dict and database
     jobs[job_id] = {
         "job_id": job_id,
         "type": "idea2video",
@@ -474,6 +616,19 @@ async def generate_idea2video(
         "working_dir": working_dir,
         "shots": []
     }
+    
+    # Create in database
+    job_manager.create_job(
+        job_id=job_id,
+        job_type="idea2video",
+        content=request.idea,
+        user_requirement=request.user_requirement,
+        style=request.style,
+        project_title=request.project_title,
+        mode="idea",
+        request_data=request.model_dump(),
+        working_dir=working_dir
+    )
     
     background_tasks.add_task(run_idea2video_pipeline, job_id, request)
     
@@ -486,12 +641,35 @@ async def generate_idea2video(
     )
 
 
-@app.post("/api/v1/generate/script2video", response_model=JobResponse)
+@app.post("/api/v1/generate/script2video", response_model=JobResponse, deprecated=True)
 async def generate_script2video(
     request: Script2VideoRequest,
     background_tasks: BackgroundTasks
 ):
-    """Generate video from a script with shot-level tracking"""
+    """
+    Generate video from a script with shot-level tracking
+    
+    **⚠️ DEPRECATED**: This endpoint is deprecated and will be removed in v4.0.
+    Please use the unified endpoint instead: `POST /api/v1/videos/generate`
+    
+    **Migration Guide**:
+    ```python
+    # Old way (deprecated)
+    POST /api/v1/generate/script2video
+    {
+        "script": "your script",
+        "style": "Anime Style"
+    }
+    
+    # New way (recommended)
+    POST /api/v1/videos/generate
+    {
+        "mode": "script",
+        "content": "your script",
+        "style": "Anime Style"
+    }
+    ```
+    """
     # Log incoming request for debugging
     print(f"[DEBUG] Received script2video request: {request.model_dump()}")
     print(f"[DEBUG] Script length: {len(request.script)}")
@@ -504,7 +682,9 @@ async def generate_script2video(
     
     # Create working directory
     working_dir = f".working_dir/script2video/{job_id}"
+    os.makedirs(working_dir, exist_ok=True)
     
+    # Store in both legacy dict and database
     jobs[job_id] = {
         "job_id": job_id,
         "type": "script2video",
@@ -515,6 +695,19 @@ async def generate_script2video(
         "working_dir": working_dir,
         "shots": []
     }
+    
+    # Create in database
+    job_manager.create_job(
+        job_id=job_id,
+        job_type="script2video",
+        content=request.script,
+        user_requirement=request.user_requirement,
+        style=request.style,
+        project_title=request.project_title,
+        mode="script",
+        request_data=request.model_dump(),
+        working_dir=working_dir
+    )
     
     background_tasks.add_task(run_script2video_pipeline, job_id, request)
     
@@ -859,9 +1052,18 @@ async def get_chat_suggestions(job_id: Optional[str] = None, shot_idx: Optional[
     }
 
 
-@app.post("/api/v1/characters", response_model=CharacterResponse)
+@app.post("/api/v1/characters", response_model=CharacterResponse, deprecated=True)
 async def create_character(request: CharacterCreateRequest):
-    """Create a new character"""
+    """
+    Create a new character
+    
+    **⚠️ DEPRECATED**: This endpoint is deprecated and will be removed in v4.0.
+    Please use the unified endpoint instead: `POST /api/v1/characters`
+    
+    **Migration Guide**:
+    The unified endpoint is already at the same path, but uses database persistence.
+    No code changes needed - this endpoint now proxies to the unified system.
+    """
     try:
         character = character_service.create_character(
             name=request.name,
@@ -890,9 +1092,14 @@ async def create_character(request: CharacterCreateRequest):
         raise HTTPException(status_code=500, detail=f"Failed to create character: {str(e)}")
 
 
-@app.get("/api/v1/characters")
+@app.get("/api/v1/characters", deprecated=True)
 async def list_characters(limit: int = 50, offset: int = 0):
-    """List all characters"""
+    """
+    List all characters
+    
+    **⚠️ DEPRECATED**: This endpoint is deprecated and will be removed in v4.0.
+    The unified character system is now active at the same path with enhanced features.
+    """
     try:
         characters = character_service.list_characters(limit, offset)
         total = len(character_service.db.characters)
@@ -925,9 +1132,14 @@ async def list_characters(limit: int = 50, offset: int = 0):
         raise HTTPException(status_code=500, detail=f"Failed to list characters: {str(e)}")
 
 
-@app.get("/api/v1/characters/{character_id}", response_model=CharacterResponse)
+@app.get("/api/v1/characters/{character_id}", response_model=CharacterResponse, deprecated=True)
 async def get_character(character_id: str):
-    """Get a character by ID"""
+    """
+    Get a character by ID
+    
+    **⚠️ DEPRECATED**: This endpoint is deprecated and will be removed in v4.0.
+    The unified character system is now active at the same path.
+    """
     character = character_service.get_character(character_id)
     if not character:
         raise HTTPException(status_code=404, detail="Character not found")
@@ -947,9 +1159,14 @@ async def get_character(character_id: str):
     )
 
 
-@app.put("/api/v1/characters/{character_id}", response_model=CharacterResponse)
+@app.put("/api/v1/characters/{character_id}", response_model=CharacterResponse, deprecated=True)
 async def update_character(character_id: str, request: CharacterUpdateRequest):
-    """Update a character"""
+    """
+    Update a character
+    
+    **⚠️ DEPRECATED**: This endpoint is deprecated and will be removed in v4.0.
+    The unified character system is now active at the same path.
+    """
     updates = request.model_dump(exclude_none=True)
     
     character = character_service.update_character(character_id, updates)
@@ -971,9 +1188,14 @@ async def update_character(character_id: str, request: CharacterUpdateRequest):
     )
 
 
-@app.delete("/api/v1/characters/{character_id}")
+@app.delete("/api/v1/characters/{character_id}", deprecated=True)
 async def delete_character(character_id: str):
-    """Delete a character"""
+    """
+    Delete a character
+    
+    **⚠️ DEPRECATED**: This endpoint is deprecated and will be removed in v4.0.
+    The unified character system is now active at the same path.
+    """
     success = character_service.delete_character(character_id)
     if not success:
         raise HTTPException(status_code=404, detail="Character not found")
@@ -981,9 +1203,14 @@ async def delete_character(character_id: str):
     return {"message": "Character deleted successfully", "character_id": character_id}
 
 
-@app.get("/api/v1/characters/{character_id}/appearances")
+@app.get("/api/v1/characters/{character_id}/appearances", deprecated=True)
 async def get_character_appearances(character_id: str):
-    """Get all appearances of a character"""
+    """
+    Get all appearances of a character
+    
+    **⚠️ DEPRECATED**: This endpoint is deprecated and will be removed in v4.0.
+    The unified character system is now active at the same path.
+    """
     character = character_service.get_character(character_id)
     if not character:
         raise HTTPException(status_code=404, detail="Character not found")
@@ -998,9 +1225,14 @@ async def get_character_appearances(character_id: str):
     }
 
 
-@app.get("/api/v1/characters/{character_id}/consistency")
+@app.get("/api/v1/characters/{character_id}/consistency", deprecated=True)
 async def check_character_consistency(character_id: str):
-    """Check consistency of a character across all appearances"""
+    """
+    Check consistency of a character across all appearances
+    
+    **⚠️ DEPRECATED**: This endpoint is deprecated and will be removed in v4.0.
+    The unified character system is now active at the same path.
+    """
     report = character_service.check_consistency(character_id)
     
     if "error" in report:
@@ -1009,7 +1241,7 @@ async def check_character_consistency(character_id: str):
     return report
 
 
-@app.post("/api/v1/characters/{character_id}/appearances")
+@app.post("/api/v1/characters/{character_id}/appearances", deprecated=True)
 async def record_character_appearance(
     character_id: str,
     job_id: str,
@@ -1017,7 +1249,12 @@ async def record_character_appearance(
     image_path: str,
     scene_idx: Optional[int] = None
 ):
-    """Record a character appearance in a shot"""
+    """
+    Record a character appearance in a shot
+    
+    **⚠️ DEPRECATED**: This endpoint is deprecated and will be removed in v4.0.
+    The unified character system is now active at the same path.
+    """
     character = character_service.get_character(character_id)
     if not character:
         raise HTTPException(status_code=404, detail="Character not found")
@@ -1033,9 +1270,14 @@ async def record_character_appearance(
     return appearance.model_dump()
 
 
-@app.get("/api/v1/jobs/{job_id}/characters")
+@app.get("/api/v1/jobs/{job_id}/characters", deprecated=True)
 async def get_job_characters(job_id: str):
-    """Get all characters that appear in a job"""
+    """
+    Get all characters that appear in a job
+    
+    **⚠️ DEPRECATED**: This endpoint is deprecated and will be removed in v4.0.
+    Use: GET /api/v1/characters/jobs/{job_id}/characters
+    """
     if job_id not in jobs:
         raise HTTPException(status_code=404, detail="Job not found")
     
@@ -1056,9 +1298,14 @@ async def get_job_characters(job_id: str):
     }
 
 
-@app.post("/api/v1/characters/extract")
+@app.post("/api/v1/characters/extract", deprecated=True)
 async def extract_characters_from_script(script: str):
-    """Extract characters from a script"""
+    """
+    Extract characters from a script
+    
+    **⚠️ DEPRECATED**: This endpoint is deprecated and will be removed in v4.0.
+    The unified character system is now active at the same path.
+    """
     try:
         characters = character_service.extract_characters_from_script(script)
         

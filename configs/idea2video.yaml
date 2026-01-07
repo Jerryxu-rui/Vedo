@@ -1,13 +1,21 @@
 chat_model:
   init_args:
+    model: deepseek-chat
+    model_provider: openai
+    api_key: ${DEEPSEEK_API_KEY}
+    base_url: https://api.deepseek.com
+  # Rate limits for chat model API calls
+  # Set to null to disable rate limiting for this service
+  max_requests_per_minute: 60
+  max_requests_per_day: 10000
+
+# Fallback chat model (Gemini via Yunwu) - used when primary model is rate limited
+fallback_chat_model:
+  init_args:
     model: gemini-2.0-flash-001
     model_provider: openai
     api_key: ${YUNWU_API_KEY}
     base_url: https://yunwu.ai/v1
-  # Rate limits for chat model API calls
-  # Set to null to disable rate limiting for this service
-  max_requests_per_minute: 500
-  max_requests_per_day: 2000
 
 image_generator:
   class_path: tools.ImageGeneratorDoubaoSeedreamYunwuAPI

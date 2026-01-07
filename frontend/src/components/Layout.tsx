@@ -21,6 +21,7 @@ function Layout() {
             <Link to="/idea2video" className={isActive('/idea2video')}>Idea to Video</Link>
             <Link to="/script2video" className={isActive('/script2video')}>Script to Video</Link>
             <Link to="/library" className={isActive('/library')}>Library</Link>
+            <Link to="/agents" className={isActive('/agents')}>Agent Monitor</Link>
           </nav>
         </div>
       </header>

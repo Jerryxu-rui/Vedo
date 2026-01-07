@@ -694,6 +694,37 @@ def create_retry_handler(
     return RetryHandler(config=config, provider=provider)
 
 
+def retry_with_backoff(
+    max_retries: int = 3,
+    base_delay: float = 1.0,
+    max_delay: float = 60.0,
+    provider: str = "default"
+):
+    """
+    Simple decorator for retry with exponential backoff.
+    
+    Args:
+        max_retries: Maximum number of retry attempts
+        base_delay: Base delay in seconds
+        max_delay: Maximum delay in seconds
+        provider: API provider name
+        
+    Returns:
+        Decorator function
+        
+    Example:
+        >>> @retry_with_backoff(max_retries=3, base_delay=1.0)
+        >>> async def my_function():
+        >>>     return await api_call()
+    """
+    config = RetryConfig(
+        max_retries=max_retries,
+        base_delay=base_delay,
+        max_delay=max_delay
+    )
+    return RetryHandler(config=config, provider=provider)
+
+
 # ============================================================================
 # Export Public API
 # ============================================================================
@@ -708,5 +739,6 @@ __all__ = [
     "CircuitState",
     "RetryMetrics",
     "PROVIDER_CONFIGS",
-    "create_retry_handler"
+    "create_retry_handler",
+    "retry_with_backoff"
 ]

@@ -463,13 +463,36 @@ async def delete_episode(
 # Character Management Endpoints
 # ============================================================================
 
-@router.post("/series/{series_id}/characters", response_model=CharacterResponse, status_code=201)
+@router.post("/series/{series_id}/characters", response_model=CharacterResponse, status_code=201, deprecated=True)
 async def create_character(
     series_id: str,
     character: CharacterCreate,
     db: Session = Depends(get_db)
 ):
-    """Create a new character for a series"""
+    """
+    Create a new character for a series
+    
+    **⚠️ 已弃用 / DEPRECATED**: 此端点已弃用，将在 v4.0 中移除。
+    请使用统一端点: `POST /api/v1/characters`
+    
+    **迁移指南 / Migration Guide**:
+    ```python
+    # 旧方式 (已弃用) / Old way (deprecated)
+    POST /api/v1/seko/series/{series_id}/characters
+    {
+        "name": "角色名",
+        "description": "描述"
+    }
+    
+    # 新方式 (推荐) / New way (recommended)
+    POST /api/v1/characters
+    {
+        "name": "角色名",
+        "description": "描述",
+        "series_id": "{series_id}"  # 添加 series_id 字段
+    }
+    ```
+    """
     try:
         # Verify series exists
         series = db.query(Series).filter(Series.id == series_id).first()
@@ -502,12 +525,17 @@ async def create_character(
         raise HTTPException(status_code=500, detail=f"Failed to create character: {str(e)}")
 
 
-@router.get("/series/{series_id}/characters", response_model=List[CharacterResponse])
+@router.get("/series/{series_id}/characters", response_model=List[CharacterResponse], deprecated=True)
 async def list_characters(
     series_id: str,
     db: Session = Depends(get_db)
 ):
-    """List all characters in a series"""
+    """
+    List all characters in a series
+    
+    **⚠️ 已弃用 / DEPRECATED**: 此端点已弃用，将在 v4.0 中移除。
+    请使用: `GET /api/v1/characters?series_id={series_id}`
+    """
     try:
         characters = db.query(Character).filter(
             Character.series_id == series_id
@@ -519,12 +547,17 @@ async def list_characters(
         raise HTTPException(status_code=500, detail=f"Failed to list characters: {str(e)}")
 
 
-@router.get("/characters/{character_id}", response_model=CharacterResponse)
+@router.get("/characters/{character_id}", response_model=CharacterResponse, deprecated=True)
 async def get_character(
     character_id: str,
     db: Session = Depends(get_db)
 ):
-    """Get character details"""
+    """
+    Get character details
+    
+    **⚠️ 已弃用 / DEPRECATED**: 此端点已弃用，将在 v4.0 中移除。
+    请使用: `GET /api/v1/characters/{character_id}`
+    """
     try:
         character = db.query(Character).filter(Character.id == character_id).first()
         
@@ -539,13 +572,18 @@ async def get_character(
         raise HTTPException(status_code=500, detail=f"Failed to get character: {str(e)}")
 
 
-@router.put("/characters/{character_id}", response_model=CharacterResponse)
+@router.put("/characters/{character_id}", response_model=CharacterResponse, deprecated=True)
 async def update_character(
     character_id: str,
     character_update: CharacterUpdate,
     db: Session = Depends(get_db)
 ):
-    """Update character details"""
+    """
+    Update character details
+    
+    **⚠️ 已弃用 / DEPRECATED**: 此端点已弃用，将在 v4.0 中移除。
+    请使用: `PUT /api/v1/characters/{character_id}`
+    """
     try:
         character = db.query(Character).filter(Character.id == character_id).first()
         
@@ -571,12 +609,17 @@ async def update_character(
         raise HTTPException(status_code=500, detail=f"Failed to update character: {str(e)}")
 
 
-@router.delete("/characters/{character_id}", status_code=204)
+@router.delete("/characters/{character_id}", status_code=204, deprecated=True)
 async def delete_character(
     character_id: str,
     db: Session = Depends(get_db)
 ):
-    """Delete character"""
+    """
+    Delete character
+    
+    **⚠️ 已弃用 / DEPRECATED**: 此端点已弃用，将在 v4.0 中移除。
+    请使用: `DELETE /api/v1/characters/{character_id}`
+    """
     try:
         character = db.query(Character).filter(Character.id == character_id).first()
         
@@ -595,13 +638,18 @@ async def delete_character(
         raise HTTPException(status_code=500, detail=f"Failed to delete character: {str(e)}")
 
 
-@router.post("/characters/{character_id}/reference")
+@router.post("/characters/{character_id}/reference", deprecated=True)
 async def upload_reference_image(
     character_id: str,
     file: UploadFile = File(...),
     db: Session = Depends(get_db)
 ):
-    """Upload a reference image for a character"""
+    """
+    Upload a reference image for a character
+    
+    **⚠️ 已弃用 / DEPRECATED**: 此端点已弃用，将在 v4.0 中移除。
+    请使用: `POST /api/v1/characters/{character_id}/reference`
+    """
     import os
     import aiofiles
     

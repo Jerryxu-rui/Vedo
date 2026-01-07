@@ -38,6 +38,57 @@
 
 ---
 
+## 🎥 Video Demonstrations
+
+Vedo generates high-quality videos from simple ideas, scripts, and novels. Here are some examples of videos created by the platform:
+
+<table>
+<tr>
+<td align="center" width="33%">
+  <strong>Idea2Video Example</strong><br/>
+  <em>"A cat and dog become best friends"</em><br/>
+  <small>Children's cartoon style, 3 scenes</small>
+</td>
+<td align="center" width="33%">
+  <strong>Script2Video Example</strong><br/>
+  <em>School basketball scene</em><br/>
+  <small>Animated style, dynamic camera angles</small>
+</td>
+<td align="center" width="33%">
+  <strong>Novel2Video Example</strong><br/>
+  <em>Fantasy adventure adaptation</em><br/>
+  <small>Episodic content, character consistency</small>
+</td>
+</tr>
+<tr>
+<td align="center" width="33%">
+  <!-- Video placeholder 1 -->
+  <div style="background: #1a1a2e; padding: 20px; border-radius: 10px; color: white;">
+    🎬 Video Example 1<br/>
+    <small>Upload to video hosting service<br/>and embed URL here</small>
+  </div>
+</td>
+<td align="center" width="33%">
+  <!-- Video placeholder 2 -->
+  <div style="background: #1a1a2e; padding: 20px; border-radius: 10px; color: white;">
+    🎬 Video Example 2<br/>
+    <small>Upload to video hosting service<br/>and embed URL here</small>
+  </div>
+</td>
+<td align="center" width="33%">
+  <!-- Video placeholder 3 -->
+  <div style="background: #1a1a2e; padding: 20px; border-radius: 10px; color: white;">
+    🎬 Video Example 3<br/>
+    <small>Upload to video hosting service<br/>and embed URL here</small>
+  </div>
+</td>
+</tr>
+</table>
+
+*Note: Actual video files are generated in the `.working_dir` directory during operation. To showcase videos in this README, upload them to a video hosting service (YouTube, Vimeo, etc.) and replace the placeholders with embedded video links.*
+
+---
+
 ## 🏗️ Architecture Overview
 
 Vedo follows a modular, service-oriented architecture:

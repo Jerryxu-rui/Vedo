@@ -82,3 +82,16 @@ test_results/
 screenshots/
 benchmark_results.json
 vimax-project.tar.gz
+
+# Documentation files - keep only README files
+*.md
+!readme.md
+!README_ZH.md
+!CONTRIBUTING.md
+
+# Zip files
+*.zip
+zipFile.zip
+
+# Other documentation directories
+docs/

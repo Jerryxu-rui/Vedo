@@ -16,6 +16,11 @@
     <a href="https://github.com/Jerryxu-rui/Vedo/commits/main"><img src="https://img.shields.io/github/last-commit/Jerryxu-rui/Vedo" alt="GitHub last commit"></a>
   </p>
 
+  <p>
+    <a href="readme.md"><img src="https://img.shields.io/badge/English-1a1a2e?style=for-the-badge"></a>
+    <a href="README_ZH.md"><img src="https://img.shields.io/badge/中文版-1a1a2e?style=for-the-badge"></a>
+  </p>
+
 </div>
 
 ---
@@ -42,50 +47,101 @@
 
 Vedo generates high-quality videos from simple ideas, scripts, and novels. Here are some examples of videos created by the platform:
 
+### 🎬 Sample Videos
+
 <table>
 <tr>
 <td align="center" width="33%">
-  <strong>Idea2Video Example</strong><br/>
-  <em>"A cat and dog become best friends"</em><br/>
-  <small>Children's cartoon style, 3 scenes</small>
+  <strong>Video Example 1</strong><br/>
+  <em>Idea2Video Generation</em><br/>
+  <small>Cat and dog friendship story</small>
 </td>
 <td align="center" width="33%">
-  <strong>Script2Video Example</strong><br/>
-  <em>School basketball scene</em><br/>
-  <small>Animated style, dynamic camera angles</small>
+  <strong>Video Example 2</strong><br/>
+  <em>Script2Video Generation</em><br/>
+  <small>School basketball scene</small>
 </td>
 <td align="center" width="33%">
-  <strong>Novel2Video Example</strong><br/>
-  <em>Fantasy adventure adaptation</em><br/>
-  <small>Episodic content, character consistency</small>
+  <strong>Video Example 3</strong><br/>
+  <em>Novel2Video Adaptation</em><br/>
+  <small>Fantasy adventure episode</small>
 </td>
 </tr>
 <tr>
 <td align="center" width="33%">
-  <!-- Video placeholder 1 -->
-  <div style="background: #1a1a2e; padding: 20px; border-radius: 10px; color: white;">
-    🎬 Video Example 1<br/>
-    <small>Upload to video hosting service<br/>and embed URL here</small>
-  </div>
+  <a href="https://oq1k07e2lmv.feishu.cn/wiki/NBiDw5PToi3PPOk4AF9ce36vnjd?fromScene=spaceOverview#share-ALDTdEFOroreGexJOUocSp0Nn6g">
+    <div style="background: #1a1a2e; padding: 20px; border-radius: 10px; color: white; cursor: pointer;">
+      🎬 Watch Video 1<br/>
+      <small>Click to view on Feishu</small>
+    </div>
+  </a>
 </td>
 <td align="center" width="33%">
-  <!-- Video placeholder 2 -->
-  <div style="background: #1a1a2e; padding: 20px; border-radius: 10px; color: white;">
-    🎬 Video Example 2<br/>
-    <small>Upload to video hosting service<br/>and embed URL here</small>
-  </div>
+  <a href="https://oq1k07e2lmv.feishu.cn/wiki/NBiDw5PToi3PPOk4AF9ce36vnjd?fromScene=spaceOverview#share-BwcTd4F6rorO9VxSi1wcSPe6nZc">
+    <div style="background: #1a1a2e; padding: 20px; border-radius: 10px; color: white; cursor: pointer;">
+      🎬 Watch Video 2<br/>
+      <small>Click to view on Feishu</small>
+    </div>
+  </a>
 </td>
 <td align="center" width="33%">
-  <!-- Video placeholder 3 -->
-  <div style="background: #1a1a2e; padding: 20px; border-radius: 10px; color: white;">
-    🎬 Video Example 3<br/>
-    <small>Upload to video hosting service<br/>and embed URL here</small>
-  </div>
+  <a href="https://oq1k07e2lmv.feishu.cn/wiki/NBiDw5PToi3PPOk4AF9ce36vnjd?fromScene=spaceOverview#share-Igw0ddbKEoaA0KxbaO7ctm3qnsb">
+    <div style="background: #1a1a2e; padding: 20px; border-radius: 10px; color: white; cursor: pointer;">
+      🎬 Watch Video 3<br/>
+      <small>Click to view on Feishu</small>
+    </div>
+  </a>
 </td>
 </tr>
 </table>
 
-*Note: Actual video files are generated in the `.working_dir` directory during operation. To showcase videos in this README, upload them to a video hosting service (YouTube, Vimeo, etc.) and replace the placeholders with embedded video links.*
+<table>
+<tr>
+<td align="center" width="33%">
+  <strong>Video Example 4</strong><br/>
+  <em>Character Consistency</em><br/>
+  <small>Maintains character across scenes</small>
+</td>
+<td align="center" width="33%">
+  <strong>Video Example 5</strong><br/>
+  <em>Scene Transitions</em><br/>
+  <small>Smooth camera movements</small>
+</td>
+<td align="center" width="33%">
+  <strong>Video Example 6</strong><br/>
+  <em>Final Compilation</em><br/>
+  <small>Complete video with audio</small>
+</td>
+</tr>
+<tr>
+<td align="center" width="33%">
+  <a href="https://oq1k07e2lmv.feishu.cn/wiki/NBiDw5PToi3PPOk4AF9ce36vnjd?fromScene=spaceOverview#share-QG6dda8NtoinL8xwkNCcJtusnMg">
+    <div style="background: #1a1a2e; padding: 20px; border-radius: 10px; color: white; cursor: pointer;">
+      🎬 Watch Video 4<br/>
+      <small>Click to view on Feishu</small>
+    </div>
+  </a>
+</td>
+<td align="center" width="33%">
+  <a href="https://oq1k07e2lmv.feishu.cn/wiki/NBiDw5PToi3PPOk4AF9ce36vnjd?fromScene=spaceOverview#share-NxU0dHRqHoXyqRx4MRacgpFhnXd">
+    <div style="background: #1a1a2e; padding: 20px; border-radius: 10px; color: white; cursor: pointer;">
+      🎬 Watch Video 5<br/>
+      <small>Click to view on Feishu</small>
+    </div>
+  </a>
+</td>
+<td align="center" width="33%">
+  <a href="https://oq1k07e2lmv.feishu.cn/wiki/NBiDw5PToi3PPOk4AF9ce36vnjd?fromScene=spaceOverview#share-UZXXdN3bao9WctxvJoZcxWlJn9f">
+    <div style="background: #1a1a2e; padding: 20px; border-radius: 10px; color: white; cursor: pointer;">
+      🎬 Watch Video 6<br/>
+      <small>Click to view on Feishu</small>
+    </div>
+  </a>
+</td>
+</tr>
+</table>
+
+*Note: Videos are hosted on Feishu (Chinese collaboration platform). Click on any video card to watch the generated content. These demonstrate Vedo's capabilities across different generation modes and scenarios.*
 
 ---
 

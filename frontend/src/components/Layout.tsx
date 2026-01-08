@@ -28,11 +28,13 @@ function Layout() {
       <main className="main">
         <Outlet />
       </main>
-      <footer className="footer">
-        <div className="container">
-          <p>ViMax - AI-Powered Video Generation Platform</p>
-        </div>
-      </footer>
+      {!location.pathname.startsWith('/idea2video') && (
+        <footer className="footer">
+          <div className="container">
+            <p>ViMax - AI-Powered Video Generation Platform</p>
+          </div>
+        </footer>
+      )}
     </div>
   )
 }

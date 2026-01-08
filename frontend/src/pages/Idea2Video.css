@@ -2259,3 +2259,86 @@
   min-width: 36px;
   text-align: right;
 }
+
+/* Shot Details Section - Video Prompt Display */
+.shot-details-section {
+  margin-top: 16px;
+  padding: 16px;
+  background: rgba(99, 102, 241, 0.05);
+  border: 1px solid rgba(99, 102, 241, 0.15);
+  border-radius: 12px;
+}
+
+.shot-info-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.shot-info-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #e0e0e0;
+}
+
+.shot-camera-info {
+  font-size: 12px;
+  color: #888;
+  padding: 4px 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+}
+
+.shot-prompt-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.shot-prompt-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6366f1;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.shot-prompt-text {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #c0c0c0;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  border-left: 3px solid #6366f1;
+  margin: 0;
+}
+
+/* Expand layout - remove extra padding/margin at bottom */
+.studio-layout {
+  min-height: calc(100vh - 64px);
+  height: calc(100vh - 64px);
+}
+
+.right-panel-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.main-preview {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.storyboard-view .main-preview {
+  flex: 1;
+  overflow-y: auto;
+}

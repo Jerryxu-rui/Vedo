@@ -326,6 +326,10 @@ async def generate_videos_for_shots(
                 # Get workflow with new session
                 bg_workflow = get_or_create_workflow(episode_id, bg_db)
                 
+                # Transition to VIDEO_GENERATING state first
+                bg_workflow.transition_to(WorkflowState.VIDEO_GENERATING)
+                save_workflow_state(bg_db, bg_workflow)
+                
                 # Initialize pipeline
                 config_path = f"configs/{workflow_mode}2video.yaml"
                 adapter = create_adapter(bg_workflow.mode, config_path)

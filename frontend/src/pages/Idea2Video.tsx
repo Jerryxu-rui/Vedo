@@ -1619,18 +1619,6 @@ function Idea2Video() {
                   </div>
                 </div>
               )}
-              
-              {/* Shot Details with Video Prompt */}
-              <div className="shot-details-section">
-                <div className="shot-info-row">
-                  <span className="shot-info-label">分镜 {selectedShot + 1}:</span>
-                  <span className="shot-camera-info">{currentShot?.camera_angle} | {currentShot?.camera_movement}</span>
-                </div>
-                <div className="shot-prompt-section">
-                  <span className="shot-prompt-label">视频生成提示词:</span>
-                  <p className="shot-prompt-text">{currentShot?.visual_desc || currentShot?.description || '暂无描述'}</p>
-                </div>
-              </div>
             </div>
           )}
 

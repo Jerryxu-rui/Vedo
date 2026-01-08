@@ -2,10 +2,7 @@ import { useState, useCallback, useRef, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useWorkflowWebSocket } from '../hooks/useWebSocket'
 import WorkflowProgress from '../components/WorkflowProgress'
-import SegmentPreview from '../components/SegmentPreview'
-import SegmentTimeline from '../components/SegmentTimeline'
-import CompilationPanel from '../components/CompilationPanel'
-import type { VideoSegment, CompilationConfig } from '../types/segment'
+import type { VideoSegment } from '../types/segment'
 import './Idea2Video.css'
 
 interface Character {

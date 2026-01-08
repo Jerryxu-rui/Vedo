@@ -1299,8 +1299,39 @@ function Idea2Video() {
     return stepInfo[workflow.step] || { label: '处理中', detail: '请稍候...' }
   }
 
+  const renderGeneratingOverlay = () => {
+    if (workflow.status !== 'generating') return null
+    const progressInfo = getStepProgressText()
+    return (
+      <div className="generating-overlay-banner">
+        <div className="overlay-spinner"></div>
+        <div className="overlay-status">
+          <span className="overlay-main-text">{progressInfo.label}</span>
+          <span className="overlay-sub-text">{progressInfo.detail}</span>
+        </div>
+        {workflow.progress > 0 && (
+          <div className="overlay-progress">
+            <div className="overlay-progress-bar">
+              <div 
+                className="overlay-progress-fill" 
+                style={{ width: `${Math.round(workflow.progress * 100)}%` }}
+              />
+            </div>
+            <span className="overlay-percentage">{Math.round(workflow.progress * 100)}%</span>
+          </div>
+        )}
+      </div>
+    )
+  }
+
   const renderRightPanel = () => {
-    if (workflow.step === 'input' || workflow.status === 'generating') {
+    const hasContent = workflow.outline || 
+                       (workflow.characters && workflow.characters.length > 0) || 
+                       (workflow.scenes && workflow.scenes.length > 0) || 
+                       (workflow.shots && workflow.shots.length > 0) ||
+                       (workflow.storyboard && workflow.storyboard.length > 0)
+
+    if (workflow.step === 'input' && !hasContent) {
       const progressInfo = getStepProgressText()
       return (
         <div className="right-panel-empty">
@@ -1340,6 +1371,7 @@ function Idea2Video() {
     if (workflow.step === 'outline' && workflow.outline) {
       return (
         <div className="right-panel-content">
+          {renderGeneratingOverlay()}
           <div className="panel-header">
             <h3>第1集: {workflow.outline.title}</h3>
             <span className="badge badge-success">已有视频</span>
@@ -1382,6 +1414,7 @@ function Idea2Video() {
     if (workflow.step === 'characters') {
       return (
         <div className="right-panel-content">
+          {renderGeneratingOverlay()}
           <div className="panel-header">
             <h3>角色设计</h3>
             <span className="badge badge-info">内容由 AI 生成</span>
@@ -1418,6 +1451,7 @@ function Idea2Video() {
     if (workflow.step === 'scenes') {
       return (
         <div className="right-panel-content">
+          {renderGeneratingOverlay()}
           <div className="panel-header">
             <h3>第1集: {workflow.outline?.title}</h3>
             <span className="badge badge-info">内容由 AI 生成</span>
@@ -1470,6 +1504,7 @@ function Idea2Video() {
       if (workflow.storyboard.length === 0) {
         return (
           <div className="right-panel-content">
+            {renderGeneratingOverlay()}
             <div className="panel-header">
               <h3>分镜设计</h3>
               <span className="badge badge-info">内容由 AI 生成</span>
@@ -1488,6 +1523,7 @@ function Idea2Video() {
 
       return (
         <div className="right-panel-content storyboard-view">
+          {renderGeneratingOverlay()}
           <div className="storyboard-header">
             <button className="btn-icon" onClick={() => handleEditShot(selectedShot)}>
               ✏️ 编辑分镜
@@ -1640,6 +1676,7 @@ function Idea2Video() {
 
       return (
         <div className="right-panel-content video-shots-view">
+          {renderGeneratingOverlay()}
           <div className="panel-header">
             <h3>分镜视频编辑</h3>
             <span className="badge badge-info">

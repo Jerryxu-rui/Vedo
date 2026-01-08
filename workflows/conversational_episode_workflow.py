@@ -268,6 +268,9 @@ class ConversationalEpisodeWorkflow:
     
     def transition_to(self, new_state: WorkflowState) -> bool:
         """转换到新状态"""
+        # Idempotent: if already in target state, return True without error
+        if self.state == new_state:
+            return True
         if self.can_transition_to(new_state):
             self.state = new_state
             self.context["updated_at"] = datetime.now().isoformat()

@@ -166,5 +166,89 @@
             "path": ".working_dir/idea2video/character_portraits/3_老龟智者/back.png",
             "description": "A back view portrait of 老龟智者."
         }
+    },
+    "阳光": {
+        "front": {
+            "path": ".working_dir/idea2video/character_portraits/1_阳光/front.png",
+            "description": "A front view portrait of 阳光."
+        },
+        "side": {
+            "path": ".working_dir/idea2video/character_portraits/1_阳光/side.png",
+            "description": "A side view portrait of 阳光."
+        },
+        "back": {
+            "path": ".working_dir/idea2video/character_portraits/1_阳光/back.png",
+            "description": "A back view portrait of 阳光."
+        }
+    },
+    "陈伯": {
+        "front": {
+            "path": ".working_dir/idea2video/character_portraits/2_陈伯/front.png",
+            "description": "A front view portrait of 陈伯."
+        },
+        "side": {
+            "path": ".working_dir/idea2video/character_portraits/2_陈伯/side.png",
+            "description": "A side view portrait of 陈伯."
+        },
+        "back": {
+            "path": ".working_dir/idea2video/character_portraits/2_陈伯/back.png",
+            "description": "A back view portrait of 陈伯."
+        }
+    },
+    "墨影": {
+        "front": {
+            "path": ".working_dir/idea2video/character_portraits/0_墨影/front.png",
+            "description": "A front view portrait of 墨影."
+        },
+        "side": {
+            "path": ".working_dir/idea2video/character_portraits/0_墨影/side.png",
+            "description": "A side view portrait of 墨影."
+        },
+        "back": {
+            "path": ".working_dir/idea2video/character_portraits/0_墨影/back.png",
+            "description": "A back view portrait of 墨影."
+        }
+    },
+    "艾米莉 (Emily)": {
+        "front": {
+            "path": ".working_dir/idea2video/character_portraits/2_艾米莉 (Emily)/front.png",
+            "description": "A front view portrait of 艾米莉 (Emily)."
+        },
+        "side": {
+            "path": ".working_dir/idea2video/character_portraits/2_艾米莉 (Emily)/side.png",
+            "description": "A side view portrait of 艾米莉 (Emily)."
+        },
+        "back": {
+            "path": ".working_dir/idea2video/character_portraits/2_艾米莉 (Emily)/back.png",
+            "description": "A back view portrait of 艾米莉 (Emily)."
+        }
+    },
+    "姜饼 (Gingerbread)": {
+        "front": {
+            "path": ".working_dir/idea2video/character_portraits/0_姜饼 (Gingerbread)/front.png",
+            "description": "A front view portrait of 姜饼 (Gingerbread)."
+        },
+        "side": {
+            "path": ".working_dir/idea2video/character_portraits/0_姜饼 (Gingerbread)/side.png",
+            "description": "A side view portrait of 姜饼 (Gingerbread)."
+        },
+        "back": {
+            "path": ".working_dir/idea2video/character_portraits/0_姜饼 (Gingerbread)/back.png",
+            "description": "A back view portrait of 姜饼 (Gingerbread)."
+        }
+    },
+    "豆包 (Bean Bun)": {
+        "front": {
+            "path": ".working_dir/idea2video/character_portraits/1_豆包 (Bean Bun)/front.png",
+            "description": "A front view portrait of 豆包 (Bean Bun)."
+        },
+        "side": {
+            "path": ".working_dir/idea2video/character_portraits/1_豆包 (Bean Bun)/side.png",
+            "description": "A side view portrait of 豆包 (Bean Bun)."
+        },
+        "back": {
+            "path": ".working_dir/idea2video/character_portraits/1_豆包 (Bean Bun)/back.png",
+            "description": "A back view portrait of 豆包 (Bean Bun)."
+        }
     }
 }

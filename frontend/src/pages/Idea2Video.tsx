@@ -79,7 +79,7 @@ function Idea2Video() {
   const [searchParams] = useSearchParams()
   const [idea, setIdea] = useState('')
   const [style, setStyle] = useState('cinematic')
-  const [isRestoringDraft, setIsRestoringDraft] = useState(false)
+  const [, setIsRestoringDraft] = useState(false)
   const [showModelSettings, setShowModelSettings] = useState(false)
   const [videoModel, setVideoModel] = useState('veo3-fast')
   const [imageModel, setImageModel] = useState('doubao-seedream-4-0-250828')
@@ -112,10 +112,8 @@ function Idea2Video() {
   })
 
   const [selectedShot, setSelectedShot] = useState<number>(0)
-  const [selectedSegment, setSelectedSegment] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<'video' | 'audio' | 'music'>('video')
   const [showWebSocketProgress, setShowWebSocketProgress] = useState(false)
-  const [showSegmentWorkflow, setShowSegmentWorkflow] = useState(false)
   const [draggedShotIndex, setDraggedShotIndex] = useState<number | null>(null)
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
   const chatEndRef = useRef<HTMLDivElement>(null)
@@ -1144,7 +1142,7 @@ function Idea2Video() {
     }
   }
 
-  const handleShotRegenerate = async (shotIndex: number, changes: any) => {
+  const handleShotRegenerate = async (shotIndex: number, _changes?: any) => {
     try {
       const shot = workflow.storyboard[shotIndex]
 
@@ -2013,16 +2011,20 @@ function Idea2Video() {
                         </option>
                       ))
                     ) : (
-                      <>
-                        <option value="gemini-2.0-flash-exp">Gemini 2.0 Flash (Google)</option>
-                        <option value="gemini-1.5-pro">Gemini 1.5 Pro (Google)</option>
-                        <option value="gemini-1.5-flash">Gemini 1.5 Flash (Google)</option>
-                        <option value="gpt-4o">GPT-4o (OpenAI)</option>
-                        <option value="gpt-4o-mini">GPT-4o Mini (OpenAI)</option>
-                        <option value="claude-3-5-sonnet-20241022">Claude 3.5 Sonnet (Anthropic)</option>
-                        <option value="qwen-plus">Qwen Plus (Alibaba)</option>
-                        <option value="deepseek-chat">DeepSeek Chat (DeepSeek)</option>
-                      </>
+                      [
+                        { id: 'gemini-2.0-flash-exp', name: 'Gemini 2.0 Flash (Google)' },
+                        { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro (Google)' },
+                        { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash (Google)' },
+                        { id: 'gpt-4o', name: 'GPT-4o (OpenAI)' },
+                        { id: 'gpt-4o-mini', name: 'GPT-4o Mini (OpenAI)' },
+                        { id: 'claude-3-5-sonnet-20241022', name: 'Claude 3.5 Sonnet (Anthropic)' },
+                        { id: 'qwen-plus', name: 'Qwen Plus (Alibaba)' },
+                        { id: 'deepseek-chat', name: 'DeepSeek Chat (DeepSeek)' }
+                      ].map(model => (
+                        <option key={model.id} value={model.id}>
+                          {model.name}
+                        </option>
+                      ))
                     )}
                   </select>
                   {llmModels.find(m => m.id === llmModel)?.description && (

@@ -19,6 +19,7 @@ dependencies = [
     "psycopg2-binary>=2.9.11",
     "pydantic>=2.10.0",
     "python-multipart>=0.0.21",
+    "requests>=2.32.5",
     "scenedetect[opencv]>=0.6.7.1",
     "sqlalchemy>=2.0.45",
     "uvicorn>=0.34.0",

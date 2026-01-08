@@ -1288,17 +1288,50 @@ function Idea2Video() {
     }
   }
 
+  const getStepProgressText = () => {
+    const stepInfo: Record<string, { label: string, detail: string }> = {
+      'outline': { label: '故事大纲', detail: '正在构思精彩的故事情节...' },
+      'characters': { label: '角色设计', detail: '正在设计独特的角色形象...' },
+      'scenes': { label: '场景设计', detail: '正在构建视觉场景...' },
+      'storyboard': { label: '分镜设计', detail: '正在绘制分镜画面...' },
+      'video': { label: '视频生成', detail: '正在生成视频内容...' }
+    }
+    return stepInfo[workflow.step] || { label: '处理中', detail: '请稍候...' }
+  }
+
   const renderRightPanel = () => {
     if (workflow.step === 'input' || workflow.status === 'generating') {
+      const progressInfo = getStepProgressText()
       return (
         <div className="right-panel-empty">
           {workflow.status === 'generating' ? (
             <div className="generating-state">
               <div className="spinner-large"></div>
-              <p>正在生成中...</p>
+              <div className="generating-status-text">
+                <span className="main-text">{progressInfo.label}</span>
+                <span className="sub-text">{progressInfo.detail}</span>
+              </div>
+              {workflow.progress > 0 && (
+                <div className="progress-indicator">
+                  <div className="progress-bar-container">
+                    <div 
+                      className="progress-bar-fill" 
+                      style={{ width: `${Math.round(workflow.progress * 100)}%` }}
+                    />
+                  </div>
+                  <span className="progress-percentage">{Math.round(workflow.progress * 100)}%</span>
+                </div>
+              )}
+              {workflow.progressMessage && (
+                <p className="progress-message">{workflow.progressMessage}</p>
+              )}
             </div>
           ) : (
-            <p>输入您的想法后，内容将在此处显示</p>
+            <div className="empty-hint">
+              <div className="hint-icon">💡</div>
+              <p>输入您的想法后，内容将在此处显示</p>
+              <span className="hint-examples">例如：一个关于太空探险的科幻故事</span>
+            </div>
           )}
         </div>
       )

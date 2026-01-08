@@ -1106,12 +1106,22 @@ function Idea2Video() {
       const data = await response.json()
 
       // Update storyboard with shot data from database
-      const updatedStoryboard = workflow.storyboard.map(shot => {
-        const dbShot = data.shots.find((s: any) => s.id === shot.id)
+      // Match by id first, then fall back to shot_number (index + 1) for temp IDs
+      const updatedStoryboard = workflow.storyboard.map((shot, index) => {
+        // Try matching by ID first
+        let dbShot = data.shots.find((s: any) => s.id === shot.id)
+        
+        // Fallback: match by shot_number (1-based index)
+        if (!dbShot) {
+          dbShot = data.shots.find((s: any) => s.shot_number === index + 1)
+        }
+        
         if (dbShot) {
           return {
             ...shot,
+            id: dbShot.id, // Update ID to match database
             video_url: dbShot.video_url,
+            frame_url: dbShot.frame_url,
             status: dbShot.status
           }
         }

@@ -14,6 +14,10 @@ except ImportError:
 from .base_a2a_agent import BaseA2AAgent, SimpleA2AAgent, create_simple_agent
 from .screenwriter_a2a import ScreenwriterA2AAgent, create_screenwriter_agent
 
+# Memory-augmented agents
+from .memory_augmented_agent import MemoryAugmentedAgent, MemoryConfig
+from .screenwriter_memory import ScreenwriterMemory, create_memory_screenwriter
+
 __all__ = [
     # A2A Protocol
     "BaseA2AAgent",
@@ -21,6 +25,12 @@ __all__ = [
     "create_simple_agent",
     "ScreenwriterA2AAgent",
     "create_screenwriter_agent",
+    
+    # Memory System
+    "MemoryAugmentedAgent",
+    "MemoryConfig",
+    "ScreenwriterMemory",
+    "create_memory_screenwriter",
 ]
 
 # Add legacy agents if available

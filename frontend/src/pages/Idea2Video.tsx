@@ -34,6 +34,7 @@ interface Shot {
   visual_desc?: string
   image_url: string
   video_url?: string
+  status?: string
 }
 
 interface Outline {
@@ -41,8 +42,8 @@ interface Outline {
   genre: string
   style: string
   synopsis: string
-  characters_summary: Array<{name: string, role: string, description?: string}>
-  plot_summary: Array<{act?: string, scene?: string, description: string}>
+  characters_summary: Array<{ name: string, role: string, description?: string }>
+  plot_summary: Array<{ act?: string, scene?: string, description: string }>
   highlights: string[]
 }
 
@@ -85,10 +86,10 @@ function Idea2Video() {
   const [showModelSettings, setShowModelSettings] = useState(false)
   const [videoModel, setVideoModel] = useState('veo3-fast')
   const [imageModel, setImageModel] = useState('doubao-seedream-4-0-250828')
-  const [videoModels, setVideoModels] = useState<Array<{name: string, description: string}>>([])
-  const [imageModels, setImageModels] = useState<Array<{name: string, description: string}>>([])
+  const [videoModels, setVideoModels] = useState<Array<{ name: string, description: string }>>([])
+  const [imageModels, setImageModels] = useState<Array<{ name: string, description: string }>>([])
   const [llmModel, setLlmModel] = useState('gemini-2.0-flash-exp')
-  const [llmModels, setLlmModels] = useState<Array<{id: string, name: string, provider: string, description: string}>>([])
+  const [llmModels, setLlmModels] = useState<Array<{ id: string, name: string, provider: string, description: string }>>([])
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: '1',
@@ -97,7 +98,7 @@ function Idea2Video() {
       timestamp: new Date()
     }
   ])
-  
+
   const [workflow, setWorkflow] = useState<WorkflowState>({
     step: 'input',
     status: 'idle',
@@ -121,7 +122,7 @@ function Idea2Video() {
   const [draggedShotIndex, setDraggedShotIndex] = useState<number | null>(null)
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
   const chatEndRef = useRef<HTMLDivElement>(null)
-  
+
   // Shot editing state (for storyboard view)
   const [editingShot, setEditingShot] = useState<number | null>(null)
   const [editedDescription, setEditedDescription] = useState('')
@@ -143,24 +144,32 @@ function Idea2Video() {
     const shot = workflow.storyboard[editingShot]
     const isNewShot = shot.id.startsWith('shot-')
     
+    if (!workflow.episodeId) {
+      addMessage('system', '无法保存：没有episode ID')
+      return
+    }
+    
     try {
       if (isNewShot) {
-        // This is a client-generated shot, need to create it in database
-        // First, we need a scene_id - get the first scene or create a default one
-        const response = await fetch(`/api/v1/conversational/episode/${workflow.episodeId}/state`)
-        const stateData = await response.json()
-        
-        let sceneId = null
-        if (stateData.scenes && stateData.scenes.length > 0) {
-          sceneId = stateData.scenes[0].id
+        // For new shots, we need to create them in the database first
+        // Get the first scene from the episode
+        const stateResponse = await fetch(`/api/v1/conversational/episode/${workflow.episodeId}/state`)
+        if (!stateResponse.ok) {
+          throw new Error('Failed to get episode state')
         }
         
-        if (!sceneId) {
-          addMessage('system', '无法保存分镜：没有找到场景。请先生成场景。')
+        const stateData = await stateResponse.json()
+        const scenes = stateData.scenes || []
+        
+        if (scenes.length === 0) {
+          addMessage('system', '无法保存新分镜：请先生成场景')
           return
         }
         
-        // Create shot in database
+        // Use the first scene's ID
+        const sceneId = scenes[0].id
+        
+        // Create the shot in database
         const createResponse = await fetch(
           `/api/v1/conversational/episode/${workflow.episodeId}/shots`,
           {
@@ -171,18 +180,21 @@ function Idea2Video() {
               shot_number: shot.shot_number,
               visual_desc: editedDescription,
               camera_angle: editedCameraAngle,
-              camera_movement: editedCameraMovement
+              camera_movement: editedCameraMovement || 'STATIC'
             })
           }
         )
         
         if (!createResponse.ok) {
-          throw new Error('Failed to create shot in database')
+          const errorText = await createResponse.text()
+          console.error('Create shot error:', errorText)
+          throw new Error(`Failed to create shot: ${createResponse.status} ${errorText}`)
         }
         
         const createData = await createResponse.json()
+        console.log('Shot created:', createData)
         
-        // Update local state with database shot
+        // Update local state with the database shot
         const updatedStoryboard = [...workflow.storyboard]
         updatedStoryboard[editingShot] = {
           ...createData.shot,
@@ -190,10 +202,11 @@ function Idea2Video() {
         }
         
         setWorkflow(prev => ({ ...prev, storyboard: updatedStoryboard }))
-        addMessage('assistant', `分镜${editingShot + 1}已创建并保存`)
+        setEditingShot(null)
+        addMessage('assistant', `分镜${editingShot + 1}已创建并保存到数据库`)
         
       } else {
-        // Existing shot, update it
+        // Update existing shot in database
         const updateResponse = await fetch(
           `/api/v1/conversational/episode/${workflow.episodeId}/shots/${shot.id}`,
           {
@@ -208,10 +221,13 @@ function Idea2Video() {
         )
         
         if (!updateResponse.ok) {
-          throw new Error('Failed to update shot in database')
+          const errorText = await updateResponse.text()
+          console.error('Update shot error:', errorText)
+          throw new Error(`Failed to update shot: ${updateResponse.status}`)
         }
         
         const updateData = await updateResponse.json()
+        console.log('Shot updated:', updateData)
         
         // Update local state
         const updatedStoryboard = [...workflow.storyboard]
@@ -221,25 +237,25 @@ function Idea2Video() {
         }
         
         setWorkflow(prev => ({ ...prev, storyboard: updatedStoryboard }))
-        addMessage('assistant', `分镜${editingShot + 1}已更新`)
+        setEditingShot(null)
+        addMessage('assistant', `分镜${editingShot + 1}已更新并保存到数据库`)
       }
-      
-      setEditingShot(null)
       
     } catch (error) {
       console.error('Error saving shot:', error)
+      setEditingShot(null)
       addMessage('system', `保存分镜失败: ${error instanceof Error ? error.message : '请重试'}`)
     }
   }
 
   const handleDeleteShot = async (index: number) => {
     if (!confirm(`确定要删除分镜${index + 1}吗？`)) return
-    
+
     const shotToDelete = workflow.storyboard[index]
-    
+
     // Check if this is a database shot (UUID format) or a client-generated shot (shot-timestamp format)
     const isDbShot = shotToDelete.id && !shotToDelete.id.startsWith('shot-')
-    
+
     // If shot exists in database, delete from database
     if (isDbShot && workflow.episodeId) {
       try {
@@ -247,12 +263,12 @@ function Idea2Video() {
           `/api/v1/conversational/episode/${workflow.episodeId}/shots/${shotToDelete.id}`,
           { method: 'DELETE' }
         )
-        
+
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}))
           throw new Error(errorData.detail || 'Failed to delete shot from database')
         }
-        
+
         addMessage('assistant', `分镜${index + 1}已从数据库删除`)
       } catch (error) {
         console.error('Error deleting shot:', error)
@@ -263,11 +279,11 @@ function Idea2Video() {
       // Client-side only shot, just remove from local state
       addMessage('assistant', `分镜${index + 1}已删除`)
     }
-    
+
     // Update local state
     const updatedStoryboard = workflow.storyboard.filter((_, i) => i !== index)
     setWorkflow(prev => ({ ...prev, storyboard: updatedStoryboard }))
-    
+
     if (selectedShot >= updatedStoryboard.length) {
       setSelectedShot(Math.max(0, updatedStoryboard.length - 1))
     }
@@ -283,7 +299,7 @@ function Idea2Video() {
       visual_desc: '新分镜描述',
       image_url: ''
     }
-    
+
     const updatedStoryboard = [...workflow.storyboard, newShot]
     setWorkflow(prev => ({ ...prev, storyboard: updatedStoryboard }))
     setSelectedShot(updatedStoryboard.length - 1)
@@ -297,7 +313,7 @@ function Idea2Video() {
       id: `shot-${Date.now()}`,
       shot_number: workflow.storyboard.length + 1
     }
-    
+
     const updatedStoryboard = [...workflow.storyboard]
     updatedStoryboard.splice(index + 1, 0, newShot)
     setWorkflow(prev => ({ ...prev, storyboard: updatedStoryboard }))
@@ -323,7 +339,7 @@ function Idea2Video() {
 
   const handleDrop = (e: React.DragEvent, targetIndex: number) => {
     e.preventDefault()
-    
+
     if (draggedShotIndex === null || draggedShotIndex === targetIndex) {
       setDraggedShotIndex(null)
       setDragOverIndex(null)
@@ -362,8 +378,8 @@ function Idea2Video() {
           progress: message.progress || prev.progress,
           progressMessage: message.message || prev.progressMessage,
           status: message.state === 'running' ? 'generating' :
-                  message.state === 'completed' ? 'ready' :
-                  message.state === 'failed' ? 'error' : prev.status
+            message.state === 'completed' ? 'ready' :
+              message.state === 'failed' ? 'error' : prev.status
         }))
 
         // Update step based on stage
@@ -409,7 +425,7 @@ function Idea2Video() {
         setImageModels(data.image || [])
       })
       .catch(err => console.error('Failed to load models:', err))
-    
+
     // Load LLM models
     fetch('/api/v1/chat/models')
       .then(res => res.json())
@@ -419,7 +435,7 @@ function Idea2Video() {
         }
       })
       .catch(err => console.error('Failed to load LLM models:', err))
-    
+
     // Load user preferences
     const savedPrefs = localStorage.getItem('model_preferences')
     if (savedPrefs) {
@@ -427,7 +443,7 @@ function Idea2Video() {
       setVideoModel(prefs.video_model || 'veo3-fast')
       setImageModel(prefs.image_model || 'doubao-seedream-4-0-250828')
     }
-    
+
     // Load LLM model preference
     const savedLLM = localStorage.getItem('selectedLLMModel')
     if (savedLLM) {
@@ -444,13 +460,13 @@ function Idea2Video() {
         setIsRestoringDraft(false)
         return
       }
-      
+
       const data = await response.json()
       const backendState = (data.state as string).toLowerCase()
-      
+
       const step = determineStepFromState(backendState)
       const isGenerating = backendState.includes('generating') || backendState.includes('refining')
-      
+
       setWorkflow(prev => ({
         ...prev,
         step: step,
@@ -463,7 +479,7 @@ function Idea2Video() {
         videoUrl: data.video_path || null,
         error: data.error || null
       }))
-      
+
       setMessages([
         {
           id: '1',
@@ -472,7 +488,7 @@ function Idea2Video() {
           timestamp: new Date()
         }
       ])
-      
+
       if (data.outline) {
         setMessages(prev => [...prev, {
           id: `restored-outline-${Date.now()}`,
@@ -481,11 +497,11 @@ function Idea2Video() {
           timestamp: new Date()
         }])
       }
-      
+
       if (isGenerating) {
         pollStatus(episodeId, step)
       }
-      
+
     } catch (error) {
       console.error('Error restoring draft:', error)
     } finally {
@@ -562,7 +578,7 @@ function Idea2Video() {
         setTimeout(() => pollStatus(episodeId, expectedStep, pollCount + 1), 3000)
         return
       }
-      
+
       const data = await response.json()
       const backendState = (data.state as string).toLowerCase()
 
@@ -584,7 +600,7 @@ function Idea2Video() {
       if (isStepComplete(backendState, expectedStep)) {
         const newStep = determineStepFromState(backendState)
         const videoUrl = data.video_path || data.step_info?.video?.path || null
-        
+
         setWorkflow(prev => ({
           ...prev,
           step: newStep === 'completed' ? 'completed' : expectedStep as typeof prev.step,
@@ -613,7 +629,7 @@ function Idea2Video() {
       // detect as stale and allow user to retry
       if (pollCount > 15) {
         const currentStep = determineStepFromState(backendState)
-        
+
         // Update to current state and stop generating status
         setWorkflow(prev => ({
           ...prev,
@@ -627,7 +643,7 @@ function Idea2Video() {
         addMsg('system', `生成似乎已停止。当前阶段: ${getStepLabel(currentStep)}。请点击"继续生成"重试。`)
         return
       }
-      
+
       setTimeout(() => pollStatus(episodeId, expectedStep, pollCount + 1), 2000)
 
     } catch (error) {
@@ -639,23 +655,23 @@ function Idea2Video() {
   // 快速意图检测（第一层：规则匹配）
   const quickIntentCheck = (message: string): 'chat' | 'video_generation' | 'uncertain' => {
     const msg = message.toLowerCase().trim()
-    
+
     // 明确的对话意图
     if (/^(hi|hello|你好|嗨|您好|hey)$/i.test(msg)) return 'chat'
     if (/^(help|帮助|功能|what can you do|你能做什么)$/i.test(msg)) return 'chat'
     if (/^(how|why|what|when|where|怎么|为什么|什么|如何)/.test(msg) && msg.length < 30) return 'chat'
-    
+
     // 明确的视频生成意图
     if (/(创建|生成|制作|做一个|拍摄|录制).*(视频|短片|影片|电影)/.test(msg)) return 'video_generation'
     if (/(make|create|generate|produce).*(video|film|movie|short)/.test(msg)) return 'video_generation'
     if (/^(拍|录|做).*(视频|短片)/.test(msg)) return 'video_generation'
-    
+
     // 不确定，需要LLM判断
     return 'uncertain'
   }
 
   // LLM意图分类（第二层：AI判断）
-  const classifyIntentWithLLM = async (message: string): Promise<{intent: string, confidence: number, reasoning: string}> => {
+  const classifyIntentWithLLM = async (message: string): Promise<{ intent: string, confidence: number, reasoning: string }> => {
     try {
       const response = await fetch('/api/v1/chat/classify-intent', {
         method: 'POST',
@@ -665,7 +681,7 @@ function Idea2Video() {
           model: llmModel
         })
       })
-      
+
       if (!response.ok) {
         // Check for API key error (503)
         if (response.status === 503) {
@@ -694,7 +710,7 @@ function Idea2Video() {
         }
         throw new Error('Intent classification failed')
       }
-      
+
       const data = await response.json()
       return {
         intent: data.intent,
@@ -727,7 +743,7 @@ function Idea2Video() {
         content: '正在思考...',
         timestamp: new Date()
       }])
-      
+
       // 创建或获取对话线程
       let threadId = workflow.context?.chat_thread_id
       if (!threadId) {
@@ -773,25 +789,25 @@ function Idea2Video() {
 （然后系统会自动触发视频生成）`
           })
         })
-        
+
         if (!threadResponse.ok) {
           throw new Error(`Failed to create thread: ${threadResponse.status}`)
         }
-        
+
         const threadData = await threadResponse.json()
         threadId = threadData.id
-        
+
         setWorkflow(prev => ({
           ...prev,
           context: { ...prev.context, chat_thread_id: threadId }
         }))
       }
-      
+
       // 验证threadId存在
       if (!threadId) {
         throw new Error('No thread ID available')
       }
-      
+
       // 调用聊天API
       const chatResponse = await fetch(`/api/v1/chat/threads/${threadId}/messages`, {
         method: 'POST',
@@ -802,19 +818,19 @@ function Idea2Video() {
           stream: false
         })
       })
-      
+
       if (!chatResponse.ok) {
         throw new Error(`Chat request failed: ${chatResponse.status}`)
       }
-      
+
       const chatData = await chatResponse.json()
-      
+
       // 移除"正在思考"消息
       setMessages(prev => prev.filter(msg => msg.id !== thinkingMsgId))
-      
+
       if (chatData.response) {
         addMessage('assistant', chatData.response)
-        
+
         // 🔥 SMART AUTO-TRIGGER: Check if accumulated content is now sufficient for video generation
         // Collect recent user messages to build complete video idea
         const recentUserMessages = messages
@@ -822,30 +838,30 @@ function Idea2Video() {
           .slice(-3)  // Last 3 user messages
           .map(msg => msg.content)
           .join(' ')
-        
+
         const combinedIdea = `${recentUserMessages} ${message}`.trim()
-        
+
         // Re-classify the accumulated content
         const recheck = await classifyIntentWithLLM(combinedIdea)
-        
+
         if (recheck.intent === 'video_generation' && recheck.confidence > 0.65) {
           console.log('[Auto-trigger] Accumulated content is now sufficient for video generation')
           console.log('[Auto-trigger] Combined idea:', combinedIdea)
           console.log('[Auto-trigger] Confidence:', recheck.confidence)
-          
+
           // Remove the chat response and trigger video generation
           setMessages(prev => prev.slice(0, -1))  // Remove last assistant message
-          
+
           // Add transition message
           addMessage('assistant', '太好了！我已经理解了您的想法。现在开始为您生成视频...')
-          
+
           // Trigger video generation with accumulated content
           await handleVideoGeneration(combinedIdea)
         }
       } else {
         addMessage('system', '收到了响应，但内容为空。')
       }
-      
+
     } catch (error) {
       // 移除"正在思考"消息
       setMessages(prev => prev.filter(msg => !msg.content.includes('正在思考')))
@@ -885,15 +901,15 @@ function Idea2Video() {
       // Handle validation errors (400 Bad Request)
       if (!createResponse.ok) {
         const errorData = await createResponse.json().catch(() => ({ detail: 'Failed to create workflow' }))
-        
+
         // Check if it's a content validation error
         if (errorData.detail && typeof errorData.detail === 'object') {
           const detail = errorData.detail
-          
+
           if (detail.error === 'content_validation_failed' || detail.error === 'invalid_intent') {
             // Remove the "generating" message
             setMessages(prev => prev.filter(msg => !msg.content.includes('好的，我将为您精心打造')))
-            
+
             // Reset workflow state
             setWorkflow(prev => ({
               ...prev,
@@ -901,10 +917,10 @@ function Idea2Video() {
               step: 'input'
             }))
             setShowWebSocketProgress(false)
-            
+
             // Display validation error with helpful guidance
             let errorMessage = detail.message || '视频创意需要更多细节'
-            
+
             if (detail.validation) {
               const v = detail.validation
               errorMessage += '\n\n缺少的元素：'
@@ -918,26 +934,26 @@ function Idea2Video() {
                   return labels[e] || e
                 }).join('\n• ')
               }
-              
+
               if (v.suggestions && v.suggestions.length > 0) {
                 errorMessage += '\n\n建议：'
                 errorMessage += '\n• ' + v.suggestions.join('\n• ')
               }
             }
-            
+
             if (detail.examples && detail.examples.length > 0) {
               errorMessage += '\n\n示例：'
               errorMessage += '\n• ' + detail.examples.join('\n• ')
             }
-            
+
             addMessage('system', errorMessage)
             return
           }
         }
-        
+
         throw new Error(typeof errorData.detail === 'string' ? errorData.detail : 'Failed to create workflow')
       }
-      
+
       const createData = await createResponse.json()
       const episodeId = createData.episode_id
 
@@ -954,7 +970,7 @@ function Idea2Video() {
     } catch (error) {
       // Remove the "generating" message
       setMessages(prev => prev.filter(msg => !msg.content.includes('好的，我将为您精心打造')))
-      
+
       setWorkflow(prev => ({
         ...prev,
         status: 'error',
@@ -973,10 +989,10 @@ function Idea2Video() {
     const userMessage = idea.trim()
     addMessage('user', userMessage)
     setIdea('')  // 立即清空输入框
-    
+
     // 第一层：快速规则检测
     const quickIntent = quickIntentCheck(userMessage)
-    
+
     if (quickIntent === 'chat') {
       // 明确是对话，直接处理
       await handleChatMessage(userMessage)
@@ -986,12 +1002,12 @@ function Idea2Video() {
     } else {
       // 不确定，使用LLM分类（第二层）
       addMessage('assistant', '让我理解一下您的需求...')
-      
+
       const classification = await classifyIntentWithLLM(userMessage)
-      
+
       // 移除"理解中"消息
       setMessages(prev => prev.filter(msg => !msg.content.includes('让我理解一下')))
-      
+
       if (classification.intent === 'video_generation' && classification.confidence > 0.6) {
         await handleVideoGeneration(userMessage)
       } else {
@@ -1056,7 +1072,7 @@ function Idea2Video() {
       await fetch(`/api/v1/conversational/episode/${workflow.episodeId}/storyboard/confirm`, {
         method: 'POST'
       })
-      
+
       // ✅ NEW: Generate videos directly for shots (not segments!)
       const response = await fetch(
         `/api/v1/conversational/episode/${workflow.episodeId}/shots/generate-videos`,
@@ -1070,10 +1086,10 @@ function Idea2Video() {
 
       const data = await response.json()
       addMessage('assistant', `已开始为 ${data.total_shots} 个分镜生成视频...`)
-      
+
       // Poll for video generation progress
       pollShotVideoGeneration(workflow.episodeId)
-      
+
     } catch (error) {
       setWorkflow(prev => ({ ...prev, status: 'error', error: 'Failed to generate videos' }))
       addMessage('system', `视频生成失败: ${error instanceof Error ? error.message : '请重试'}`)
@@ -1086,14 +1102,14 @@ function Idea2Video() {
       const response = await fetch(
         `/api/v1/conversational/episode/${episodeId}/shots/video-status`
       )
-      
+
       if (!response.ok) {
         setTimeout(() => pollShotVideoGeneration(episodeId), 2000)
         return
       }
 
       const data = await response.json()
-      
+
       // Update storyboard with shot data from database
       const updatedStoryboard = workflow.storyboard.map(shot => {
         const dbShot = data.shots.find((s: any) => s.id === shot.id)
@@ -1106,7 +1122,7 @@ function Idea2Video() {
         }
         return shot
       })
-      
+
       setWorkflow(prev => ({
         ...prev,
         storyboard: updatedStoryboard
@@ -1134,32 +1150,49 @@ function Idea2Video() {
   const handleShotRegenerate = async (shotIndex: number, changes: any) => {
     try {
       const shot = workflow.storyboard[shotIndex]
-      const segmentId = (shot as any).segment_id
-      
-      if (!segmentId) {
-        addMessage('system', '该分镜还没有生成视频')
+
+      if (!shot.id || shot.id.startsWith('shot-')) {
+        addMessage('system', '该分镜还没有保存到数据库，请先保存')
         return
       }
 
-      const response = await fetch(`/api/v1/segment-review/${segmentId}/regenerate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          feedback: changes.description || changes.prompt,
-          changes: changes
-        })
-      })
-
-      if (!response.ok) throw new Error('Failed to regenerate shot video')
+      if (!workflow.episodeId) {
+        addMessage('system', '无法重新生成：没有episode ID')
+        return
+      }
 
       addMessage('assistant', `正在重新生成分镜${shotIndex + 1}的视频...`)
-      
-      // Refresh video generation status
-      if (workflow.episodeId) {
-        pollShotVideoGeneration(workflow.episodeId)
+
+      const response = await fetch(
+        `/api/v1/conversational/episode/${workflow.episodeId}/shots/${shot.id}/regenerate-video`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        }
+      )
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('Regenerate shot error:', errorText)
+        throw new Error(`Failed to regenerate shot video: ${response.status}`)
       }
+
+      const data = await response.json()
+      console.log('Shot regeneration started:', data)
+
+      // Update local state to show generating status
+      const updatedStoryboard = [...workflow.storyboard]
+      updatedStoryboard[shotIndex] = {
+        ...shot,
+        status: 'generating_video'
+      }
+      setWorkflow(prev => ({ ...prev, storyboard: updatedStoryboard }))
+
+      // Poll for video generation status
+      pollShotVideoGeneration(workflow.episodeId)
     } catch (error) {
-      addMessage('system', '重新生成失败，请重试')
+      console.error('Error regenerating shot:', error)
+      addMessage('system', `重新生成失败: ${error instanceof Error ? error.message : '请重试'}`)
     }
   }
 
@@ -1173,7 +1206,7 @@ function Idea2Video() {
         const isCompleted = (shot as any).status === 'completed'
         return hasVideo || isCompleted
       })
-      
+
       if (shotsWithVideos.length === 0) {
         addMessage('system', '没有可合成的视频。请先生成分镜视频。')
         return
@@ -1211,12 +1244,12 @@ function Idea2Video() {
       }
 
       const data = await response.json()
-      
+
       console.log('[Compilation] Started with job_id:', data.job_id, 'total_shots:', data.total_shots)
-      
+
       // Poll for compilation status
       pollCompilationStatus(data.job_id)
-      
+
     } catch (error) {
       console.error('[Compilation] Error:', error)
       addMessage('system', `视频合成失败: ${error instanceof Error ? error.message : '请重试'}`)
@@ -1225,13 +1258,13 @@ function Idea2Video() {
 
   const pollCompilationStatus = async (jobId: string) => {
     if (!workflow.episodeId) return
-    
+
     try {
       // ✅ NEW: Use shot-based compilation status endpoint
       const response = await fetch(
         `/api/v1/conversational/episode/${workflow.episodeId}/video/compilation-status/${jobId}`
       )
-      
+
       if (!response.ok) {
         setTimeout(() => pollCompilationStatus(jobId), 2000)
         return
@@ -1284,7 +1317,7 @@ function Idea2Video() {
             <span className="badge badge-success">已有视频</span>
             <span className="badge badge-info">内容由 AI 生成</span>
           </div>
-          
+
           <div className="content-section">
             <h4 className="section-title">故事梗概</h4>
             <div className="synopsis-box">
@@ -1325,7 +1358,7 @@ function Idea2Video() {
             <h3>角色设计</h3>
             <span className="badge badge-info">内容由 AI 生成</span>
           </div>
-          
+
           {workflow.characters.length > 0 ? (
             <div className="characters-grid-new">
               {workflow.characters.map((char) => (
@@ -1361,7 +1394,7 @@ function Idea2Video() {
             <h3>第1集: {workflow.outline?.title}</h3>
             <span className="badge badge-info">内容由 AI 生成</span>
           </div>
-          
+
           {workflow.scenes.length > 0 ? (
             <>
               <div className="content-section">
@@ -1405,7 +1438,7 @@ function Idea2Video() {
 
     if (workflow.step === 'storyboard') {
       const currentShot = workflow.storyboard[selectedShot]
-      
+
       if (workflow.storyboard.length === 0) {
         return (
           <div className="right-panel-content">
@@ -1441,11 +1474,11 @@ function Idea2Video() {
               ➕ 添加分镜
             </button>
           </div>
-          
+
           {editingShot === selectedShot ? (
             <div className="shot-edit-form">
               <h4>编辑分镜 {selectedShot + 1}</h4>
-              
+
               <div className="edit-field">
                 <label>镜头描述:</label>
                 <textarea
@@ -1576,7 +1609,7 @@ function Idea2Video() {
     if (workflow.step === 'video' && workflow.storyboard.length > 0) {
       const currentShot = workflow.storyboard[selectedShot]
       const hasVideos = workflow.storyboard.some(shot => (shot as any).video_url)
-      
+
       return (
         <div className="right-panel-content video-shots-view">
           <div className="panel-header">
@@ -1667,9 +1700,8 @@ function Idea2Video() {
               {workflow.storyboard.map((shot, index) => (
                 <div
                   key={shot.id || index}
-                  className={`timeline-shot-card ${selectedShot === index ? 'active' : ''} ${
-                    draggedShotIndex === index ? 'dragging' : ''
-                  } ${dragOverIndex === index ? 'drag-over' : ''}`}
+                  className={`timeline-shot-card ${selectedShot === index ? 'active' : ''} ${draggedShotIndex === index ? 'dragging' : ''
+                    } ${dragOverIndex === index ? 'drag-over' : ''}`}
                   draggable={true}
                   onDragStart={(e) => handleDragStart(e, index)}
                   onDragOver={(e) => handleDragOver(e, index)}
@@ -1697,7 +1729,7 @@ function Idea2Video() {
                     <span className="shot-number">分镜 {index + 1}</span>
                     <span className="shot-status">
                       {(shot as any).video_url ? '✓ 已生成' :
-                       (shot as any).status === 'generating' ? '⟳ 生成中' : '○ 待生成'}
+                        (shot as any).status === 'generating' ? '⟳ 生成中' : '○ 待生成'}
                     </span>
                   </div>
                   <div className="shot-actions">
@@ -1731,7 +1763,7 @@ function Idea2Video() {
           {hasVideos && (
             <div className="panel-footer">
               <button
-                className="btn-primary-action"
+                className="btn-primary-action glass-button"
                 onClick={() => {
                   if (workflow.episodeId) {
                     handleCompileShots()
@@ -1754,7 +1786,7 @@ function Idea2Video() {
               Your browser does not support video playback.
             </video>
           </div>
-          
+
           <div className="video-actions">
             <a href={workflow.videoUrl} download className="btn-primary-action">
               导出
@@ -1817,7 +1849,7 @@ function Idea2Video() {
         </button>
       </div>
 
-      <div className="chat-panel">
+      <div className="chat-panel glass-card">
         <div className="shot-selector">
           <span>■ 分镜{selectedShot + 1}</span>
           <button className="btn-generate-video">图片生成视频</button>
@@ -1842,8 +1874,8 @@ function Idea2Video() {
             <WorkflowProgress
               workflowId={workflow.episodeId}
               state={workflow.status === 'generating' ? 'running' :
-                     workflow.status === 'ready' ? 'completed' :
-                     workflow.status === 'error' ? 'failed' : 'pending'}
+                workflow.status === 'ready' ? 'completed' :
+                  workflow.status === 'error' ? 'failed' : 'pending'}
               progress={workflow.progress}
               stage={workflow.step}
               message={workflow.progressMessage}
@@ -1938,7 +1970,7 @@ function Idea2Video() {
                 <option value="anime">动漫风格</option>
                 <option value="realistic">写实风格</option>
               </select>
-              
+
               <button
                 type="button"
                 className="btn-model-settings"
@@ -1947,10 +1979,10 @@ function Idea2Video() {
               >
                 ⚙️
               </button>
-              
+
               <span className="char-count">+10</span>
             </div>
-            
+
             {showModelSettings && (
               <div className="model-settings-dropdown">
                 <div className="dropdown-header">
@@ -1963,7 +1995,7 @@ function Idea2Video() {
                     ✕
                   </button>
                 </div>
-                
+
                 <div className="model-select-group">
                   <label className="model-select-label">
                     <span className="label-icon">🤖</span>
@@ -2002,7 +2034,7 @@ function Idea2Video() {
                     </span>
                   )}
                 </div>
-                
+
                 <div className="model-select-group">
                   <label className="model-select-label">
                     <span className="label-icon">🎬</span>
@@ -2066,7 +2098,7 @@ function Idea2Video() {
         </div>
       </div>
 
-      <div className="content-panel">
+      <div className="content-panel glass-card">
         {renderRightPanel()}
       </div>
     </div>

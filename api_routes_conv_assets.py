@@ -77,7 +77,32 @@ async def create_shot(
         # Verify scene exists and belongs to this episode
         scene = db.query(Scene).filter(Scene.id == request.scene_id).first()
         if not scene:
-            raise HTTPException(status_code=404, detail="Scene not found")
+            # Scene doesn't exist - create a default scene for this episode
+            print(f"[Shot Creation] Scene {request.scene_id} not found, creating default scene for episode {episode_id}")
+            
+            # Check if a default scene already exists
+            default_scene = db.query(Scene).filter(
+                Scene.episode_id == episode_id,
+                Scene.location == "Default Scene"
+            ).first()
+            
+            if not default_scene:
+                # Create a new default scene
+                default_scene = Scene(
+                    episode_id=episode_id,
+                    scene_number=1,
+                    location="Default Scene",
+                    description="Auto-generated default scene for manual shots",
+                    visual_description="Default scene for shots created before scene generation"
+                )
+                db.add(default_scene)
+                db.flush()
+                print(f"[Shot Creation] Created default scene {default_scene.id} for episode {episode_id}")
+            
+            # Use the default scene
+            scene = default_scene
+            request.scene_id = scene.id
+        
         if scene.episode_id != episode_id:
             raise HTTPException(status_code=400, detail="Scene does not belong to this episode")
         

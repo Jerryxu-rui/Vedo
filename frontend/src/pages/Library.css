@@ -24,11 +24,11 @@
 }
 
 .filter-tab:hover {
-  color: var(--text);
+  color: var(--text-primary);
 }
 
 .filter-tab.active {
-  background: var(--primary);
+  background: var(--color-primary-500);
   color: white;
 }
 
@@ -42,14 +42,16 @@
   width: 40px;
   height: 40px;
   border: 3px solid var(--surface-light);
-  border-top-color: var(--primary);
+  border-top-color: var(--color-primary-500);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto 16px;
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .empty-state {
@@ -67,6 +69,7 @@
 .empty-state h3 {
   font-size: 24px;
   margin-bottom: 8px;
+  color: var(--text-primary);
 }
 
 .empty-state p {
@@ -80,16 +83,16 @@
 }
 
 .video-card {
-  background: var(--surface);
+  /* background handled by glass-card */
   border-radius: 16px;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-default);
   transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
 }
 
 .video-card:hover {
   transform: translateY(-4px);
-  border-color: var(--primary);
+  border-color: var(--color-primary-500);
 }
 
 .video-card.clickable {
@@ -97,7 +100,7 @@
 }
 
 .video-card.clickable:hover {
-  box-shadow: 0 8px 24px rgba(124, 58, 237, 0.2);
+  box-shadow: var(--shadow-glow-primary);
 }
 
 .video-thumbnail {
@@ -135,17 +138,17 @@
 
 .video-status-badge.completed {
   background: rgba(16, 185, 129, 0.2);
-  color: var(--success);
+  color: var(--color-success-400);
 }
 
 .video-status-badge.processing {
   background: rgba(99, 102, 241, 0.2);
-  color: var(--primary);
+  color: var(--color-primary-400);
 }
 
 .video-status-badge.pending {
   background: rgba(245, 158, 11, 0.2);
-  color: var(--warning);
+  color: var(--color-warning-400);
 }
 
 .video-info {
@@ -156,6 +159,7 @@
   font-size: 16px;
   margin-bottom: 8px;
   line-height: 1.4;
+  color: var(--text-primary);
 }
 
 .video-date {
@@ -182,7 +186,7 @@
 
 .btn-danger {
   background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
+  color: var(--color-error-400);
   border: 1px solid rgba(239, 68, 68, 0.2);
 }
 
@@ -198,5 +202,5 @@
 
 .video-status-badge.draft {
   background: rgba(168, 85, 247, 0.2);
-  color: #a855f7;
+  color: var(--color-secondary-400);
 }

@@ -28,7 +28,7 @@ function Library() {
       if (seriesResponse.ok) {
         const seriesList = await seriesResponse.json()
         const videoList: VideoItem[] = []
-        
+
         for (const series of seriesList || []) {
           const episodesResponse = await fetch(`/api/v1/seko/series/${series.id}/episodes`)
           if (episodesResponse.ok) {
@@ -44,7 +44,7 @@ function Library() {
             }
           }
         }
-        
+
         videoList.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
         setVideos(videoList)
       }
@@ -57,7 +57,7 @@ function Library() {
 
   const handleDelete = async (videoId: string, e: React.MouseEvent) => {
     e.stopPropagation()
-    
+
     if (!confirm('确定要删除这个草稿吗？此操作无法撤销。')) {
       return
     }
@@ -104,20 +104,20 @@ function Library() {
 
       <div className="library-controls">
         <div className="filter-tabs">
-          <button 
-            className={`filter-tab ${filter === 'all' ? 'active' : ''}`}
+          <button
+            className={`filter-tab glass-button ${filter === 'all' ? 'active' : ''}`}
             onClick={() => setFilter('all')}
           >
             All Videos
           </button>
-          <button 
-            className={`filter-tab ${filter === 'completed' ? 'active' : ''}`}
+          <button
+            className={`filter-tab glass-button ${filter === 'completed' ? 'active' : ''}`}
             onClick={() => setFilter('completed')}
           >
             Completed
           </button>
-          <button 
-            className={`filter-tab ${filter === 'processing' ? 'active' : ''}`}
+          <button
+            className={`filter-tab glass-button ${filter === 'processing' ? 'active' : ''}`}
             onClick={() => setFilter('processing')}
           >
             Processing
@@ -139,9 +139,9 @@ function Library() {
       ) : (
         <div className="video-grid">
           {filteredVideos.map(video => (
-            <div 
-              key={video.id} 
-              className={`video-card ${video.status === 'draft' ? 'clickable' : ''}`}
+            <div
+              key={video.id}
+              className={`video-card glass-card ${video.status === 'draft' ? 'clickable' : ''}`}
               onClick={() => video.status === 'draft' && navigate(`/idea2video?episode=${video.id}`)}
             >
               <div className="video-thumbnail">
@@ -167,7 +167,7 @@ function Library() {
                 {video.status === 'draft' && (
                   <>
                     <button
-                      className="btn btn-primary btn-sm"
+                      className="btn btn-primary btn-sm glass-button"
                       onClick={(e) => {
                         e.stopPropagation()
                         navigate(`/idea2video?episode=${video.id}`)
@@ -176,7 +176,7 @@ function Library() {
                       继续编辑
                     </button>
                     <button
-                      className="btn btn-danger btn-sm"
+                      className="btn btn-danger btn-sm glass-button"
                       onClick={(e) => handleDelete(video.id, e)}
                       disabled={deleting === video.id}
                     >
@@ -186,18 +186,18 @@ function Library() {
                 )}
                 {video.status === 'completed' && (
                   <>
-                    <a 
+                    <a
                       href={`/api/v1/videos/episode/${video.id}/stream`}
-                      className="btn btn-secondary btn-sm"
+                      className="btn btn-secondary btn-sm glass-button"
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={(e) => e.stopPropagation()}
                     >
                       预览
                     </a>
-                    <a 
+                    <a
                       href={`/api/v1/videos/episode/${video.id}/download`}
-                      className="btn btn-primary btn-sm"
+                      className="btn btn-primary btn-sm glass-button"
                       onClick={(e) => e.stopPropagation()}
                     >
                       下载

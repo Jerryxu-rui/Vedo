@@ -10,7 +10,7 @@ function Layout() {
 
   return (
     <div className="layout">
-      <header className="header">
+      <header className="header glass-navbar">
         <div className="container header-content">
           <Link to="/" className="logo">
             <span className="logo-icon">V</span>

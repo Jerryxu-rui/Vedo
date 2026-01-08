@@ -1,0 +1,247 @@
+/**
+ * Error State Component Styles
+ * Provides clear visual feedback for error conditions
+ */
+
+/* ============================================
+   ERROR STATE CONTAINER
+   ============================================ */
+
+.error-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8);
+  min-height: 400px;
+}
+
+.error-state-content {
+  max-width: 500px;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+/* ============================================
+   ICON
+   ============================================ */
+
+.error-state-icon {
+  color: var(--color-error-500);
+  margin-bottom: var(--space-2);
+}
+
+.error-state-icon-default {
+  width: 48px;
+  height: 48px;
+}
+
+/* ============================================
+   TEXT CONTENT
+   ============================================ */
+
+.error-state-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-2xl);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.error-state-message {
+  font-size: var(--text-base);
+  color: var(--text-secondary);
+  line-height: var(--leading-relaxed);
+  margin: 0;
+}
+
+/* ============================================
+   ERROR DETAILS
+   ============================================ */
+
+.error-state-details-container {
+  width: 100%;
+  margin-top: var(--space-2);
+}
+
+.error-state-details-toggle {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  transition: var(--transition-fast);
+}
+
+.error-state-details-toggle:hover {
+  color: var(--text-secondary);
+  background: var(--surface-light);
+}
+
+.error-state-details-toggle:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.error-state-details {
+  margin-top: var(--space-3);
+  padding: var(--space-4);
+  background: var(--surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  text-align: left;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.error-state-details code {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--color-error-400);
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+/* ============================================
+   VALIDATION ERRORS LIST
+   ============================================ */
+
+.error-state-validation-list {
+  list-style: none;
+  padding: 0;
+  margin: var(--space-4) 0;
+  text-align: left;
+  width: 100%;
+}
+
+.error-state-validation-item {
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface);
+  border-left: 3px solid var(--color-error-500);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.error-state-validation-item:last-child {
+  margin-bottom: 0;
+}
+
+/* ============================================
+   ACTIONS
+   ============================================ */
+
+.error-state-actions {
+  display: flex;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.error-state-retry,
+.error-state-cancel {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--touch-target-min);
+}
+
+/* ============================================
+   HELP SECTION
+   ============================================ */
+
+.error-state-help {
+  margin-top: var(--space-6);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border-default);
+  width: 100%;
+}
+
+.error-state-help-text {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.error-state-help-link {
+  color: var(--color-primary-400);
+  text-decoration: none;
+  font-weight: var(--font-medium);
+  transition: var(--transition-fast);
+}
+
+.error-state-help-link:hover {
+  color: var(--color-primary-300);
+  text-decoration: underline;
+}
+
+.error-state-help-link:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+  border-radius: var(--radius-sm);
+}
+
+/* ============================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================ */
+
+@media (max-width: 768px) {
+  .error-state {
+    padding: var(--space-6) var(--space-4);
+    min-height: 300px;
+  }
+
+  .error-state-title {
+    font-size: var(--text-xl);
+  }
+
+  .error-state-message {
+    font-size: var(--text-sm);
+  }
+
+  .error-state-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .error-state-retry,
+  .error-state-cancel {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ============================================
+   ACCESSIBILITY
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .error-state-details-toggle svg {
+    transition: none !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .error-state-icon {
+    color: var(--color-error-600);
+  }
+
+  .error-state-details {
+    border-width: 2px;
+  }
+
+  .error-state-validation-item {
+    border-left-width: 4px;
+  }
+}

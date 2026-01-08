@@ -310,12 +310,25 @@ async def generate_videos_for_shots(
         
         logger.info(f"[Shot Videos] Found {len(all_shots)} shots to generate")
         
+        # Extract shot IDs and workflow mode for background task
+        shot_ids = [shot.id for shot in all_shots]
+        workflow_mode = workflow.mode.value
+        workflow_style = workflow.style
+        
         # Generate videos in background
         async def generate_all_videos():
+            # ⚠️ CRITICAL: Create NEW database session for background task
+            # The original session is request-scoped and will be closed
+            from database import SessionLocal
+            bg_db = SessionLocal()
+            
             try:
+                # Get workflow with new session
+                bg_workflow = get_or_create_workflow(episode_id, bg_db)
+                
                 # Initialize pipeline
-                config_path = f"configs/{workflow.mode.value}2video.yaml"
-                adapter = create_adapter(workflow.mode, config_path)
+                config_path = f"configs/{workflow_mode}2video.yaml"
+                adapter = create_adapter(bg_workflow.mode, config_path)
                 await adapter.initialize_pipeline()
                 
                 pipeline = adapter.pipeline
@@ -324,18 +337,26 @@ async def generate_videos_for_shots(
                 
                 logger.info(f"[Shot Videos] Pipeline initialized, working_dir: {working_dir}")
                 
-                for idx, shot in enumerate(all_shots):
+                # Get shots with new session
+                for idx, shot_id in enumerate(shot_ids):
                     try:
-                        logger.info(f"[Shot Videos] Generating video {idx + 1}/{len(all_shots)} for shot {shot.shot_number}")
+                        # Fetch shot from database with new session
+                        shot = bg_db.query(Shot).filter(Shot.id == shot_id).first()
+                        if not shot:
+                            logger.error(f"[Shot Videos] Shot {shot_id} not found")
+                            continue
+                        
+                        logger.info(f"[Shot Videos] Generating video {idx + 1}/{len(shot_ids)} for shot {shot.shot_number}")
                         
                         # Update status
                         shot.status = 'generating_video'
-                        db.commit()
+                        bg_db.commit()
+                        logger.info(f"[Shot Videos] Status updated to generating_video for shot {shot.id}")
                         
                         # Generate video
                         video_path = await generate_video_for_shot(
                             shot=shot,
-                            style=workflow.style,
+                            style=workflow_style,
                             video_generator=video_generator,
                             working_dir=working_dir
                         )
@@ -343,19 +364,28 @@ async def generate_videos_for_shots(
                         # Update shot with video URL
                         shot.video_url = video_path
                         shot.status = 'completed'
-                        db.commit()
+                        bg_db.commit()
                         
-                        logger.info(f"[Shot Videos] ✅ Shot {idx + 1}/{len(all_shots)} completed")
+                        logger.info(f"[Shot Videos] ✅ Shot {idx + 1}/{len(shot_ids)} completed, video_url saved: {video_path}")
                         
                     except Exception as e:
                         logger.error(f"[Shot Videos] ❌ Shot {idx + 1} failed: {e}")
-                        shot.status = 'failed'
-                        db.commit()
+                        import traceback
+                        traceback.print_exc()
+                        
+                        # Update shot status to failed
+                        try:
+                            shot = bg_db.query(Shot).filter(Shot.id == shot_id).first()
+                            if shot:
+                                shot.status = 'failed'
+                                bg_db.commit()
+                        except Exception as update_error:
+                            logger.error(f"[Shot Videos] Failed to update shot status: {update_error}")
                         continue
                 
                 # Update workflow state
-                workflow.transition_to(WorkflowState.VIDEO_COMPLETED)
-                save_workflow_state(db, workflow)
+                bg_workflow.transition_to(WorkflowState.VIDEO_COMPLETED)
+                save_workflow_state(bg_db, bg_workflow)
                 
                 logger.info(f"[Shot Videos] ✅ All videos generated for episode {episode_id}")
                 
@@ -363,10 +393,17 @@ async def generate_videos_for_shots(
                 logger.error(f"[Shot Videos] ❌ Generation failed: {e}")
                 import traceback
                 traceback.print_exc()
-                workflow.error = str(e)
-                # Don't transition to FAILED, just log the error
-                # The workflow can stay in current state
-                save_workflow_state(db, workflow)
+                
+                try:
+                    bg_workflow = get_or_create_workflow(episode_id, bg_db)
+                    bg_workflow.error = str(e)
+                    save_workflow_state(bg_db, bg_workflow)
+                except Exception as save_error:
+                    logger.error(f"[Shot Videos] Failed to save error state: {save_error}")
+            finally:
+                # Always close the background session
+                bg_db.close()
+                logger.info(f"[Shot Videos] Background database session closed")
         
         # Start generation in background
         background_tasks.add_task(generate_all_videos)
@@ -456,6 +493,126 @@ async def get_video_generation_status(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@router.post("/episode/{episode_id}/shots/{shot_id}/regenerate-video")
+async def regenerate_shot_video(
+    episode_id: str,
+    shot_id: str,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db)
+):
+    """
+    Regenerate video for a single shot
+    
+    Allows user to regenerate a specific shot's video if unsatisfied.
+    
+    Args:
+        episode_id: Episode ID
+        shot_id: Shot ID
+        background_tasks: FastAPI background tasks
+        db: Database session
+        
+    Returns:
+        Success message with regeneration status
+    """
+    try:
+        logger.info(f"[Shot Regenerate] Starting for shot: {shot_id}")
+        validate_episode_exists(episode_id, db)
+        workflow = get_or_create_workflow(episode_id, db)
+        
+        # Get the shot
+        shot = db.query(Shot).filter(Shot.id == shot_id).first()
+        if not shot:
+            raise HTTPException(status_code=404, detail="Shot not found")
+        
+        # Verify shot belongs to this episode
+        scene = db.query(Scene).filter(Scene.id == shot.scene_id).first()
+        if not scene or scene.episode_id != episode_id:
+            raise HTTPException(status_code=404, detail="Shot not found in this episode")
+        
+        logger.info(f"[Shot Regenerate] Found shot {shot.shot_number}: {shot.visual_desc[:50]}...")
+        
+        # Mark as regenerating
+        shot.status = 'generating_video'
+        db.commit()
+        
+        # Extract data for background task
+        workflow_mode = workflow.mode.value
+        workflow_style = workflow.style
+        
+        async def regenerate_video():
+            # ⚠️ CRITICAL: Create NEW database session for background task
+            from database import SessionLocal
+            bg_db = SessionLocal()
+            
+            try:
+                # Get shot with new session
+                shot = bg_db.query(Shot).filter(Shot.id == shot_id).first()
+                if not shot:
+                    logger.error(f"[Shot Regenerate] Shot {shot_id} not found in background task")
+                    return
+                
+                # Initialize pipeline
+                config_path = f"configs/{workflow_mode}2video.yaml"
+                bg_workflow = get_or_create_workflow(episode_id, bg_db)
+                adapter = create_adapter(bg_workflow.mode, config_path)
+                await adapter.initialize_pipeline()
+                
+                pipeline = adapter.pipeline
+                video_generator = pipeline.video_generator
+                working_dir = pipeline.working_dir
+                
+                logger.info(f"[Shot Regenerate] Pipeline initialized")
+                
+                # Generate video
+                video_path = await generate_video_for_shot(
+                    shot=shot,
+                    style=workflow_style,
+                    video_generator=video_generator,
+                    working_dir=working_dir
+                )
+                
+                # Update shot with new video URL
+                shot.video_url = video_path
+                shot.status = 'completed'
+                bg_db.commit()
+                
+                logger.info(f"[Shot Regenerate] ✅ Completed: {video_path}, video_url saved to database")
+                
+            except Exception as e:
+                logger.error(f"[Shot Regenerate] ❌ Failed: {e}")
+                import traceback
+                traceback.print_exc()
+                
+                try:
+                    shot = bg_db.query(Shot).filter(Shot.id == shot_id).first()
+                    if shot:
+                        shot.status = 'failed'
+                        bg_db.commit()
+                except Exception as update_error:
+                    logger.error(f"[Shot Regenerate] Failed to update shot status: {update_error}")
+            finally:
+                # Always close the background session
+                bg_db.close()
+                logger.info(f"[Shot Regenerate] Background database session closed")
+        
+        # Start regeneration in background
+        background_tasks.add_task(regenerate_video)
+        
+        return {
+            "message": "Shot video regeneration started",
+            "shot_id": shot_id,
+            "shot_number": shot.shot_number,
+            "status": "generating"
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"[Shot Regenerate] Error: {e}")
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @router.post("/episode/{episode_id}/video/compile")
 async def compile_shot_videos(
     episode_id: str,
@@ -501,50 +658,71 @@ async def compile_shot_videos(
         
         async def compile_videos():
             try:
+                logger.info(f"[Compilation {job_id}] Starting compilation")
+                logger.info(f"[Compilation {job_id}] Video paths: {video_paths}")
+                
+                # Check if all video files exist
+                missing_files = []
+                for path in video_paths:
+                    if not os.path.exists(path):
+                        missing_files.append(path)
+                        logger.error(f"[Compilation {job_id}] Missing video file: {path}")
+                
+                if missing_files:
+                    raise Exception(f"Missing video files: {missing_files}")
+                
                 from moviepy.editor import VideoFileClip, concatenate_videoclips
                 
-                logger.info(f"[Compilation] Loading {len(video_paths)} video clips")
+                logger.info(f"[Compilation {job_id}] Loading {len(video_paths)} video clips")
                 
                 # Load video clips
                 clips = []
-                for path in video_paths:
+                for idx, path in enumerate(video_paths):
                     try:
+                        logger.info(f"[Compilation {job_id}] Loading clip {idx + 1}/{len(video_paths)}: {path}")
                         clip = VideoFileClip(path)
                         clips.append(clip)
+                        logger.info(f"[Compilation {job_id}] ✅ Loaded clip {idx + 1}: duration={clip.duration}s")
                     except Exception as e:
-                        logger.error(f"[Compilation] Failed to load {path}: {e}")
+                        logger.error(f"[Compilation {job_id}] ❌ Failed to load {path}: {e}")
                         continue
                 
                 if not clips:
                     raise Exception("No valid video clips to compile")
                 
-                logger.info(f"[Compilation] Concatenating {len(clips)} clips")
+                logger.info(f"[Compilation {job_id}] Concatenating {len(clips)} clips")
                 
                 # Concatenate
                 final_clip = concatenate_videoclips(clips, method="compose")
+                logger.info(f"[Compilation {job_id}] ✅ Concatenated, total duration: {final_clip.duration}s")
                 
                 # Save
                 output_dir = f".working_dir/episodes/{episode_id}"
                 os.makedirs(output_dir, exist_ok=True)
                 output_path = os.path.join(output_dir, "final_video.mp4")
                 
-                logger.info(f"[Compilation] Writing final video to {output_path}")
+                logger.info(f"[Compilation {job_id}] Writing final video to {output_path}")
                 final_clip.write_videofile(
                     output_path,
                     codec='libx264',
                     audio_codec='aac',
                     temp_audiofile='temp-audio.m4a',
-                    remove_temp=True
+                    remove_temp=True,
+                    verbose=True,
+                    logger='bar'
                 )
                 
                 # Clean up
+                logger.info(f"[Compilation {job_id}] Cleaning up clips")
                 for clip in clips:
                     clip.close()
                 final_clip.close()
                 
                 # Update workflow
+                logger.info(f"[Compilation {job_id}] Updating workflow state")
                 workflow = get_or_create_workflow(episode_id, db)
                 workflow.context["video_path"] = output_path
+                workflow.context["compilation_job_id"] = job_id
                 workflow.transition_to(WorkflowState.VIDEO_COMPLETED)
                 save_workflow_state(db, workflow)
                 
@@ -554,12 +732,22 @@ async def compile_shot_videos(
                     episode.status = "completed"
                     db.commit()
                 
-                logger.info(f"[Compilation] ✅ Completed: {output_path}")
+                logger.info(f"[Compilation {job_id}] ✅ Completed: {output_path}")
                 
             except Exception as e:
-                logger.error(f"[Compilation] ❌ Failed: {e}")
+                logger.error(f"[Compilation {job_id}] ❌ Failed: {e}")
                 import traceback
                 traceback.print_exc()
+                
+                # Update workflow with error
+                try:
+                    workflow = get_or_create_workflow(episode_id, db)
+                    workflow.error = str(e)
+                    workflow.context["compilation_error"] = str(e)
+                    workflow.context["compilation_job_id"] = job_id
+                    save_workflow_state(db, workflow)
+                except Exception as save_error:
+                    logger.error(f"[Compilation {job_id}] Failed to save error state: {save_error}")
         
         background_tasks.add_task(compile_videos)
         

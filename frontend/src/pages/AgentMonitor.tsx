@@ -5,7 +5,7 @@
  * Part of Week 3: Frontend WebSocket Integration - Phase 2
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useCoordinatorWebSocket } from '../hooks/useWebSocket';
 import AgentStatusCard from '../components/AgentStatusCard';
 import './AgentMonitor.css';
@@ -60,9 +60,9 @@ export const AgentMonitor: React.FC = () => {
   const filteredAgents = Object.entries(agents).filter(([name, agent]) => {
     const matchesFilter = filter === 'all' || agent.status === filter;
     const matchesSearch = name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         agent.capabilities.some(cap => 
-                           cap.toLowerCase().includes(searchTerm.toLowerCase())
-                         );
+      agent.capabilities.some(cap =>
+        cap.toLowerCase().includes(searchTerm.toLowerCase())
+      );
     return matchesFilter && matchesSearch;
   });
 
@@ -86,19 +86,19 @@ export const AgentMonitor: React.FC = () => {
 
       {metrics && (
         <div className="agent-monitor-metrics">
-          <div className="metric-card">
+          <div className="metric-card glass-card">
             <div className="metric-value">{metrics.total_agents}</div>
             <div className="metric-label">Total Agents</div>
           </div>
-          <div className="metric-card">
+          <div className="metric-card glass-card">
             <div className="metric-value">{metrics.active_workflows}</div>
             <div className="metric-label">Active Workflows</div>
           </div>
-          <div className="metric-card">
+          <div className="metric-card glass-card">
             <div className="metric-value">{metrics.completed_workflows}</div>
             <div className="metric-label">Completed</div>
           </div>
-          <div className="metric-card">
+          <div className="metric-card glass-card">
             <div className="metric-value">{metrics.failed_workflows}</div>
             <div className="metric-label">Failed</div>
           </div>
@@ -108,31 +108,31 @@ export const AgentMonitor: React.FC = () => {
       <div className="agent-monitor-controls">
         <div className="agent-monitor-filters">
           <button
-            className={`filter-button ${filter === 'all' ? 'active' : ''}`}
+            className={`filter-button glass-button ${filter === 'all' ? 'active' : ''}`}
             onClick={() => setFilter('all')}
           >
             All ({Object.keys(agents).length})
           </button>
           <button
-            className={`filter-button ${filter === 'idle' ? 'active' : ''}`}
+            className={`filter-button glass-button ${filter === 'idle' ? 'active' : ''}`}
             onClick={() => setFilter('idle')}
           >
             Idle ({getStatusCount('idle')})
           </button>
           <button
-            className={`filter-button ${filter === 'busy' ? 'active' : ''}`}
+            className={`filter-button glass-button ${filter === 'busy' ? 'active' : ''}`}
             onClick={() => setFilter('busy')}
           >
             Busy ({getStatusCount('busy')})
           </button>
           <button
-            className={`filter-button ${filter === 'error' ? 'active' : ''}`}
+            className={`filter-button glass-button ${filter === 'error' ? 'active' : ''}`}
             onClick={() => setFilter('error')}
           >
             Error ({getStatusCount('error')})
           </button>
           <button
-            className={`filter-button ${filter === 'offline' ? 'active' : ''}`}
+            className={`filter-button glass-button ${filter === 'offline' ? 'active' : ''}`}
             onClick={() => setFilter('offline')}
           >
             Offline ({getStatusCount('offline')})
@@ -145,7 +145,7 @@ export const AgentMonitor: React.FC = () => {
             placeholder="Search agents or capabilities..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="search-input"
+            className="search-input glass-input"
           />
         </div>
       </div>

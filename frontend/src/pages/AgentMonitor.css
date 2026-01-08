@@ -20,7 +20,7 @@
   margin: 0;
   font-size: 28px;
   font-weight: 700;
-  color: #111827;
+  color: var(--text-primary);
 }
 
 .agent-monitor-connection-status {
@@ -29,21 +29,21 @@
 }
 
 .connection-status-connected {
-  color: #10b981;
+  color: var(--color-success-400);
 }
 
 .connection-status-disconnected {
-  color: #ef4444;
+  color: var(--color-error-400);
 }
 
 .agent-monitor-error {
   padding: 12px 16px;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  border-left: 4px solid #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-left: 4px solid var(--color-error-500);
   border-radius: 4px;
   margin-bottom: 24px;
-  color: #991b1b;
+  color: var(--color-error-400);
 }
 
 .agent-monitor-error strong {
@@ -59,30 +59,28 @@
 }
 
 .metric-card {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+  /* background handled by glass-card */
   border-radius: 8px;
   padding: 20px;
   text-align: center;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .metric-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-glow-primary);
 }
 
 .metric-value {
   font-size: 36px;
   font-weight: 700;
-  color: #111827;
+  color: var(--text-primary);
   margin-bottom: 8px;
 }
 
 .metric-label {
   font-size: 14px;
-  color: #6b7280;
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -102,25 +100,23 @@
 
 .filter-button {
   padding: 8px 16px;
-  background: #ffffff;
-  border: 1px solid #d1d5db;
+  background: transparent;
+  border: none;
   border-radius: 6px;
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;
-  color: #374151;
+  color: var(--text-muted);
   transition: all 0.2s;
 }
 
 .filter-button:hover {
-  background: #f9fafb;
-  border-color: #9ca3af;
+  color: var(--text-primary);
 }
 
 .filter-button.active {
-  background: #3b82f6;
-  border-color: #3b82f6;
-  color: #ffffff;
+  background: var(--color-primary-500);
+  color: white;
 }
 
 .agent-monitor-search {
@@ -131,7 +127,7 @@
 .search-input {
   width: 100%;
   padding: 8px 16px;
-  border: 1px solid #d1d5db;
+  /* border handled by glass-input */
   border-radius: 6px;
   font-size: 14px;
   transition: border-color 0.2s;
@@ -139,8 +135,8 @@
 
 .search-input:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: var(--color-primary-500);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
 .agent-monitor-grid {

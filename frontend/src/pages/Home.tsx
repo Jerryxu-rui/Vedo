@@ -12,7 +12,7 @@ function Home() {
     if (!idea.trim()) return
 
     setIsSubmitting(true)
-    
+
     localStorage.setItem('vimax_idea', idea)
     navigate('/idea2video')
   }
@@ -29,17 +29,17 @@ function Home() {
           <span className="gradient-text"> Amazing Videos</span>
         </h1>
         <p className="hero-subtitle">
-          ViMax is your AI-powered video production studio. Describe your creative vision 
+          ViMax is your AI-powered video production studio. Describe your creative vision
           and our intelligent agents will generate scripts, characters, and complete videos.
         </p>
       </section>
 
       <section className="idea-input-section">
-        <div className="card idea-card">
+        <div className="card idea-card glass-card">
           <form onSubmit={handleSubmit}>
             <div className="idea-input-wrapper">
               <textarea
-                className="idea-textarea"
+                className="idea-textarea glass-input"
                 placeholder="Describe your video idea... For example: 'A magical forest where glowing butterflies guide a lost child home at sunset. The atmosphere should be dreamlike with soft golden light filtering through ancient trees.'"
                 value={idea}
                 onChange={(e) => setIdea(e.target.value)}
@@ -47,17 +47,17 @@ function Home() {
               />
             </div>
             <div className="idea-actions">
-              <button 
-                type="submit" 
-                className="btn btn-primary"
+              <button
+                type="submit"
+                className="btn btn-primary glass-button"
                 disabled={!idea.trim() || isSubmitting}
               >
                 Generate Video from Idea
               </button>
               <span className="or-divider">or</span>
-              <button 
+              <button
                 type="button"
-                className="btn btn-secondary"
+                className="btn btn-secondary glass-button"
                 onClick={handleScriptUpload}
               >
                 Upload Existing Script
@@ -106,32 +106,32 @@ function Home() {
 
       <section className="features-section">
         <div className="feature-grid">
-          <div className="feature-card">
+          <div className="feature-card glass-card-medium">
             <div className="feature-icon">🎬</div>
             <h3>Idea to Video</h3>
             <p>Transform any creative concept into a polished video with AI-generated script and visuals</p>
           </div>
-          <div className="feature-card">
+          <div className="feature-card glass-card-medium">
             <div className="feature-icon">📝</div>
             <h3>Script to Video</h3>
             <p>Upload your script and watch it come to life with consistent characters</p>
           </div>
-          <div className="feature-card">
+          <div className="feature-card glass-card-medium">
             <div className="feature-icon">👥</div>
             <h3>Character Consistency</h3>
             <p>AI maintains visual consistency for characters across all scenes</p>
           </div>
-          <div className="feature-card">
+          <div className="feature-card glass-card-medium">
             <div className="feature-icon">🎯</div>
             <h3>Shot-by-Shot Control</h3>
             <p>Review detailed storyboards with camera movements and composition</p>
           </div>
-          <div className="feature-card">
+          <div className="feature-card glass-card-medium">
             <div className="feature-icon">📺</div>
             <h3>Multi-Episode Series</h3>
             <p>Create entire video series with consistent storytelling</p>
           </div>
-          <div className="feature-card">
+          <div className="feature-card glass-card-medium">
             <div className="feature-icon">⚡</div>
             <h3>Real-time Progress</h3>
             <p>Track generation progress with live updates</p>

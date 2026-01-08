@@ -30,8 +30,8 @@ function Script2Video() {
           progress: Math.round((message.progress || 0) * 100),
           message: message.message || prev.message,
           status: message.state === 'completed' ? 'completed' :
-                  message.state === 'failed' ? 'error' :
-                  message.state === 'running' ? 'processing' : prev.status
+            message.state === 'failed' ? 'error' :
+              message.state === 'running' ? 'processing' : prev.status
         }))
       }
     }
@@ -42,14 +42,14 @@ function Script2Video() {
     if (!file) return
 
     setFileName(file.name)
-    
+
     const text = await file.text()
     setScript(text)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!script.trim()) return
 
     setGeneration({
@@ -74,7 +74,7 @@ function Script2Video() {
       }
 
       const data = await response.json()
-      
+
       setGeneration({
         status: 'processing',
         progress: 10,
@@ -99,9 +99,9 @@ function Script2Video() {
         if (!response.ok) return
 
         const data = await response.json()
-        
+
         const progress = Math.min(data.progress || 0, 100)
-        
+
         if (data.status === 'completed') {
           setGeneration({
             status: 'completed',
@@ -141,15 +141,15 @@ function Script2Video() {
       </div>
 
       <div className="script2video-layout">
-        <div className="card input-section">
+        <div className="card input-section glass-card">
           <div className="mode-toggle">
-            <button 
+            <button
               className={`mode-btn ${uploadMode === 'paste' ? 'active' : ''}`}
               onClick={() => setUploadMode('paste')}
             >
               Paste Script
             </button>
-            <button 
+            <button
               className={`mode-btn ${uploadMode === 'upload' ? 'active' : ''}`}
               onClick={() => setUploadMode('upload')}
             >
@@ -162,8 +162,8 @@ function Script2Video() {
               <div className="form-group">
                 <label className="label">Script File</label>
                 <div className="file-upload">
-                  <input 
-                    type="file" 
+                  <input
+                    type="file"
                     accept=".txt,.md,.doc,.docx"
                     onChange={handleFileUpload}
                     id="script-file"
@@ -184,7 +184,7 @@ function Script2Video() {
               <div className="form-group">
                 <label className="label">Your Script</label>
                 <textarea
-                  className="textarea script-textarea"
+                  className="textarea script-textarea glass-input"
                   placeholder="Paste your complete script here. Include scene descriptions, dialogue, and any character information..."
                   value={script}
                   onChange={(e) => setScript(e.target.value)}
@@ -193,9 +193,9 @@ function Script2Video() {
               </div>
             )}
 
-            <button 
-              type="submit" 
-              className="btn btn-primary btn-full"
+            <button
+              type="submit"
+              className="btn btn-primary btn-full glass-button"
               disabled={!script.trim() || generation.status === 'processing'}
             >
               {generation.status === 'processing' ? 'Processing...' : 'Generate Video'}
@@ -203,7 +203,7 @@ function Script2Video() {
           </form>
         </div>
 
-        <div className="card status-section">
+        <div className="card status-section glass-card">
           <div className="status-header">
             <h3>Generation Progress</h3>
             {generation.jobId && (
@@ -219,14 +219,14 @@ function Script2Video() {
               <WorkflowProgress
                 workflowId={generation.jobId}
                 state={generation.status === 'processing' ? 'running' :
-                       generation.status === 'completed' ? 'completed' :
-                       generation.status === 'error' ? 'failed' : 'pending'}
+                  generation.status === 'completed' ? 'completed' :
+                    generation.status === 'error' ? 'failed' : 'pending'}
                 progress={generation.progress / 100}
                 message={generation.message}
               />
             </div>
           )}
-          
+
           {generation.status === 'idle' && (
             <div className="status-idle">
               <div className="status-icon">📝</div>
@@ -239,15 +239,15 @@ function Script2Video() {
               <div className="status-badge status-processing">Processing</div>
               <div className="progress-container">
                 <div className="progress-bar">
-                  <div 
-                    className="progress-fill" 
+                  <div
+                    className="progress-fill"
                     style={{ width: `${generation.progress}%` }}
                   />
                 </div>
                 <span className="progress-text">{generation.progress}%</span>
               </div>
               <p className="status-message">{generation.message}</p>
-              
+
               <div className="process-steps">
                 <div className={`process-step ${generation.progress >= 10 ? 'active' : ''}`}>
                   <span className="step-icon">✓</span>
@@ -278,9 +278,9 @@ function Script2Video() {
               <div className="status-badge status-completed">Completed</div>
               <div className="status-icon success">✓</div>
               <p>{generation.message}</p>
-              <a 
+              <a
                 href={`/api/v1/videos/episode/${generation.jobId}/download`}
-                className="btn btn-primary"
+                className="btn btn-primary glass-button"
               >
                 Download Video
               </a>
@@ -291,7 +291,7 @@ function Script2Video() {
             <div className="status-error">
               <div className="status-badge status-error">Error</div>
               <p>{generation.message}</p>
-              <button 
+              <button
                 className="btn btn-secondary"
                 onClick={() => setGeneration({ status: 'idle', progress: 0, message: '' })}
               >

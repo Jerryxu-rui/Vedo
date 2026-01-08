@@ -870,3 +870,212 @@ class SegmentReview(Base):
             'suggested_changes': self.suggested_changes or {},
             'created_at': self.created_at.isoformat() if self.created_at else None,
         }
+
+
+# ============================================================================
+# ENHANCED AGENT MEMORY SYSTEM MODELS
+# ============================================================================
+
+class EpisodeMemory(Base):
+    """Episodic Memory - Session-based memory for episode generation"""
+    __tablename__ = 'episode_memories'
+    
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    episode_id = Column(String(36), ForeignKey('episodes.id', ondelete='CASCADE'), nullable=False)
+    user_id = Column(String(255), nullable=False)
+    memory_type = Column(String(50), nullable=False)  # decision, feedback, outcome, interaction
+    agent_name = Column(String(100), nullable=False)
+    context = Column(JSON, nullable=False)
+    outcome = Column(JSON)
+    quality_score = Column(Float)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'episode_id': self.episode_id,
+            'user_id': self.user_id,
+            'memory_type': self.memory_type,
+            'agent_name': self.agent_name,
+            'context': self.context or {},
+            'outcome': self.outcome or {},
+            'quality_score': self.quality_score,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+        }
+
+
+class SemanticMemory(Base):
+    """Semantic Memory - Long-term cross-session knowledge"""
+    __tablename__ = 'semantic_memories'
+    
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    user_id = Column(String(255))  # NULL for global memories
+    memory_category = Column(String(100), nullable=False)  # pattern, preference, strategy, failure, feedback
+    agent_name = Column(String(100))
+    content = Column(JSON, nullable=False)
+    embedding_text = Column(Text)  # Text for embedding generation
+    usage_count = Column(Integer, default=0)
+    success_rate = Column(Float, default=0.0)
+    last_used_at = Column(DateTime)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    decay_score = Column(Float, default=1.0)
+    
+    # Relationships
+    embeddings = relationship("MemoryEmbedding", back_populates="semantic_memory", cascade="all, delete-orphan")
+    retrieval_logs = relationship("MemoryRetrievalLog", back_populates="semantic_memory", cascade="all, delete-orphan")
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'memory_category': self.memory_category,
+            'agent_name': self.agent_name,
+            'content': self.content or {},
+            'embedding_text': self.embedding_text,
+            'usage_count': self.usage_count,
+            'success_rate': self.success_rate,
+            'last_used_at': self.last_used_at.isoformat() if self.last_used_at else None,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None,
+            'decay_score': self.decay_score,
+        }
+
+
+class UserMemoryProfile(Base):
+    """User Memory Profile - Personalization data"""
+    __tablename__ = 'user_memory_profiles'
+    
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    user_id = Column(String(255), unique=True, nullable=False)
+    preferred_styles = Column(JSON, default=list)
+    preferred_genres = Column(JSON, default=list)
+    common_themes = Column(JSON, default=list)
+    generation_preferences = Column(JSON, default=dict)
+    feedback_patterns = Column(JSON, default=dict)
+    total_episodes = Column(Integer, default=0)
+    avg_quality_score = Column(Float)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'preferred_styles': self.preferred_styles or [],
+            'preferred_genres': self.preferred_genres or [],
+            'common_themes': self.common_themes or [],
+            'generation_preferences': self.generation_preferences or {},
+            'feedback_patterns': self.feedback_patterns or {},
+            'total_episodes': self.total_episodes,
+            'avg_quality_score': self.avg_quality_score,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None,
+        }
+
+
+class MemoryConsolidation(Base):
+    """Memory Consolidation Log - Audit trail for consolidation process"""
+    __tablename__ = 'memory_consolidations'
+    
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    episode_id = Column(String(36), ForeignKey('episodes.id', ondelete='SET NULL'))
+    consolidation_type = Column(String(50), nullable=False)  # episode_complete, periodic, manual
+    insights_extracted = Column(Integer, default=0)
+    patterns_identified = Column(Integer, default=0)
+    memories_created = Column(Integer, default=0)
+    memories_updated = Column(Integer, default=0)
+    memories_pruned = Column(Integer, default=0)
+    processing_time_ms = Column(Integer)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'episode_id': self.episode_id,
+            'consolidation_type': self.consolidation_type,
+            'insights_extracted': self.insights_extracted,
+            'patterns_identified': self.patterns_identified,
+            'memories_created': self.memories_created,
+            'memories_updated': self.memories_updated,
+            'memories_pruned': self.memories_pruned,
+            'processing_time_ms': self.processing_time_ms,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+        }
+
+
+class MemoryEmbedding(Base):
+    """Memory Embedding Cache - Stores vector embeddings for semantic search"""
+    __tablename__ = 'memory_embeddings'
+    
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    semantic_memory_id = Column(String(36), ForeignKey('semantic_memories.id', ondelete='CASCADE'), nullable=False)
+    embedding_model = Column(String(100), nullable=False)
+    embedding_vector = Column(Text, nullable=False)  # JSON array of floats
+    dimension = Column(Integer, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    semantic_memory = relationship("SemanticMemory", back_populates="embeddings")
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'semantic_memory_id': self.semantic_memory_id,
+            'embedding_model': self.embedding_model,
+            'dimension': self.dimension,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+        }
+
+
+class AgentPerformanceMetric(Base):
+    """Agent Performance Metrics - Track agent performance for memory-augmented decisions"""
+    __tablename__ = 'agent_performance_metrics'
+    
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    agent_name = Column(String(100), nullable=False)
+    episode_id = Column(String(36), ForeignKey('episodes.id', ondelete='CASCADE'))
+    metric_type = Column(String(50), nullable=False)  # quality, speed, accuracy, user_satisfaction
+    metric_value = Column(Float, nullable=False)
+    context = Column(JSON)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'agent_name': self.agent_name,
+            'episode_id': self.episode_id,
+            'metric_type': self.metric_type,
+            'metric_value': self.metric_value,
+            'context': self.context or {},
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+        }
+
+
+class MemoryRetrievalLog(Base):
+    """Memory Retrieval Log - Track memory usage for analytics"""
+    __tablename__ = 'memory_retrieval_log'
+    
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    semantic_memory_id = Column(String(36), ForeignKey('semantic_memories.id', ondelete='CASCADE'), nullable=False)
+    agent_name = Column(String(100), nullable=False)
+    episode_id = Column(String(36), ForeignKey('episodes.id', ondelete='SET NULL'))
+    query_text = Column(Text)
+    similarity_score = Column(Float)
+    was_useful = Column(Boolean)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    semantic_memory = relationship("SemanticMemory", back_populates="retrieval_logs")
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'semantic_memory_id': self.semantic_memory_id,
+            'agent_name': self.agent_name,
+            'episode_id': self.episode_id,
+            'query_text': self.query_text,
+            'similarity_score': self.similarity_score,
+            'was_useful': self.was_useful,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+        }

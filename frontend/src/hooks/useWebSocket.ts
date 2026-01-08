@@ -302,10 +302,19 @@ export function useWebSocket(options: UseWebSocketOptions): UseWebSocketReturn {
 }
 
 /**
+ * Get WebSocket URL based on current environment
+ */
+function getWebSocketUrl(path: string): string {
+  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  const host = window.location.host;
+  return `${protocol}//${host}${path}`;
+}
+
+/**
  * Hook for workflow progress WebSocket
  */
 export function useWorkflowWebSocket(workflowId: string, onProgress?: (data: any) => void) {
-  const url = `ws://localhost:3001/ws/workflow/${workflowId}`;
+  const url = getWebSocketUrl(`/ws/workflow/${workflowId}`);
   
   return useWebSocket({
     url,
@@ -323,7 +332,7 @@ export function useWorkflowWebSocket(workflowId: string, onProgress?: (data: any
  * Hook for agent status WebSocket
  */
 export function useAgentWebSocket(agentName: string, onStatus?: (data: any) => void) {
-  const url = `ws://localhost:3001/ws/agent/${agentName}`;
+  const url = getWebSocketUrl(`/ws/agent/${agentName}`);
   
   return useWebSocket({
     url,
@@ -341,7 +350,7 @@ export function useAgentWebSocket(agentName: string, onStatus?: (data: any) => v
  * Hook for coordinator metrics WebSocket
  */
 export function useCoordinatorWebSocket(onMetrics?: (data: any) => void) {
-  const url = `ws://localhost:3001/ws/coordinator`;
+  const url = getWebSocketUrl(`/ws/coordinator`);
   
   return useWebSocket({
     url,

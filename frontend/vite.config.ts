@@ -6,6 +6,7 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',
     port: 5000,
+    strictPort: true,
     allowedHosts: true,
     proxy: {
       '/api': {
@@ -14,6 +15,11 @@ export default defineConfig({
       },
       '/media': {
         target: 'http://localhost:3001',
+        changeOrigin: true
+      },
+      '/ws': {
+        target: 'ws://localhost:3001',
+        ws: true,
         changeOrigin: true
       }
     }

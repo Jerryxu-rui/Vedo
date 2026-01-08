@@ -1,6 +1,5 @@
 import logging
-from optparse import Option
-from typing import List, Optional
+from typing import Any, List, Optional
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain.chat_models import init_chat_model
@@ -163,8 +162,8 @@ human_prompt_template_write_script_based_on_story = \
 class Screenwriter:
     def __init__(
         self,
-        chat_model: str,
-        fallback_chat_model: Optional[str] = None,
+        chat_model: Any,
+        fallback_chat_model: Optional[Any] = None,
     ):
         self.chat_model = chat_model
         self.fallback_chat_model = fallback_chat_model

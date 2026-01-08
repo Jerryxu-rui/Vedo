@@ -259,8 +259,8 @@ class SimpleA2AAgent(BaseA2AAgent):
         self,
         name: str,
         capabilities: List[AgentCapability],
-        dependencies: List[str] = None,
-        task_handlers: Dict[str, Callable] = None
+        dependencies: Optional[List[str]] = None,
+        task_handlers: Optional[Dict[str, Callable]] = None
     ):
         self._capabilities = capabilities
         self._dependencies = dependencies or []
@@ -328,8 +328,8 @@ class SimpleA2AAgent(BaseA2AAgent):
 def create_simple_agent(
     name: str,
     capabilities: List[Dict[str, Any]],
-    dependencies: List[str] = None,
-    task_handlers: Dict[str, Callable] = None
+    dependencies: Optional[List[str]] = None,
+    task_handlers: Optional[Dict[str, Callable]] = None
 ) -> SimpleA2AAgent:
     """
     Helper to create a simple A2A agent

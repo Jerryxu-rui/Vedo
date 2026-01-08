@@ -1313,10 +1313,10 @@ async def extract_characters_from_script(script: str):
             "total_characters": len(characters),
             "characters": [
                 {
-                    "name": char.name,
-                    "description": char.description,
-                    "appearance": char.appearance.model_dump() if char.appearance else {},
-                    "personality_traits": char.personality_traits
+                    "name": char.get("name", ""),
+                    "description": char.get("description", ""),
+                    "appearance": {},
+                    "personality_traits": []
                 }
                 for char in characters
             ]

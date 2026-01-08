@@ -3,6 +3,7 @@ Database configuration for ViMax with SQLAlchemy
 Provides database engine and session management
 """
 
+from typing import Generator
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from database_models import Base
@@ -22,7 +23,7 @@ engine = create_engine(
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
-def get_db() -> Session:
+def get_db() -> Generator[Session, None, None]:
     """
     Database session dependency for FastAPI
     Usage: db: Session = Depends(get_db)

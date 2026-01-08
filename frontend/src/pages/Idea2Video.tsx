@@ -526,12 +526,36 @@ function Idea2Video() {
   const workflowSteps: WorkflowStep[] = [
     { id: 'outline', label: '根据本集内容，生成详细的故事大纲', completed: workflow.step !== 'input' && workflow.step !== 'outline', active: workflow.step === 'outline' },
     { id: 'style', label: '定义写实电影感的视觉风格和美术元素', completed: workflow.step !== 'input' && workflow.step !== 'outline', active: false },
-    { id: 'characters', label: '细化本集出场角色的造型和特点', sublabel: '设计角色特征', completed: ['scenes', 'storyboard', 'video', 'completed'].includes(workflow.step), active: workflow.step === 'characters' },
-    { id: 'character_gen', sublabel: '调用工具生成角色图', completed: ['scenes', 'storyboard', 'video', 'completed'].includes(workflow.step), active: workflow.step === 'characters', label: '' },
-    { id: 'scenes', label: '设计本集所需的关键场景细节', completed: ['storyboard', 'video', 'completed'].includes(workflow.step), active: workflow.step === 'scenes' },
-    { id: 'scene_gen', sublabel: '调用工具生成场景图', completed: ['storyboard', 'video', 'completed'].includes(workflow.step), active: workflow.step === 'scenes', label: '' },
-    { id: 'storyboard', label: '绘制本集详细的分镜剧本', completed: ['video', 'completed'].includes(workflow.step), active: workflow.step === 'storyboard' },
+    { id: 'characters', label: '细化本集出场角色的造型和特点', sublabel: '设计角色特征', completed: ['scenes', 'storyboard', 'video', 'segments', 'completed'].includes(workflow.step), active: workflow.step === 'characters' },
+    { id: 'character_gen', sublabel: '调用工具生成角色图', completed: ['scenes', 'storyboard', 'video', 'segments', 'completed'].includes(workflow.step), active: workflow.step === 'characters', label: '' },
+    { id: 'scenes', label: '设计本集所需的关键场景细节', completed: ['storyboard', 'video', 'segments', 'completed'].includes(workflow.step), active: workflow.step === 'scenes' },
+    { id: 'scene_gen', sublabel: '调用工具生成场景图', completed: ['storyboard', 'video', 'segments', 'completed'].includes(workflow.step), active: workflow.step === 'scenes', label: '' },
+    { id: 'storyboard', label: '绘制本集详细的分镜剧本', completed: ['video', 'segments', 'completed'].includes(workflow.step), active: workflow.step === 'storyboard' },
+    { id: 'video', label: '生成视频片段', completed: ['completed'].includes(workflow.step), active: workflow.step === 'video' || workflow.step === 'segments' },
   ]
+
+  const handleStepClick = (stepId: string, isCompleted: boolean) => {
+    if (!isCompleted || workflow.status === 'generating') return
+    
+    const stepMapping: Record<string, WorkflowState['step']> = {
+      'outline': 'outline',
+      'style': 'outline',
+      'characters': 'characters',
+      'character_gen': 'characters',
+      'scenes': 'scenes',
+      'scene_gen': 'scenes',
+      'storyboard': 'storyboard',
+      'video': 'video',
+      'segments': 'segments',
+      'completed': 'completed',
+    }
+    
+    const targetStep = stepMapping[stepId]
+    if (targetStep && targetStep !== workflow.step) {
+      setWorkflow(prev => ({ ...prev, step: targetStep }))
+      addMessage('system', `已切换到"${getStepLabel(targetStep)}"阶段`)
+    }
+  }
 
   const determineStepFromState = (backendState: string): 'input' | 'outline' | 'characters' | 'scenes' | 'storyboard' | 'video' | 'segments' | 'completed' => {
     if (backendState === 'video_completed') return 'completed'
@@ -1349,7 +1373,6 @@ function Idea2Video() {
     const hasContent = workflow.outline || 
                        (workflow.characters && workflow.characters.length > 0) || 
                        (workflow.scenes && workflow.scenes.length > 0) || 
-                       (workflow.shots && workflow.shots.length > 0) ||
                        (workflow.storyboard && workflow.storyboard.length > 0)
 
     if (workflow.step === 'input' && !hasContent) {
@@ -2011,7 +2034,12 @@ function Idea2Video() {
 
         <div className="workflow-steps-list">
           {workflowSteps.filter(step => step.label).map((step) => (
-            <div key={step.id} className={`workflow-step-item ${step.completed ? 'completed' : ''} ${step.active ? 'active' : ''}`}>
+            <div 
+              key={step.id} 
+              className={`workflow-step-item ${step.completed ? 'completed clickable' : ''} ${step.active ? 'active' : ''}`}
+              onClick={() => handleStepClick(step.id, step.completed)}
+              title={step.completed ? `点击跳转到${step.label}` : ''}
+            >
               <span className={`step-checkbox ${step.completed ? 'checked' : ''}`}>
                 {step.completed ? '✓' : '○'}
               </span>

@@ -1881,6 +1881,19 @@
   color: #6366f1;
 }
 
+.workflow-step-item.completed.clickable {
+  cursor: pointer;
+}
+
+.workflow-step-item.completed.clickable:hover {
+  background: rgba(99, 102, 241, 0.15);
+  transform: translateX(4px);
+}
+
+.workflow-step-item.completed.clickable:hover .step-label {
+  text-decoration: underline;
+}
+
 .workflow-step-item.completed .step-checkbox {
   background: linear-gradient(135deg, #6366f1, #8b5cf6);
   border-color: #6366f1;

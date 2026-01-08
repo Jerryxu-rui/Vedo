@@ -292,7 +292,21 @@ async def get_workflow_state(
         db_scenes = db.query(Scene).filter(Scene.episode_id == episode_id).all()
         for scene in db_scenes:
             shots = db.query(Shot).filter(Shot.scene_id == scene.id).order_by(Shot.shot_number).all()
-            storyboard_data.extend([shot.to_dict() for shot in shots])
+            for shot in shots:
+                shot_dict = shot.to_dict()
+                # Convert file paths to URLs (only if not already a URL)
+                # Check for both relative URLs (/media) and absolute URLs (http://, https://)
+                def is_already_url(path):
+                    if not path:
+                        return True
+                    return path.startswith('/media') or path.startswith('http://') or path.startswith('https://')
+                
+                if shot_dict.get('video_url') and not is_already_url(shot_dict['video_url']):
+                    shot_dict['video_url'] = convert_file_path_to_url(shot_dict['video_url'])
+                if shot_dict.get('frame_url') and not is_already_url(shot_dict['frame_url']):
+                    shot_dict['frame_url'] = convert_file_path_to_url(shot_dict['frame_url'])
+                    shot_dict['image_url'] = shot_dict['frame_url']  # Keep alias in sync
+                storyboard_data.append(shot_dict)
         
         # Get video path if completed
         video_path = None

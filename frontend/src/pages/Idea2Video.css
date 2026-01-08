@@ -21,6 +21,29 @@
   background: var(--background);
   color: var(--text-primary);
   font-family: var(--font-body);
+  transition: grid-template-columns 0.3s ease;
+}
+
+.studio-layout.chat-collapsed {
+  grid-template-columns: 80px 64px 0px 1fr;
+}
+
+.studio-layout.chat-collapsed .chat-panel {
+  width: 0;
+  min-width: 0;
+  padding: 0;
+  overflow: hidden;
+  border-right: none;
+}
+
+.chat-panel.collapsed {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.chat-toggle {
+  margin-top: auto;
+  border-top: 1px solid var(--border-default);
 }
 
 @media (max-width: 1200px) {

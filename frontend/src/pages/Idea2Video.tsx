@@ -116,6 +116,7 @@ function Idea2Video() {
   const [showWebSocketProgress, setShowWebSocketProgress] = useState(false)
   const [draggedShotIndex, setDraggedShotIndex] = useState<number | null>(null)
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
+  const [chatPanelCollapsed, setChatPanelCollapsed] = useState(false)
   const chatEndRef = useRef<HTMLDivElement>(null)
 
   // Shot editing state (for storyboard view)
@@ -1093,7 +1094,6 @@ function Idea2Video() {
 
   const pollShotVideoGeneration = async (episodeId: string) => {
     try {
-      // ✅ NEW: Poll shot video status directly
       const response = await fetch(
         `/api/v1/conversational/episode/${episodeId}/shots/video-status`
       )
@@ -1104,34 +1104,38 @@ function Idea2Video() {
       }
 
       const data = await response.json()
+      console.log('[Video Poll] Received data:', data)
 
-      // Update storyboard with shot data from database
-      // Match by id first, then fall back to shot_number (index + 1) for temp IDs
-      const updatedStoryboard = workflow.storyboard.map((shot, index) => {
-        // Try matching by ID first
-        let dbShot = data.shots.find((s: any) => s.id === shot.id)
-        
-        // Fallback: match by shot_number (1-based index)
-        if (!dbShot) {
-          dbShot = data.shots.find((s: any) => s.shot_number === index + 1)
-        }
-        
-        if (dbShot) {
-          return {
-            ...shot,
-            id: dbShot.id, // Update ID to match database
-            video_url: dbShot.video_url,
-            frame_url: dbShot.frame_url,
-            status: dbShot.status
+      // Use functional update to avoid stale closure issue
+      setWorkflow(prev => {
+        // Match by id first, then fall back to shot_number (index + 1) for temp IDs
+        const updatedStoryboard = prev.storyboard.map((shot, index) => {
+          // Try matching by ID first
+          let dbShot = data.shots.find((s: any) => s.id === shot.id)
+          
+          // Fallback: match by shot_number (1-based index)
+          if (!dbShot) {
+            dbShot = data.shots.find((s: any) => s.shot_number === index + 1)
           }
+          
+          if (dbShot) {
+            console.log(`[Video Poll] Matched shot ${index + 1}: video_url=${dbShot.video_url}`)
+            return {
+              ...shot,
+              id: dbShot.id,
+              video_url: dbShot.video_url,
+              frame_url: dbShot.frame_url,
+              status: dbShot.status
+            }
+          }
+          return shot
+        })
+        
+        return {
+          ...prev,
+          storyboard: updatedStoryboard
         }
-        return shot
       })
-
-      setWorkflow(prev => ({
-        ...prev,
-        storyboard: updatedStoryboard
-      }))
 
       // Check if all done
       if (data.all_done) {
@@ -1882,7 +1886,7 @@ function Idea2Video() {
   }
 
   return (
-    <div className="studio-layout">
+    <div className={`studio-layout ${chatPanelCollapsed ? 'chat-collapsed' : ''}`}>
       <div className="episode-sidebar">
         <div className="sidebar-header">
           <span className="back-link">← 返回策划</span>
@@ -1921,9 +1925,17 @@ function Idea2Video() {
           <span className="nav-icon">🎵</span>
           <span className="nav-label">音乐</span>
         </button>
+        <button
+          className="nav-item chat-toggle"
+          onClick={() => setChatPanelCollapsed(!chatPanelCollapsed)}
+          title={chatPanelCollapsed ? '展开对话框' : '收起对话框'}
+        >
+          <span className="nav-icon">{chatPanelCollapsed ? '»' : '«'}</span>
+          <span className="nav-label">{chatPanelCollapsed ? '展开' : '收起'}</span>
+        </button>
       </div>
 
-      <div className="chat-panel glass-card">
+      <div className={`chat-panel glass-card ${chatPanelCollapsed ? 'collapsed' : ''}`}>
         <div className="shot-selector">
           <span>■ 分镜{selectedShot + 1}</span>
           <button className="btn-generate-video">图片生成视频</button>

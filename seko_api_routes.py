@@ -14,7 +14,7 @@ import json
 # Import database models
 from database_models import (
     Series, Episode, Scene, Shot, Character, CharacterShot, 
-    GenerationProgress, Base
+    GenerationProgress, Base, EpisodeWorkflowSession
 )
 
 # Create router
@@ -366,7 +366,25 @@ async def list_episodes(
             Episode.series_id == series_id
         ).order_by(Episode.episode_number).all()
         
-        return [e.to_dict() for e in episodes]
+        result = []
+        for e in episodes:
+            episode_dict = e.to_dict()
+            # Check for workflow state to override status
+            workflow = db.query(EpisodeWorkflowSession).filter(
+                EpisodeWorkflowSession.episode_id == e.id
+            ).first()
+            if workflow:
+                # Map workflow state to display status
+                state = workflow.state
+                if state in ['video_completed']:
+                    episode_dict['status'] = 'completed'
+                elif state in ['video_generating', 'storyboard_generating', 'scenes_generating', 'characters_generating', 'outline_generating']:
+                    episode_dict['status'] = 'processing'
+                elif state in ['failed']:
+                    episode_dict['status'] = 'failed'
+            result.append(episode_dict)
+        
+        return result
     
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to list episodes: {str(e)}")

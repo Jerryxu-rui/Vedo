@@ -118,6 +118,7 @@ function Idea2Video() {
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
   const [chatPanelCollapsed, setChatPanelCollapsed] = useState(false)
   const chatEndRef = useRef<HTMLDivElement>(null)
+  const restoredEpisodeRef = useRef<string | null>(null)
 
   // Shot editing state (for storyboard view)
   const [editingShot, setEditingShot] = useState<number | null>(null)
@@ -407,9 +408,11 @@ function Idea2Video() {
 
   useEffect(() => {
     const episodeId = searchParams.get('episode')
-    if (episodeId && !workflow.episodeId) {
+    if (episodeId && restoredEpisodeRef.current !== episodeId) {
+      restoredEpisodeRef.current = episodeId
       restoreDraftState(episodeId)
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams])
 
   useEffect(() => {
@@ -462,6 +465,8 @@ function Idea2Video() {
 
       const step = determineStepFromState(backendState)
       const isGenerating = backendState.includes('generating') || backendState.includes('refining')
+      
+      console.log('[RestoreDraft] backendState:', backendState, 'step:', step, 'storyboard:', data.storyboard?.length || 0)
 
       setWorkflow(prev => ({
         ...prev,
@@ -528,14 +533,16 @@ function Idea2Video() {
     { id: 'storyboard', label: '绘制本集详细的分镜剧本', completed: ['video', 'completed'].includes(workflow.step), active: workflow.step === 'storyboard' },
   ]
 
-  const determineStepFromState = (backendState: string): 'outline' | 'characters' | 'scenes' | 'storyboard' | 'video' | 'segments' | 'completed' => {
+  const determineStepFromState = (backendState: string): 'input' | 'outline' | 'characters' | 'scenes' | 'storyboard' | 'video' | 'segments' | 'completed' => {
     if (backendState === 'video_completed') return 'completed'
     if (backendState.includes('segment')) return 'segments'
     if (backendState.includes('video')) return 'video'
     if (backendState.includes('storyboard')) return 'storyboard'
     if (backendState.includes('scene')) return 'scenes'
     if (backendState.includes('character')) return 'characters'
-    return 'outline'
+    if (backendState.includes('outline') || backendState.includes('refin')) return 'outline'
+    if (backendState === 'initial' || backendState === 'init' || backendState === 'input') return 'input'
+    return 'outline'  // Default to outline for unknown states
   }
 
   const isStepComplete = (backendState: string, targetStep: string): boolean => {
@@ -1683,7 +1690,7 @@ function Idea2Video() {
     }
 
 
-    if (workflow.step === 'video' && workflow.storyboard.length > 0) {
+    if ((workflow.step === 'video' || workflow.step === 'completed') && workflow.storyboard.length > 0 && !workflow.videoUrl) {
       const currentShot = workflow.storyboard[selectedShot]
       const hasVideos = workflow.storyboard.some(shot => (shot as any).video_url)
 

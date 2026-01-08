@@ -141,8 +141,8 @@ function Library() {
           {filteredVideos.map(video => (
             <div
               key={video.id}
-              className={`video-card glass-card ${video.status === 'draft' ? 'clickable' : ''}`}
-              onClick={() => video.status === 'draft' && navigate(`/idea2video?episode=${video.id}`)}
+              className={`video-card glass-card ${video.status !== 'processing' ? 'clickable' : ''}`}
+              onClick={() => video.status !== 'processing' && navigate(`/idea2video?episode=${video.id}`)}
             >
               <div className="video-thumbnail">
                 {video.thumbnail ? (
@@ -186,18 +186,18 @@ function Library() {
                 )}
                 {video.status === 'completed' && (
                   <>
-                    <a
-                      href={`/api/v1/videos/episode/${video.id}/stream`}
-                      className="btn btn-secondary btn-sm glass-button"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={(e) => e.stopPropagation()}
+                    <button
+                      className="btn btn-primary btn-sm glass-button"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        navigate(`/idea2video?episode=${video.id}`)
+                      }}
                     >
-                      预览
-                    </a>
+                      查看详情
+                    </button>
                     <a
                       href={`/api/v1/videos/episode/${video.id}/download`}
-                      className="btn btn-primary btn-sm glass-button"
+                      className="btn btn-secondary btn-sm glass-button"
                       onClick={(e) => e.stopPropagation()}
                     >
                       下载
